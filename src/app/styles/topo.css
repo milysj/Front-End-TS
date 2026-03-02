@@ -1,0 +1,186 @@
+/* ===========================
+   Container principal
+   =========================== */
+.container-main {
+    margin-left: 7px; /* espaço da esquerda */
+    margin-top: 8px; /* espaço do topo */
+}
+
+/* ===========================
+   Menu central (itens alinhados)
+   =========================== */
+div .item-menu-central {
+    display: flex;
+    align-self: center; /* centraliza verticalmente */
+}
+
+.item-menu-central a {
+    font-size: 1.1vw; /* tamanho responsivo */
+}
+
+nav.menu-central {
+    height: 90px;
+    margin-top: 0;
+    display: flex;
+    align-items: left;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    padding-left: 0px;
+}
+
+.logo {
+    padding: 0px 10px;
+    width: 300px;
+    margin-right: 20% px; /* ajuste de espaçamento da logo */
+}
+
+/* ===========================
+   Estilo do menu (nav + ul)
+   =========================== */
+nav ul {
+    list-style: none; /* remove marcadores */
+}
+
+nav ul li {
+    display: inline-block; /* itens lado a lado */
+}
+
+nav ul li a {
+    padding: 10px 20px;
+    text-decoration: none;
+    font-size: 19px;
+    color: black;
+    border-radius: 30px;
+    transition: 0.6s;
+}
+
+nav ul li a:hover {
+    background-color: #054fb1; /* cor de hover */
+    padding: 8px 20px;
+}
+
+a:link {
+    text-decoration: none; /* remove sublinhado dos links */
+}
+
+/* ===========================
+   Dropdown menu
+   =========================== */
+.dropdown-menu {
+    position: absolute;
+    box-shadow: 0 0 2px black;
+    display: none; /* escondido por padrão */
+    margin-bottom: 50px;
+}
+
+.dropdown-menu a {
+    display: block;
+    color: #000;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block; /* aparece ao passar o mouse */
+    transition: 0.5s;
+}
+
+/* ===========================
+   Corpo principal (wrapper)
+   =========================== */
+.body-wrapper {
+    display: flex;
+    align-items: start;
+}
+
+.body-wrapper > .container {
+    margin-top: 0 !important;
+}
+
+.body-wrapper .main {
+    display: flex;
+    flex-direction: row; /* conteúdo lado a lado */
+}
+
+/* ===========================
+   Menu lateral (sidebar)
+   =========================== */
+nav.menu-lateral {
+    width: 80px; /* tamanho padrão */
+    background-color: #056cf2;
+    padding: 40px 0 40px 1%;
+    box-shadow: 3px 0 0 rgb(0, 0, 0);
+    overflow: hidden;
+    transition: .2s;
+    position: fixed;
+    z-index: 3;
+    height: 100%; /* ocupa toda a altura */
+}
+
+/* Botão para expandir menu lateral */
+.btn-expandir {
+    width: 100%;
+    padding-left: 10px;
+}
+
+.btn-expandir > i {
+    color: #ffffff;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+/* Lista do menu lateral */
+ul.item-menu {
+    height: 100%;
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li.item-menu a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 20px;
+    padding: 20px 4px;
+    display: flex;
+    margin-bottom: 20px;
+    line-height: 40px;
+    gap: 0 16px; /* espaço entre ícone e texto */
+}
+
+ul li.item-menu a.txt-link {
+    margin-left: 40px;
+}
+
+ul li.item-menu a .icon > i {
+    font-size: 30px;
+    margin-left: 10px;
+}
+
+/* Texto do menu lateral escondido por padrão */
+ul li .txt-link {
+    display: none;
+}
+
+/* Quando o menu lateral está em hover, mostra o texto */
+nav.menu-lateral:hover > .item-menu .txt-link {
+    display: block;
+}
+
+/* Largura expandida fixa */
+.w-300 {
+    width: 300px !important;
+}
+
+/* ===========================
+   Responsividade
+   =========================== */
+@media (min-width: 992px) {
+    nav.menu-lateral:hover {
+        width: 300px; /* expande no desktop */
+    }
+}
+
+/* ===========================
+   Sidebar geral
+   =========================== */
+Sidebar {
+    background-color: #054fb1;
+}

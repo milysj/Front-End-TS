@@ -1,0 +1,621 @@
+@import "tailwindcss";
+/* Importa TailwindCSS */
+@import "bootstrap/dist/css/bootstrap.min.css";
+/* Importa Bootstrap */
+@import "./styles/NavbarSuperior.css";
+/* Estilos customizados do navbar superior */
+@import "./styles/style_perfil.css";
+/* Estilos customizados da página de perfil */
+@import "./styles/style_nav.css";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *)); /* Estilos customizados da navegação */
+
+/* ===========================
+   Fonte personalizada (Jaro)
+   =========================== */
+:root {
+    --font-jaro: 'Jaro', sans-serif; /* Define a fonte Jaro como variável global */
+    --radius: 0.625rem;
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --chart-1: oklch(0.646 0.222 41.116);
+    --chart-2: oklch(0.6 0.118 184.704);
+    --chart-3: oklch(0.398 0.07 227.392);
+    --chart-4: oklch(0.828 0.189 84.429);
+    --chart-5: oklch(0.769 0.188 70.08);
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+    
+    /* Cores customizadas para tema claro */
+    --bg-page: #f3f4f6;
+    --bg-card: #ffffff;
+    --bg-input: #ffffff;
+    --text-primary: #1f2937;
+    --text-secondary: #4b5563;
+    --text-muted: #6b7280;
+    --border-color: #e5e7eb;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+.font-jaro {
+    font-family: var(--font-jaro); /* Classe para aplicar a fonte Jaro */
+}
+
+/* ===========================
+   Animação de queda
+   =========================== */
+@keyframes fall {
+    0% {
+        transform: translateY(-50px); /* começa acima da tela */
+        opacity: 1; /* visível */
+    }
+    100% {
+        transform: translateY(100vh); /* cai até o final da tela */
+        opacity: 0; /* desaparece */
+    }
+}
+
+.animate-fall {
+    animation: fall 5s linear infinite; /* aplica animação contínua */
+}
+
+/* ===========================
+   Sidebar responsiva
+   =========================== */
+@media (max-width: 991.98px) {
+    .pro-sidebar {
+        transition: transform 0.3s ease; /* animação suave para abrir/fechar */
+        transform: translateX(-100%); /* esconde fora da tela */
+    }
+
+    .pro-sidebar.toggled {
+        transform: translateX(0); /* aparece quando ativo */
+    }
+}
+
+/* ===========================
+   Dropdown customizado (antigo - mantido para compatibilidade)
+   =========================== */
+.custom-dropdown {
+    position: absolute;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 2px 10px var(--shadow-color);
+    z-index: 1000;
+    min-width: 200px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dropdown-item {
+    padding: 8px 16px;
+    display: block;
+    color: var(--text-primary);
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #00a2ff;
+    text-decoration: none;
+}
+
+/* ===========================
+   Radix UI Dropdown Menu
+   =========================== */
+@keyframes slideDownAndFade {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.radix-dropdown-content {
+    animation: slideDownAndFade 0.2s ease-out;
+}
+
+/* Reset de estilos padrão do Radix para melhor controle */
+[data-radix-dropdown-menu-content] {
+    outline: none;
+}
+
+/* ===========================
+   Ajustes de dropdown em mobile
+   =========================== */
+@media (max-width: 991.98px) {
+    .dropdown-container {
+        position: static; /* mantém no fluxo */
+    }
+
+    .custom-dropdown {
+        position: static;
+        border: none;
+        box-shadow: none; /* remove sombra no mobile */
+    }
+}
+
+/* ===========================
+   Remover scrollbars
+   =========================== */
+.no-scrollbar::-webkit-scrollbar {
+    display: none; /* remove em Chrome/Safari */
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none; /* remove em IE/Edge antigo */
+    scrollbar-width: none; /* remove em Firefox */
+}
+
+@theme inline {
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+html.dark,
+.dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+    --chart-1: oklch(0.488 0.243 264.376);
+    --chart-2: oklch(0.696 0.17 162.48);
+    --chart-3: oklch(0.769 0.188 70.08);
+    --chart-4: oklch(0.627 0.265 303.9);
+    --chart-5: oklch(0.645 0.246 16.439);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+    
+    /* Cores customizadas para tema escuro */
+    --bg-page: #1a1a1a;
+    --bg-card: #2d2d2d;
+    --bg-input: #3a3a3a;
+    --text-primary: #f3f4f6;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --border-color: #404040;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    background-color: var(--bg-page) !important;
+    color: var(--text-primary) !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    }
+  
+  /* Garantir que elementos com classes Tailwind usando variáveis CSS funcionem */
+  [class*="bg-\[var\(--bg-card\)\]"] {
+    background-color: var(--bg-card) !important;
+  }
+  
+  [class*="bg-\[var\(--bg-input\)\]"] {
+    background-color: var(--bg-input) !important;
+  }
+  
+  [class*="bg-\[var\(--bg-page\)\]"] {
+    background-color: var(--bg-page) !important;
+  }
+  
+  [class*="text-\[var\(--text-primary\)\]"] {
+    color: var(--text-primary) !important;
+  }
+  
+  [class*="text-\[var\(--text-secondary\)\]"] {
+    color: var(--text-secondary) !important;
+  }
+  
+  [class*="text-\[var\(--text-muted\)\]"] {
+    color: var(--text-muted) !important;
+  }
+  
+  [class*="border-\[var\(--border-color\)\]"] {
+    border-color: var(--border-color) !important;
+  }
+  
+  /* Placeholder color para inputs */
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.7;
+  }
+}
+
+/* ===========================
+   Prevenir oscilação do background
+   Solução simplificada: scrollbar-gutter mantém layout estável
+   =========================== */
+body {
+    /* Reserva espaço para scrollbar, prevenindo layout shift */
+    /* Quando scrollbar aparece/desaparece, o espaço já está reservado */
+    scrollbar-gutter: stable;
+}
+
+/* ===========================
+   Classes utilitárias para tema
+   =========================== */
+.theme-bg-page {
+    background-color: var(--bg-page);
+}
+
+.theme-bg-card {
+    background-color: var(--bg-card);
+}
+
+.theme-bg-input {
+    background-color: var(--bg-input);
+}
+
+.theme-text-primary {
+    color: var(--text-primary);
+}
+
+.theme-text-secondary {
+    color: var(--text-secondary);
+}
+
+.theme-text-muted {
+    color: var(--text-muted);
+}
+
+.theme-border {
+    border-color: var(--border-color);
+}
+
+.theme-shadow {
+    box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+/* ===========================
+   Estilos de Acessibilidade
+   =========================== */
+
+/* Skip Link - Link para pular para o conteúdo principal */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    padding: 8px 16px;
+    text-decoration: none;
+    z-index: 10000;
+    border-radius: 0 0 4px 0;
+    font-weight: 600;
+    transition: top 0.3s ease;
+}
+
+.skip-link:focus {
+    top: 0;
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+}
+
+/* Foco visível para navegação por teclado */
+*:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Remover outline apenas quando usando mouse */
+.keyboard-navigation *:focus {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+}
+
+/* Classe para elementos visualmente ocultos mas acessíveis para leitores de tela */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Indicador de campo obrigatório */
+.required-indicator {
+    color: var(--destructive);
+    margin-left: 4px;
+    font-weight: bold;
+}
+
+/* Estilos para inputs acessíveis */
+.accessible-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+}
+
+.accessible-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.accessible-input {
+    padding: 10px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.accessible-input:focus {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px rgba(var(--ring-rgb), 0.1);
+    outline: none;
+}
+
+.accessible-input.error {
+    border-color: var(--destructive);
+}
+
+.accessible-input.error:focus {
+    box-shadow: 0 0 0 3px rgba(var(--destructive-rgb), 0.1);
+}
+
+.helper-text {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.error-text {
+    font-size: 12px;
+    color: var(--destructive);
+    font-weight: 500;
+}
+
+/* Estilos para botões acessíveis */
+.accessible-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.accessible-button:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+}
+
+.accessible-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.accessible-button-primary {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+}
+
+.accessible-button-primary:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.accessible-button-secondary {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+}
+
+.accessible-button-secondary:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.accessible-button-danger {
+    background-color: var(--destructive);
+    color: var(--primary-foreground);
+}
+
+.accessible-button-danger:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.accessible-button-ghost {
+    background-color: transparent;
+    color: var(--text-primary);
+}
+
+.accessible-button-ghost:hover:not(:disabled) {
+    background-color: var(--muted);
+}
+
+/* Respeitar preferência de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Melhorar contraste para links */
+a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+a:hover {
+    text-decoration-thickness: 2px;
+}
+
+a:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Melhorar contraste para elementos interativos */
+button,
+[role="button"],
+input[type="submit"],
+input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Área de foco maior para elementos pequenos */
+input[type="checkbox"],
+input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+}
+
+/* Estados de loading com feedback acessível */
+[aria-busy="true"] {
+    position: relative;
+    pointer-events: none;
+}
+
+[aria-busy="true"]::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Melhorar visibilidade de elementos com aria-live */
+[aria-live] {
+    position: relative;
+}
+
+/* Estilos para landmarks semânticos */
+main,
+nav,
+header,
+footer,
+aside,
+section,
+article {
+    outline: none;
+}
+
+main:focus-visible,
+nav:focus-visible,
+header:focus-visible,
+footer:focus-visible {
+    outline: 2px dashed var(--ring);
+    outline-offset: 4px;
+}

@@ -1,0 +1,88 @@
+/* ===========================
+   Logo principal
+   =========================== */
+.logo {
+    align-items: center; /* Centraliza verticalmente os itens */
+    width: auto; /* Largura automática */
+    height: 1.2em; /* Altura relativa à fonte */
+    font-family: "Jaro", sans-serif; /* Fonte personalizada Jaro */
+    font-size: 4.6vw; /* Tamanho responsivo */
+    display: flex; /* Flexbox para alinhamento interno */
+    padding: 0px 10px; /* Espaçamento interno horizontal */
+}
+
+/* Logo dentro de div específica */
+div.logo {
+    align-items: center;
+    width: auto;
+    height: 1.2em;
+    font-family: "Jaro";
+    font-size: 4.6vw;
+}
+
+/* ===========================
+   Letras coloridas da logo
+   =========================== */
+
+/* Letra E azul escuro */
+.E {
+    color: #036cf2;
+    -webkit-text-stroke-width: 3px; /* Contorno da letra */
+    -webkit-text-stroke-color: #000;
+}
+
+/* Letra S azul claro */
+.S {
+    color: #0c87f2;
+    -webkit-text-stroke-width: 3px;
+    -webkit-text-stroke-color: #000;
+}
+
+/* Letra T verde escuro */
+.T {
+    color: #0a7307;
+    -webkit-text-stroke-width: 3px;
+    -webkit-text-stroke-color: #000;
+}
+
+/* Letra U amarelo */
+.U {
+    color: #f2cb07;
+    -webkit-text-stroke-width: 3px;
+    -webkit-text-stroke-color: #000;
+}
+
+/* Letra D laranja */
+.D {
+    color: #f24c27;
+    -webkit-text-stroke-width: 3px;
+    -webkit-text-stroke-color: #000;
+}
+
+/* Segunda letra E em vermelho */
+.E2 {
+    color: #e8181c;
+    -webkit-text-stroke-width: 3px;
+    -webkit-text-stroke-color: #000;
+}
+
+/* Ponto da logo */
+.ponto {
+    color: black;
+    -webkit-text-stroke-width: 3px;
+    -webkit-text-stroke-color: #000;
+}
+
+/* Letra M rosa */
+.M {
+    color: #ff00ff;
+    -webkit-text-stroke-width: 3px;
+    -webkit-text-stroke-color: #000;
+}
+
+/* Letra Y fúcsia */
+.Y {
+    color: fuchsia;
+    -webkit-text-stroke-width: 3px;
+    -webkit-text-stroke-color: #000;
+}

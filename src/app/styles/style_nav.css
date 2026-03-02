@@ -1,0 +1,131 @@
+/* ===========================
+   Container principal
+   =========================== */
+.container-main {
+    margin-left: 7px; /* Espaço à esquerda */
+    margin-top: 8px; /* Espaço superior */
+}
+
+/* ===========================
+   Menu central
+   =========================== */
+div .item-menu-central {
+    display: flex; /* Organiza itens em linha */
+    align-self: center; /* Centraliza verticalmente */
+}
+
+.item-menu-central a {
+    font-size: 1.1vw; /* Tamanho relativo ao viewport */
+}
+
+/* ===========================
+   Menu de navegação (nav + ul)
+   =========================== */
+nav ul {
+    list-style: none; /* Remove marcadores da lista */
+}
+
+nav ul li {
+    display: inline-block; /* Itens lado a lado */
+}
+
+nav ul li a {
+    padding: 10px 20px; /* Espaçamento interno */
+    text-decoration: nome; /* (aparentemente aqui deveria ser 'none') */
+    font-size: 19px; /* Tamanho da fonte */
+    color: black; /* Cor do texto */
+    border-radius: 30px; /* Bordas arredondadas */
+    transition: 0.6s; /* Transição suave ao hover */
+}
+
+
+
+a:link {
+    text-decoration: none; /* Remove sublinhado padrão dos links */
+}
+
+/* ===========================
+   Wrapper do corpo da página
+   =========================== */
+.body-wrapper {
+    display: flex; /* Flexbox para layout */
+    align-items: start; /* Alinha itens ao topo */
+}
+
+.body-wrapper > .container {
+    margin-top: 0 !important; /* Remove margem superior */
+}
+
+.body-wrapper .main {
+    display: flex; /* Flexbox horizontal */
+    flex-direction: row; /* Itens lado a lado */
+}
+
+/* ===========================
+   Botão para expandir menu lateral
+   =========================== */
+.btn-expandir {
+    width: 100%; /* Ocupa toda a largura */
+    padding-left: 10px; /* Espaçamento interno à esquerda */
+}
+
+.btn-expandir > i {
+    color: #ffffff; /* Ícone branco */
+    font-size: 30px; /* Tamanho do ícone */
+    cursor: pointer; /* Cursor de clique */
+}
+
+/* ===========================
+   Menu lateral (sidebar)
+   =========================== */
+ul.item-menu {
+    height: 100%; /* Ocupa toda a altura */
+    list-style-type: none; /* Remove marcadores */
+    padding: 0; /* Remove padding */
+}
+
+ul li.item-menu a {
+    color: #ffffff; /* Texto branco */
+    text-decoration: none;
+    font-size: 20px;
+    padding: 20px 4px;
+    display: flex;
+    margin-bottom: 20px;
+    line-height: 40px;
+    gap: 0 16px; /* Espaçamento entre ícone e texto */
+}
+
+ul li.item-menu a.txt-link {
+    margin-left: 40px; /* Espaço extra para o texto */
+}
+
+ul li.item-menu a .icon > i {
+    font-size: 30px; /* Tamanho do ícone */
+    margin-left: 10px; /* Espaço entre ícone e texto */
+}
+
+/* Texto do menu lateral escondido por padrão */
+ul li .txt-link {
+    display: none;
+}
+
+/* Mostra o texto quando o menu lateral estiver em hover */
+nav.menu-lateral:hover > .item-menu .txt-link {
+    display: block;
+}
+
+/* ===========================
+   Classes utilitárias
+   =========================== */
+.w-300 {
+    width: 300px !important; /* Força largura de 300px */
+}
+
+/* ===========================
+   Responsividade
+   =========================== */
+@media (min-width: 992px) {
+    nav.menu-lateral:hover {
+        width: 300px; /* Expande menu lateral no desktop ao passar o mouse */
+    }
+}

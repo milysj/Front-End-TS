@@ -1,0 +1,138 @@
+/* ========================== */
+/* Estilos Gerais da página   */
+/* ========================== */
+body {
+    font-family: Arial, sans-serif; /* Define a fonte padrão */
+    margin: 0; /* Remove margens padrão */
+    padding: 0; /* Remove espaçamento padrão */
+    box-sizing: border-box; /* Garante que padding/border não alterem largura total */
+    background-color: #f9f9f9; /* Cor de fundo clara */
+    text-align: center; /* Centraliza o texto */
+}
+
+/* ========================== */
+/* Cabeçalho                  */
+/* ========================== */
+header {
+    display: flex; /* Usa flexbox para organizar os itens */
+    justify-content: space-between; /* Espaça logo/título e usuário */
+    align-items: center; /* Centraliza os itens verticalmente */
+    padding: 10px 20px; /* Espaçamento interno */
+    background-color: #ffffff; /* Fundo branco */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra suave abaixo */
+}
+
+header .menu {
+    display: flex; /* Organiza o menu em linha */
+    align-items: center; /* Alinha ícones e botões */
+}
+
+/* Botão do menu lateral */
+.menu-btn {
+    font-size: 24px; /* Tamanho do ícone/texto */
+    border: none; /* Remove borda */
+    background-color: #007bff; /* Cor azul padrão bootstrap */
+    color: #fff; /* Texto branco */
+    padding: 5px 10px; /* Espaçamento interno */
+    border-radius: 5px; /* Bordas arredondadas */
+    cursor: pointer; /* Cursor de mãozinha */
+    margin-right: 10px; /* Espaçamento entre o título */
+}
+
+header h1 {
+    font-size: 24px; /* Título maior */
+    color: #000; /* Preto */
+}
+
+header h1 span {
+    color: #ff0000; /* Destaca parte do texto em vermelho */
+}
+
+/* Área do usuário no cabeçalho */
+header .user {
+    display: flex;
+    align-items: center;
+}
+
+/* Imagem de perfil do usuário */
+header .user-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* Deixa redonda */
+    margin-left: 10px;
+}
+
+/* ========================== */
+/* Área de botões principais  */
+/* ========================== */
+.buttons-container {
+    display: grid; /* Usa grid */
+    grid-template-columns: repeat(2, 1fr); /* 2 colunas iguais */
+    gap: 20px; /* Espaço entre os botões */
+    padding: 20px;
+}
+
+/* Botões azuis principais */
+.blue-btn {
+    background-color: #007bff; /* Azul */
+    color: #fff; /* Texto branco */
+    font-weight: bold; /* Negrito */
+    font-size: 16px;
+    padding: 12px 16px; /* Padding reduzido e responsivo */
+    border: none;
+    border-radius: 10px; /* Bordas arredondadas */
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); /* Sombra */
+    cursor: pointer;
+    text-transform: uppercase; /* Texto em maiúsculas */
+    box-sizing: border-box; /* Garante que padding não cause overflow */
+    max-width: 100%; /* Previne overflow horizontal */
+    overflow: hidden; /* Previne conteúdo que ultrapassa */
+}
+
+/* Efeito hover dos botões */
+.blue-btn:hover {
+    background-color: #0056b3; /* Azul mais escuro */
+}
+
+.blue-btn br {
+    display: block; /* Força quebra de linha */
+}
+
+/* ========================== */
+/* Personagem/Imagem ilustrativa */
+/* ========================== */
+.character img {
+    width: 150px; /* Define tamanho fixo */
+    margin: 20px 0;
+}
+
+.character p {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* ========================== */
+/* Rodapé                     */
+/* ========================== */
+footer {
+    display: flex; /* Itens lado a lado */
+    justify-content: center; /* Centraliza */
+    gap: 10px; /* Espaçamento entre botões */
+    padding: 10px;
+    background-color: #f1f1f1; /* Fundo cinza claro */
+    border-top: 1px solid #ddd; /* Linha separadora */
+}
+
+/* Botões do rodapé */
+.footer-btn {
+    background-color: #e0e0e0; /* Cinza médio */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Efeito hover no rodapé */
+.footer-btn:hover {
+    background-color: #d0d0d0; /* Cinza mais escuro */
+}
