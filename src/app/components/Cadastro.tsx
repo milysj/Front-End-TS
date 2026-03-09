@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Button } from "react-bootstrap";
+import { useRouter } from "next/navigation"; // Importe para navegação interna
 
 type UsuarioTipo = "ALUNO" | "PROFESSOR";
  
@@ -22,6 +23,7 @@ interface Termos {
 }
 
 const Cadastrar = () => {
+  const router = useRouter(); // Inicialize aqui
   const [tipoUsuario, setTipoUsuario] = useState<UsuarioTipo | "">("");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -42,6 +44,8 @@ const Cadastrar = () => {
     "termos"
   );
   const [carregandoTermos, setCarregandoTermos] = useState(false);
+
+  const maxDataNascimento = new Date().toISOString().split("T")[0];
 
   // Função para buscar termos quando o modal for aberto
   const buscarTermos = async () => {
@@ -79,6 +83,11 @@ const Cadastrar = () => {
     }
     if (!dataNascimento) {
       setMessage("A data de nascimento é obrigatória.");
+      return;
+    }
+    const dataRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dataRegex.test(dataNascimento)) {
+      setMessage("Data de nascimento inválida. Use um ano com 4 dígitos.");
       return;
     }
     if (!senha || senha.length < 8) {
@@ -141,7 +150,7 @@ const Cadastrar = () => {
 
       setSucesso("Usuário cadastrado com sucesso!");
       console.log("Usuário cadastrado:", data);
-      window.location.href = "/login";
+     window.location.href = "/email-enviado";
     } catch (error) {
       console.error(error);
       setMessage("Erro ao conectar com o servidor.");
@@ -197,6 +206,8 @@ const Cadastrar = () => {
           required
           value={dataNascimento}
           onChange={(e) => setDataNascimento(e.target.value)}
+          min="1900-01-01"
+          max={maxDataNascimento}
         />
       </div>
     </>

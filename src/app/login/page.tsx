@@ -48,6 +48,7 @@ export default function LoginPage() {
         verificarAutenticacao();
     }, [router]);
 
+    
     return (
         <PageWrapper 
             title="Login" 
@@ -67,4 +68,5 @@ export default function LoginPage() {
             </div>
         </PageWrapper>
     );
+
 }

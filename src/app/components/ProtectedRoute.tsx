@@ -5,7 +5,16 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/app/contexts/AuthContext";
 
 // Rotas públicas que não precisam de autenticação
-const PUBLIC_ROUTES = ["/", "/login", "/cadastro", "/recuperar-senha"];
+const PUBLIC_ROUTES = [
+  "/",
+  "/login",
+  "/cadastro",
+  "/recuperar-senha",
+  "/email-enviado",
+  "/confirmar",
+  "/reenviar-verificacao",
+  "/verificarEmail",
+];
 
 // Rotas que não precisam de perfil criado (além das públicas)
 const ROUTES_WITHOUT_PROFILE = ["/criarPerfil"];

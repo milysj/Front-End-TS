@@ -21,6 +21,7 @@ const Login = () => {
   const [emailRecuperacao, setEmailRecuperacao] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [erroEmailNaoVerificado, setErroEmailNaoVerificado] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -35,6 +36,7 @@ const Login = () => {
     e.preventDefault();
     setErro("");
     setSucesso("");
+    setErroEmailNaoVerificado(false);
 
     try {
       const API_URL =
@@ -48,7 +50,19 @@ const Login = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        setErro(data.message || "Erro desconhecido");
+        const msg = data.message || "Erro desconhecido";
+        const emailNaoVerificado =
+          data.emailNaoVerificado ||
+          /verifiqu(e|ar)|confirm(e|ar)|não verificad|não confirmad/i.test(msg);
+        if (emailNaoVerificado) {
+          setErro(
+            "Seu e-mail ainda não foi verificado. Verifique sua caixa de entrada ou reenvie o link."
+          );
+          setErroEmailNaoVerificado(true);
+          setSucesso("");
+          return;
+        }
+        setErro(msg);
         return;
       }
 
@@ -189,14 +203,22 @@ const Login = () => {
           </div>
 
           {erro && (
-            <p 
-              id="email-error senha-error"
-              className="text-red-600 text-sm" 
-              role="alert"
-              aria-live="assertive"
-            >
-              {erro}
-            </p>
+            <div className="space-y-2" role="alert" aria-live="assertive">
+              <p id="email-error senha-error" className="text-red-600 text-sm">
+                {erro}
+              </p>
+              {erroEmailNaoVerificado && (
+                <p className="text-sm">
+                  <a
+                    href="/reenviar-verificacao"
+                    className="hover:underline font-medium"
+                    style={{ color: "var(--ring, #3b82f6)" }}
+                  >
+                    Reenviar e-mail de verificação
+                  </a>
+                </p>
+              )}
+            </div>
           )}
           <Button 
             type="submit" 

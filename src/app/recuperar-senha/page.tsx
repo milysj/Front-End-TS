@@ -118,8 +118,11 @@ function RecuperarSenhaContent() {
   if (verificando) {
     return (
       <PageWrapper title="Recuperar Senha" description="Verificando token de recuperação">
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="text-center">
+        <div
+          className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg-page)]"
+          style={{ backgroundImage: `url('${backgroundImage}')` }}
+        >
+          <div className="w-full max-w-md p-6 bg-[var(--bg-card)] rounded-lg shadow-md border border-[var(--border-color)] text-center">
             <p className="text-[var(--text-secondary)]" role="status" aria-live="polite">
               Verificando token...
             </p>
@@ -133,12 +136,10 @@ function RecuperarSenhaContent() {
     return (
       <PageWrapper title="Recuperar Senha" description="Token inválido ou expirado">
         <div
-          className="min-h-screen flex items-center justify-center bg-gray-50 px-4"
-          style={{
-            backgroundImage: `url('${backgroundImage}')`,
-          }}
+          className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg-page)]"
+          style={{ backgroundImage: `url('${backgroundImage}')` }}
         >
-          <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+          <div className="w-full max-w-md p-6 bg-[var(--bg-card)] rounded-lg shadow-md border border-[var(--border-color)]">
             <div className="mb-6 text-center">
               <Image
                 width={400}
@@ -173,12 +174,10 @@ function RecuperarSenhaContent() {
       description="Redefina sua senha usando o token de recuperação"
     >
       <div
-        className="min-h-screen flex items-center justify-center bg-gray-50 px-4"
-        style={{
-          backgroundImage: `url('/img/background-image-login-register.png')`,
-        }}
+        className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg-page)]"
+        style={{ backgroundImage: `url('${backgroundImage}')` }}
       >
-        <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+        <div className="w-full max-w-md p-6 bg-[var(--bg-card)] rounded-lg shadow-md border border-[var(--border-color)]">
           <div className="mb-6 text-center">
             <Image
               width={400}
@@ -192,14 +191,14 @@ function RecuperarSenhaContent() {
 
           <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); handleRedefinir(); }} aria-label="Formulário de redefinição de senha">
             <div className="flex flex-col">
-              <label htmlFor="nova-senha" className="text-sm text-left mb-1">
+              <label htmlFor="nova-senha" className="text-sm text-left mb-1 text-[var(--text-primary)]">
                 Nova senha:
               </label>
               <input
                 id="nova-senha"
                 type="password"
                 placeholder="Digite sua nova senha (mínimo 8 caracteres)"
-                className="rounded-lg py-2 px-3 text-sm border border-gray-300 w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+                className="rounded-lg py-2 px-3 text-sm border w-full bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border-color)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] transition-colors duration-300"
                 value={novaSenha}
                 onChange={(e) => setNovaSenha(e.target.value)}
                 required
@@ -211,14 +210,14 @@ function RecuperarSenhaContent() {
             </div>
 
             <div className="flex flex-col">
-              <label htmlFor="confirmar-senha" className="text-sm text-left mb-1">
+              <label htmlFor="confirmar-senha" className="text-sm text-left mb-1 text-[var(--text-primary)]">
                 Confirmar nova senha:
               </label>
               <input
                 id="confirmar-senha"
                 type="password"
                 placeholder="Confirme sua nova senha"
-                className="rounded-lg py-2 px-3 text-sm border border-gray-300 w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+                className="rounded-lg py-2 px-3 text-sm border w-full bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border-color)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] transition-colors duration-300"
                 value={confirmarSenha}
                 onChange={(e) => setConfirmarSenha(e.target.value)}
                 required
@@ -229,12 +228,12 @@ function RecuperarSenhaContent() {
             </div>
 
             {erro && (
-              <p id="senha-error" className="text-red-600 text-sm" role="alert" aria-live="assertive">
+              <p id="senha-error" className="text-red-600 dark:text-red-400 text-sm" role="alert" aria-live="assertive">
                 {erro}
               </p>
             )}
             {sucesso && (
-              <p className="text-green-600 text-sm" role="status" aria-live="polite">
+              <p className="text-green-600 dark:text-green-400 text-sm" role="status" aria-live="polite">
                 {sucesso}
               </p>
             )}
@@ -259,7 +258,7 @@ export default function RecuperarSenhaPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page)]">
           <div className="text-center">
             <p className="text-[var(--text-secondary)]">Carregando...</p>
           </div>
