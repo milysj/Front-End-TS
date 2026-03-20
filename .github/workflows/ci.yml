@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  issues: read
+
 jobs:
   version:
     runs-on: ubuntu-latest
@@ -12,6 +16,8 @@ jobs:
     steps:
       - name: Checkout do código
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configurar Node.js
         uses: actions/setup-node@v2
@@ -33,6 +39,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0 # Buscar tags
+          token: ${{ secrets.GITHUB_TOKEN }}
 
 
       - name: Instalar semver
