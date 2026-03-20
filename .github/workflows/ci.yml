@@ -105,16 +105,20 @@ jobs:
           npm version ${{ steps.version.outputs.new_version }} --no-git-tag-version
           
       - name: Commit e push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
           git add package.json
-          git commit -m "chore(release): version ${{ steps.version.outputs.new_version }}"
-          git tag v${{ steps.version.outputs.new_version }}
-          git push origin main --tags
+          git commit -m "chore(release): version ${{ steps.version.outputs.new_version }}" || echo "Sem mudanças"
+          TAG="v${{ steps.version.outputs.new_version }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag já existe, pulando..."
+          else
+            git tag $TAG
+            git push origin $TAG
+          fi
+          git push origin main
+
 
       - name: Enviar email em caso de falha
         if: failure()
@@ -127,4 +131,4 @@ jobs:
           subject: "Falha no CI - Back-End-TS"
           body: "O processo de CI falhou. Por favor, verifique os logs para mais detalhes."
           to: ${{ secrets.EMAIL_DESTINO }}
-          from: ${{ secrets.EMAIL_ORIGIN }}   
+          from: ${{ secrets.EMAIL_ORIGIN }}
