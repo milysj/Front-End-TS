@@ -28,3 +28,21 @@ Gabriel Lupateli	👨‍💻 Product Owner
 Beatriz Siqueira	👩‍💻 Scrum Master
 
 Wallacy José	🧑‍💻 Frontend Devoloper
+
+## Docker
+
+Na raiz do repositório **Front-End-TS**, com Docker instalado:
+
+```bash
+# Gerar a imagem
+docker build -t estudemy-frontend:latest .
+
+# Subir um container (ajuste a porta se precisar)
+docker run --rm -p 3000:3000 estudemy-frontend:latest
+```
+
+A aplicação fica em `http://localhost:3000`. O build usa o modo `standalone` do Next.js (definido em `next.config.ts`).
+
+Para apontar a API, use variáveis de ambiente do Next no momento do `docker run`, por exemplo `-e NEXT_PUBLIC_API_URL=https://sua-api...` (conforme as variáveis que o projeto utilizar).
+
+**Stack completo (Mongo + API + este frontend):** use o `docker-compose.yml` na raiz do repositório **Back-End-TS** (irmão deste projeto); ele faz o build do frontend com `NEXT_PUBLIC_API_URL=http://localhost:5000`.

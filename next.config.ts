@@ -2,6 +2,8 @@
 
 const nextConfig = {
 
+  output: 'standalone',
+
   eslint: {
 
     // ⛔ Ignora erros de ESLint durante o build (deploy não trava por causa de lint)
