@@ -1,38 +1,36 @@
-# Etapa 1 - Build
-FROM node:20 AS builder
-
-# Diretório de trabalho dentro do container
+FROM node:22-alpine AS deps
 WORKDIR /app
 
-# Copia apenas package.json e package-lock.json para instalar dependências
-COPY package*.json ./
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Instala dependências
-RUN npm install
-
-# Copia todo o restante do código
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Ignora ESLint durante o build para não quebrar o Docker
-RUN echo "module.exports = { eslint: { ignoreDuringBuilds: true } };" > next.config.js.tmp \
-    && node -e "const fs=require('fs'); const c=require('./next.config.js.tmp'); fs.writeFileSync('next.config.js', 'module.exports = '+JSON.stringify(c)); fs.unlinkSync('./next.config.js.tmp');"
+ARG NEXT_PUBLIC_API_URL=http://localhost:5000
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run vercel-build
 
-# Gera build de produção
-RUN npm run build
-
-# Etapa 2 - Produção
-FROM node:20-alpine
-
+FROM node:22-alpine AS runner
 WORKDIR /app
 
-# Copia apenas o build e node_modules do builder
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
-# Expõe a porta que o Next.js vai rodar
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
 EXPOSE 3000
 
-# Comando para iniciar a aplicação
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
