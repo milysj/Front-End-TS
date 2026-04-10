@@ -27,10 +27,18 @@ const materias = [
   "Biologia",
 ];
 
+//Lista de idiomas
+const idiomas = [
+  "Português",
+  "Inglês",
+  "espanhol"
+];
+
 // Imagens disponíveis
 
 // Interface da trilha
 interface Trilha {
+  idioma: string | number | readonly string[] | undefined;
   id?: number;
   _id?: string;
   titulo: string;
@@ -72,6 +80,7 @@ export default function GerenciarTrilha() {
     dataCriacao: "",
     dataTermino: "",
     materia: "",
+    idioma: "",
     dificuldade: "Facil",
     disponibilidade: "Privado",
     pagamento: "Gratuita",
@@ -381,6 +390,7 @@ export default function GerenciarTrilha() {
       dataCriacao: "",
       dataTermino: "",
       materia: "",
+      idioma: "",
       dificuldade: "Facil",
       disponibilidade: "Privado",
       pagamento: "Gratuita",
@@ -735,6 +745,30 @@ export default function GerenciarTrilha() {
                       <option value="Facil">Fácil</option>
                       <option value="Medio">Médio</option>
                       <option value="Dificil">Difícil</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1">
+                    <label className="block font-semibold mb-1 text-sm sm:text-base">
+                      Idioma
+                    </label>
+                    <select
+                      name="idioma"
+                      value={trilha.idioma}
+                      onChange={handleChange}
+                      className="w-full border rounded px-3 py-2 text-sm sm:text-base"
+                    >
+                      <option value="" disabled>
+                        Selecione um idioma
+                      </option>
+                      {idiomas.map((i, index) => (  
+
+                        <option key={index} value={i}>
+                          {i}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
