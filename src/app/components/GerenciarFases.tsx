@@ -15,7 +15,9 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronUp,
+  Sparkles,
 } from "lucide-react";
+import GerarTrilhaIaDialog from "@/app/components/GerarTrilhaIaDialog";
 import {
   buscarSecoesPorTrilha,
   criarSecao,
@@ -65,6 +67,8 @@ export default function GerenciarFasesConteudo() {
   const [faseEditada, setFaseEditada] = useState<Fase | null>(null);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string>("");
+  const [gerarIaAberto, setGerarIaAberto] = useState(false);
+  const [materiaTrilha, setMateriaTrilha] = useState("");
 
   useLayoutEffect(() => {
     document.title = "Gerenciar Fases - Estude.My";
@@ -141,6 +145,21 @@ export default function GerenciarFasesConteudo() {
       isMounted = false;
       abortController.abort();
     };
+  }, [trilhaId]);
+
+  useEffect(() => {
+    if (!trilhaId) return;
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (!token) return;
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    fetch(`${API_URL}/api/trilhas/${trilhaId}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d && typeof d.materia === "string") setMateriaTrilha(d.materia);
+      })
+      .catch(() => {});
   }, [trilhaId]);
 
   const carregarFasesSecao = async (secaoId: string) => {
@@ -340,7 +359,7 @@ export default function GerenciarFasesConteudo() {
 
   return (
     <div className="w-full max-w-4xl mx-auto p-3 sm:p-4 md:p-6 bg-[var(--bg-card)] rounded-lg shadow-lg overflow-x-hidden border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3 sm:gap-0">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
         <div className="flex-1 min-w-0">
           <Button
             variant="outline"
@@ -360,7 +379,25 @@ export default function GerenciarFasesConteudo() {
             </p>
           )}
         </div>
+        <Button
+          type="button"
+          variant="secondary"
+          className="shrink-0 border border-violet-500/50 text-violet-700 hover:bg-violet-50 dark:text-violet-300 dark:hover:bg-violet-950/40"
+          onClick={() => setGerarIaAberto(true)}
+          disabled={loading}
+        >
+          <Sparkles className="mr-2 h-4 w-4" aria-hidden />
+          Gerar com IA
+        </Button>
       </div>
+
+      <GerarTrilhaIaDialog
+        open={gerarIaAberto}
+        onOpenChange={setGerarIaAberto}
+        trilhaId={trilhaId}
+        materiaInicial={materiaTrilha}
+        tituloTrilhaInicial={titulo || ""}
+      />
 
       {erro && (
         <div className="mb-4 p-2 sm:p-3 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded text-sm sm:text-base transition-colors duration-300">

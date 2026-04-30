@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Lock, Unlock } from "lucide-react";
 import { useRouter } from "next/navigation";
+import GerarTrilhaIaDialog, {
+  type TrilhaSugestaoRespostaUi,
+} from "@/app/components/GerarTrilhaIaDialog";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -97,8 +100,25 @@ export default function GerenciarTrilha() {
   const [filtroBusca, setFiltroBusca] = useState<string>("");
   const [filtroMateria, setFiltroMateria] = useState<string>("");
   const [filtroDificuldade, setFiltroDificuldade] = useState<string>("");
+  const [gerarIaAberto, setGerarIaAberto] = useState(false);
 
   const router = useRouter();
+
+  const preencherTrilhaComSugestaoIa = useCallback((s: TrilhaSugestaoRespostaUi) => {
+    const matAi = s.trilha.materia?.trim() || "";
+    const materiaMatched =
+      materias.find((m) => m.toLowerCase() === matAi.toLowerCase()) ??
+      materias.find((m) => matAi.toLowerCase().includes(m.toLowerCase())) ??
+      matAi;
+    setTrilha((prev) => ({
+      ...prev,
+      titulo: s.trilha.titulo || prev.titulo,
+      descricao: s.trilha.descricao || prev.descricao,
+      materia: materiaMatched,
+      dificuldade: s.trilha.dificuldade,
+    }));
+    setMostrarFormulario(true);
+  }, []);
 
   // ================== Funções CRUD ==================
   // ================== Funções CRUD ==================
@@ -447,16 +467,26 @@ export default function GerenciarTrilha() {
   if (tipoUsuario === "ADMINISTRADOR") {
     return (
       <div className="flex flex-col items-center p-2 sm:p-4 mx-auto w-full max-w-6xl relative">
-        {/* ================= Botão Criar Trilha ================= */}
-        <button
-          className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition mb-6 mx-auto"
-          onClick={() => {
-            resetForm();
-            setMostrarFormulario(true);
-          }}
-        >
-          Criar Trilha
-        </button>
+        {/* ================= Botões criar / IA ================= */}
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            className="rounded bg-green-600 px-6 py-2 text-white transition hover:bg-green-700"
+            onClick={() => {
+              resetForm();
+              setMostrarFormulario(true);
+            }}
+          >
+            Criar Trilha
+          </button>
+          <button
+            type="button"
+            className="rounded border border-violet-600 bg-[var(--bg-card)] px-6 py-2 text-violet-700 transition hover:bg-violet-50 dark:text-violet-300 dark:hover:bg-violet-950/40"
+            onClick={() => setGerarIaAberto(true)}
+          >
+            Gerar com IA
+          </button>
+        </div>
 
         {/* ================= Filtros ================= */}
         <div className="mt-4 w-full mb-6 bg-[var(--bg-card)] p-4 rounded shadow-md border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
@@ -911,6 +941,11 @@ export default function GerenciarTrilha() {
             </div>
           </>
         )}
+        <GerarTrilhaIaDialog
+          open={gerarIaAberto}
+          onOpenChange={setGerarIaAberto}
+          onPreencherFormularioTrilha={preencherTrilhaComSugestaoIa}
+        />
       </div>
     );
   }
@@ -918,16 +953,25 @@ export default function GerenciarTrilha() {
   // ================== Interface para PROFESSOR ==================
   return (
     <div className="flex flex-col items-center p-2 sm:p-4 mx-auto w-full max-w-6xl relative">
-      {/* ================= Botão Criar Trilha ================= */}
-      <button
-        className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition mb-6 mx-auto"
-        onClick={() => {
-          resetForm();
-          setMostrarFormulario(true);
-        }}
-      >
-        Criar Trilha
-      </button>
+      <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
+        <button
+          type="button"
+          className="rounded bg-green-600 px-6 py-2 text-white transition hover:bg-green-700"
+          onClick={() => {
+            resetForm();
+            setMostrarFormulario(true);
+          }}
+        >
+          Criar Trilha
+        </button>
+        <button
+          type="button"
+          className="rounded border border-violet-600 bg-[var(--bg-card)] px-6 py-2 text-violet-700 transition hover:bg-violet-50 dark:text-violet-300 dark:hover:bg-violet-950/40"
+          onClick={() => setGerarIaAberto(true)}
+        >
+          Gerar com IA
+        </button>
+      </div>
 
       {/* ================= Lista de Trilhas ================= */}
       <div className="w-full mb-8">
@@ -1265,6 +1309,11 @@ export default function GerenciarTrilha() {
           </div>
         </>
       )}
+      <GerarTrilhaIaDialog
+        open={gerarIaAberto}
+        onOpenChange={setGerarIaAberto}
+        onPreencherFormularioTrilha={preencherTrilhaComSugestaoIa}
+      />
     </div>
   );
 }
