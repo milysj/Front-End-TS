@@ -45,7 +45,7 @@ export const buscarSecaoPorId = async (id: string): Promise<Secao> => {
 export const criarSecao = async (secaoData: Omit<Secao, "_id">): Promise<Secao> => {
   try {
     const response = await api.post(API_ENDPOINTS.SECOES.LISTAR, secaoData);
-    return response.data;
+    return response.data.secao || response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Erro ao criar seção");
   }
@@ -63,7 +63,7 @@ export const atualizarSecao = async (
 ): Promise<Secao> => {
   try {
     const response = await api.put(API_ENDPOINTS.SECOES.POR_ID(id), secaoData);
-    return response.data;
+    return response.data.secao || response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Erro ao atualizar seção");
   }

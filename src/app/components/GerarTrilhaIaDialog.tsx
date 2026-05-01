@@ -209,11 +209,18 @@ export default function GerarTrilhaIaDialog({
 
         for (let fi = 0; fi < sec.fases.length; fi++) {
           const f = sec.fases[fi];
-          const perguntas = (f.perguntas || []).map((p) => ({
-            enunciado: String(p.enunciado || "").trim(),
-            alternativas: (p.alternativas?.length ? p.alternativas : ["", "", "", ""]).slice(0, 4),
-            respostaCorreta: String(p.respostaCorreta ?? ""),
-          }));
+          const perguntas = (f.perguntas || []).map((p) => {
+            const alts = (p.alternativas?.length ? p.alternativas : ["Opção A", "Opção B", "Opção C", "Opção D"])
+              .map(a => String(a).trim() || "Opção")
+              .slice(0, 4);
+            // Garantir que haja pelo menos uma alternativa válida
+            while (alts.length < 2) alts.push("Opção");
+            return {
+              enunciado: String(p.enunciado || "").trim() || "Pergunta sem enunciado",
+              alternativas: alts,
+              respostaCorreta: String(p.respostaCorreta || "").trim() || alts[0],
+            };
+          });
 
           await criarFase({
             trilhaId,

@@ -92,6 +92,7 @@ export default function GerenciarTrilha() {
   });
   const [modoEdicao, setModoEdicao] = useState(false);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [sugestaoPendente, setSugestaoPendente] = useState<TrilhaSugestaoRespostaUi | null>(null);
   
   // Estados para administrador
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
@@ -117,11 +118,60 @@ export default function GerenciarTrilha() {
       materia: materiaMatched,
       dificuldade: s.trilha.dificuldade,
     }));
+    setSugestaoPendente(s);
     setMostrarFormulario(true);
   }, []);
 
   // ================== Funções CRUD ==================
   // ================== Funções CRUD ==================
+
+  const aplicarSugestao = async (sugestao: TrilhaSugestaoRespostaUi, trilhaId: string) => {
+    try {
+      const { criarSecao } = await import("@/app/services/secaoService");
+      const { criarFase } = await import("@/app/services/faseService");
+      
+      for (let si = 0; si < sugestao.secoes.length; si++) {
+        const sec = sugestao.secoes[si];
+        const secaoCriada = await criarSecao({
+          trilhaId,
+          titulo: sec.titulo || `Seção ${si + 1}`,
+          descricao: sec.descricao || "",
+          ordem: si + 1,
+        });
+
+        const sid = secaoCriada._id;
+        if (!sid) continue;
+
+        for (let fi = 0; fi < sec.fases.length; fi++) {
+          const f = sec.fases[fi];
+          const perguntas = (f.perguntas || []).map((p) => {
+            const alts = (p.alternativas?.length ? p.alternativas : ["Opção A", "Opção B", "Opção C", "Opção D"])
+              .map(a => String(a).trim() || "Opção")
+              .slice(0, 4);
+            // Garantir que haja pelo menos uma alternativa válida
+            while (alts.length < 2) alts.push("Opção");
+            return {
+              enunciado: String(p.enunciado || "").trim() || "Pergunta sem enunciado",
+              alternativas: alts,
+              respostaCorreta: String(p.respostaCorreta || "").trim() || alts[0],
+            };
+          });
+
+          await criarFase({
+            trilhaId,
+            secaoId: sid,
+            titulo: f.titulo || `Fase ${fi + 1}`,
+            descricao: f.descricao || "",
+            conteudo: (f.conteudo || f.descricao || "").trim(),
+            ordem: f.ordem ?? fi + 1,
+            perguntas,
+          });
+        }
+      }
+    } catch (e) {
+      console.error("Erro ao salvar seções e fases da sugestão IA", e);
+    }
+  };
 
   // Função para agrupar trilhas por usuário
   const agruparTrilhasPorUsuario = (trilhasData: Trilha[]) => {
@@ -307,6 +357,11 @@ export default function GerenciarTrilha() {
 
       const novaTrilha = await response.json();
 
+      if (!modoEdicao && sugestaoPendente && (novaTrilha.id || novaTrilha._id)) {
+        await aplicarSugestao(sugestaoPendente, novaTrilha.id || novaTrilha._id);
+        setSugestaoPendente(null);
+      }
+
       if (modoEdicao) {
         setTrilhas((prev) => {
           const trilhasAtualizadas = prev.map((t) => (t.id === novaTrilha.id || (t as any)._id === novaTrilha._id ? novaTrilha : t));
@@ -404,6 +459,7 @@ export default function GerenciarTrilha() {
   };
 
   const resetForm = () => {
+    setSugestaoPendente(null);
     setTrilha({
       titulo: "",
       descricao: "",
