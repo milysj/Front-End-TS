@@ -9,7 +9,7 @@ const PUBLIC_ROUTES = [
   '/home',
   '/recuperar-senha',
   '/esquecisenha',
-];
+];  
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
