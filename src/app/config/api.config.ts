@@ -10,10 +10,10 @@
  * Por padrão, Spring Boot roda na porta 8080
  * 
  * Para configurar, crie um arquivo .env.local na raiz do projeto com:
- * NEXT_PUBLIC_API_URL=http://localhost:8080
+ * NEXT_PUBLIC_API_URL=http://localhost:5000
  */
 export const API_BASE_URL = 
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 /**
  * Timeout padrão para requisições (em milissegundos)
@@ -61,6 +61,8 @@ export const API_ENDPOINTS = {
   // Trilhas
   TRILHAS: {
     LISTAR: "/api/trilhas",
+    /** POST — professor; corpo `{ materia, temaOuObjetivo?, ... }`; resposta `{ trilha, secoes }` */
+    GERAR_COM_IA: "/api/trilhas/gerar-com-ia",
     BUSCAR: "/api/trilhas/buscar",
     NOVIDADES: "/api/trilhas/novidades",
     POPULARES: "/api/trilhas/populares",

@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Lock, Unlock } from "lucide-react";
 import { useRouter } from "next/navigation";
+import GerarTrilhaIaDialog, {
+  type TrilhaSugestaoRespostaUi,
+} from "@/app/components/GerarTrilhaIaDialog";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -89,6 +92,7 @@ export default function GerenciarTrilha() {
   });
   const [modoEdicao, setModoEdicao] = useState(false);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [sugestaoPendente, setSugestaoPendente] = useState<TrilhaSugestaoRespostaUi | null>(null);
   
   // Estados para administrador
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
@@ -97,11 +101,77 @@ export default function GerenciarTrilha() {
   const [filtroBusca, setFiltroBusca] = useState<string>("");
   const [filtroMateria, setFiltroMateria] = useState<string>("");
   const [filtroDificuldade, setFiltroDificuldade] = useState<string>("");
+  const [gerarIaAberto, setGerarIaAberto] = useState(false);
 
   const router = useRouter();
 
+  const preencherTrilhaComSugestaoIa = useCallback((s: TrilhaSugestaoRespostaUi) => {
+    const matAi = s.trilha.materia?.trim() || "";
+    const materiaMatched =
+      materias.find((m) => m.toLowerCase() === matAi.toLowerCase()) ??
+      materias.find((m) => matAi.toLowerCase().includes(m.toLowerCase())) ??
+      matAi;
+    setTrilha((prev) => ({
+      ...prev,
+      titulo: s.trilha.titulo || prev.titulo,
+      descricao: s.trilha.descricao || prev.descricao,
+      materia: materiaMatched,
+      dificuldade: s.trilha.dificuldade,
+    }));
+    setSugestaoPendente(s);
+    setMostrarFormulario(true);
+  }, []);
+
   // ================== Funções CRUD ==================
   // ================== Funções CRUD ==================
+
+  const aplicarSugestao = async (sugestao: TrilhaSugestaoRespostaUi, trilhaId: string) => {
+    try {
+      const { criarSecao } = await import("@/app/services/secaoService");
+      const { criarFase } = await import("@/app/services/faseService");
+      
+      for (let si = 0; si < sugestao.secoes.length; si++) {
+        const sec = sugestao.secoes[si];
+        const secaoCriada = await criarSecao({
+          trilhaId,
+          titulo: sec.titulo || `Seção ${si + 1}`,
+          descricao: sec.descricao || "",
+          ordem: si + 1,
+        });
+
+        const sid = secaoCriada._id;
+        if (!sid) continue;
+
+        for (let fi = 0; fi < sec.fases.length; fi++) {
+          const f = sec.fases[fi];
+          const perguntas = (f.perguntas || []).map((p) => {
+            const alts = (p.alternativas?.length ? p.alternativas : ["Opção A", "Opção B", "Opção C", "Opção D"])
+              .map(a => String(a).trim() || "Opção")
+              .slice(0, 4);
+            // Garantir que haja pelo menos uma alternativa válida
+            while (alts.length < 2) alts.push("Opção");
+            return {
+              enunciado: String(p.enunciado || "").trim() || "Pergunta sem enunciado",
+              alternativas: alts,
+              respostaCorreta: String(p.respostaCorreta || "").trim() || alts[0],
+            };
+          });
+
+          await criarFase({
+            trilhaId,
+            secaoId: sid,
+            titulo: f.titulo || `Fase ${fi + 1}`,
+            descricao: f.descricao || "",
+            conteudo: (f.conteudo || f.descricao || "").trim(),
+            ordem: f.ordem ?? fi + 1,
+            perguntas,
+          });
+        }
+      }
+    } catch (e) {
+      console.error("Erro ao salvar seções e fases da sugestão IA", e);
+    }
+  };
 
   // Função para agrupar trilhas por usuário
   const agruparTrilhasPorUsuario = (trilhasData: Trilha[]) => {
@@ -287,6 +357,11 @@ export default function GerenciarTrilha() {
 
       const novaTrilha = await response.json();
 
+      if (!modoEdicao && sugestaoPendente && (novaTrilha.id || novaTrilha._id)) {
+        await aplicarSugestao(sugestaoPendente, novaTrilha.id || novaTrilha._id);
+        setSugestaoPendente(null);
+      }
+
       if (modoEdicao) {
         setTrilhas((prev) => {
           const trilhasAtualizadas = prev.map((t) => (t.id === novaTrilha.id || (t as any)._id === novaTrilha._id ? novaTrilha : t));
@@ -384,6 +459,7 @@ export default function GerenciarTrilha() {
   };
 
   const resetForm = () => {
+    setSugestaoPendente(null);
     setTrilha({
       titulo: "",
       descricao: "",
@@ -447,16 +523,26 @@ export default function GerenciarTrilha() {
   if (tipoUsuario === "ADMINISTRADOR") {
     return (
       <div className="flex flex-col items-center p-2 sm:p-4 mx-auto w-full max-w-6xl relative">
-        {/* ================= Botão Criar Trilha ================= */}
-        <button
-          className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition mb-6 mx-auto"
-          onClick={() => {
-            resetForm();
-            setMostrarFormulario(true);
-          }}
-        >
-          Criar Trilha
-        </button>
+        {/* ================= Botões criar / IA ================= */}
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            className="rounded bg-green-600 px-6 py-2 text-white transition hover:bg-green-700"
+            onClick={() => {
+              resetForm();
+              setMostrarFormulario(true);
+            }}
+          >
+            Criar Trilha
+          </button>
+          <button
+            type="button"
+            className="rounded border border-violet-600 bg-[var(--bg-card)] px-6 py-2 text-violet-700 transition hover:bg-violet-50 dark:text-violet-300 dark:hover:bg-violet-950/40"
+            onClick={() => setGerarIaAberto(true)}
+          >
+            Gerar com IA
+          </button>
+        </div>
 
         {/* ================= Filtros ================= */}
         <div className="mt-4 w-full mb-6 bg-[var(--bg-card)] p-4 rounded shadow-md border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
@@ -911,6 +997,11 @@ export default function GerenciarTrilha() {
             </div>
           </>
         )}
+        <GerarTrilhaIaDialog
+          open={gerarIaAberto}
+          onOpenChange={setGerarIaAberto}
+          onPreencherFormularioTrilha={preencherTrilhaComSugestaoIa}
+        />
       </div>
     );
   }
@@ -918,16 +1009,25 @@ export default function GerenciarTrilha() {
   // ================== Interface para PROFESSOR ==================
   return (
     <div className="flex flex-col items-center p-2 sm:p-4 mx-auto w-full max-w-6xl relative">
-      {/* ================= Botão Criar Trilha ================= */}
-      <button
-        className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition mb-6 mx-auto"
-        onClick={() => {
-          resetForm();
-          setMostrarFormulario(true);
-        }}
-      >
-        Criar Trilha
-      </button>
+      <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
+        <button
+          type="button"
+          className="rounded bg-green-600 px-6 py-2 text-white transition hover:bg-green-700"
+          onClick={() => {
+            resetForm();
+            setMostrarFormulario(true);
+          }}
+        >
+          Criar Trilha
+        </button>
+        <button
+          type="button"
+          className="rounded border border-violet-600 bg-[var(--bg-card)] px-6 py-2 text-violet-700 transition hover:bg-violet-50 dark:text-violet-300 dark:hover:bg-violet-950/40"
+          onClick={() => setGerarIaAberto(true)}
+        >
+          Gerar com IA
+        </button>
+      </div>
 
       {/* ================= Lista de Trilhas ================= */}
       <div className="w-full mb-8">
@@ -1265,6 +1365,11 @@ export default function GerenciarTrilha() {
           </div>
         </>
       )}
+      <GerarTrilhaIaDialog
+        open={gerarIaAberto}
+        onOpenChange={setGerarIaAberto}
+        onPreencherFormularioTrilha={preencherTrilhaComSugestaoIa}
+      />
     </div>
   );
 }
