@@ -2,10 +2,18 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
+  // We use a try-catch for useAuth because ThemeToggle might be rendered outside AuthProvider in some edge cases (though unlikely here)
+  let auth: ReturnType<typeof useAuth> | null = null;
+  try {
+    auth = useAuth();
+  } catch (e) {
+    // If not within AuthProvider, it's fine, we just won't sync with DB.
+  }
 
   // useEffect only runs on the client, so now we can safely show the UI
   useEffect(() => {
@@ -16,9 +24,19 @@ export default function ThemeToggle() {
     return null;
   }
 
+  const handleToggle = () => {
+    const novoTema = theme === "dark" ? "light" : "dark";
+    setTheme(novoTema);
+    
+    // Se o usuário estiver logado, salva a preferência no banco
+    if (auth?.isAuthenticated && auth?.updateUserTheme) {
+      auth.updateUserTheme(novoTema);
+    }
+  };
+
   return (
     <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={handleToggle}
       className="fixed top-4 right-4 z-50 p-3 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/30 hover:bg-white/30 transition-all duration-300 shadow-lg"
       aria-label="Alternar tema"
       title={theme === "dark" ? "Mudar para modo claro" : "Mudar para modo escuro"}
