@@ -41,7 +41,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
   token: string | null;
-  login: (token: string) => Promise<void>;
+  login: (token: string, userData?: User) => Promise<void>;
   logout: () => void;
   loading: boolean;
   updateUserTheme: (novoTema: string) => Promise<void>;
@@ -154,22 +154,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const login = async (newToken: string) => {
+  const login = async (newToken: string, userData?: User) => {
     setToken(newToken);
     setAuthState(newToken);
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/users/me`, {
-        headers: {
-          Authorization: `Bearer ${newToken}`,
-        },
-      });
-      if (res.ok) {
-        const userData = await res.json();
+      if (userData) {
         handleSetUser(userData);
         saveSafeCookie(userData);
       } else {
-        throw new Error("Falha ao buscar dados do usuário após o login");
+        const res = await fetch(`${API_URL}/api/users/me`, {
+          headers: {
+            Authorization: `Bearer ${newToken}`,
+          },
+        });
+        if (res.ok) {
+          const fetchedUserData = await res.json();
+          handleSetUser(fetchedUserData);
+          saveSafeCookie(fetchedUserData);
+        } else {
+          throw new Error("Falha ao buscar dados do usuário após o login");
+        }
       }
     } catch (error) {
       console.error(error);

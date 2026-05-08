@@ -326,7 +326,7 @@ export default function GerarTrilhaIaDialog({
                 <input
                   type="number"
                   min={1}
-                  max={8}
+                  max={4}
                   value={numeroSecoes}
                   onChange={(e) => setNumeroSecoes(Number(e.target.value) || 1)}
                   className="mt-1 w-full rounded border border-[var(--border-color)] bg-[var(--bg-input)] px-3 py-2 text-sm"
@@ -337,7 +337,7 @@ export default function GerarTrilhaIaDialog({
                 <input
                   type="number"
                   min={1}
-                  max={6}
+                  max={4}
                   value={fasesPorSecao}
                   onChange={(e) => setFasesPorSecao(Number(e.target.value) || 1)}
                   className="mt-1 w-full rounded border border-[var(--border-color)] bg-[var(--bg-input)] px-3 py-2 text-sm"
@@ -348,7 +348,7 @@ export default function GerarTrilhaIaDialog({
                 <input
                   type="number"
                   min={2}
-                  max={8}
+                  max={4}
                   value={perguntasPorFase}
                   onChange={(e) => setPerguntasPorFase(Number(e.target.value) || 2)}
                   className="mt-1 w-full rounded border border-[var(--border-color)] bg-[var(--bg-input)] px-3 py-2 text-sm"
