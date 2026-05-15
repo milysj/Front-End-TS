@@ -273,7 +273,7 @@ export default function GerenciarTrilha() {
 
   // Agrupar trilhas por usuário quando as trilhas ou tipoUsuario mudarem
   useEffect(() => {
-    if (tipoUsuario === "ADMINISTRADOR" && trilhas.length > 0) {
+    if ((tipoUsuario === "ADMINISTRADOR" || tipoUsuario === "OWNER") && trilhas.length > 0) {
       agruparTrilhasPorUsuario(trilhas);
     }
   }, [trilhas, tipoUsuario]);
@@ -365,8 +365,8 @@ export default function GerenciarTrilha() {
       if (modoEdicao) {
         setTrilhas((prev) => {
           const trilhasAtualizadas = prev.map((t) => (t.id === novaTrilha.id || (t as any)._id === novaTrilha._id ? novaTrilha : t));
-          // Se for ADMINISTRADOR, atualizar também a lista agrupada
-          if (tipoUsuario === "ADMINISTRADOR") {
+          // Se for ADMINISTRADOR ou OWNER, atualizar também a lista agrupada
+          if (tipoUsuario === "ADMINISTRADOR" || tipoUsuario === "OWNER") {
             agruparTrilhasPorUsuario(trilhasAtualizadas);
           }
           return trilhasAtualizadas;
@@ -374,8 +374,8 @@ export default function GerenciarTrilha() {
       } else {
         setTrilhas((prev) => {
           const novasTrilhas = [...prev, novaTrilha];
-          // Se for ADMINISTRADOR, atualizar também a lista agrupada
-          if (tipoUsuario === "ADMINISTRADOR") {
+          // Se for ADMINISTRADOR ou OWNER, atualizar também a lista agrupada
+          if (tipoUsuario === "ADMINISTRADOR" || tipoUsuario === "OWNER") {
             agruparTrilhasPorUsuario(novasTrilhas);
           }
           return novasTrilhas;
@@ -432,15 +432,15 @@ export default function GerenciarTrilha() {
       if (response.ok) {
         setTrilhas((prev) => {
           const novasTrilhas = prev.filter((t) => t.id?.toString() !== id && (t as any)._id !== id);
-          // Se for ADMINISTRADOR, atualizar também a lista agrupada
-          if (tipoUsuario === "ADMINISTRADOR" && novasTrilhas.length > 0) {
+          // Se for ADMINISTRADOR ou OWNER, atualizar também a lista agrupada
+          if ((tipoUsuario === "ADMINISTRADOR" || tipoUsuario === "OWNER") && novasTrilhas.length > 0) {
             agruparTrilhasPorUsuario(novasTrilhas);
           }
           return novasTrilhas;
         });
         
-        // Atualizar também a lista de usuários se for ADMINISTRADOR
-        if (tipoUsuario === "ADMINISTRADOR") {
+        // Atualizar também a lista de usuários se for ADMINISTRADOR ou OWNER
+        if (tipoUsuario === "ADMINISTRADOR" || tipoUsuario === "OWNER") {
           setUsuariosComTrilhas((prev) => {
             return prev.map((usuario) => ({
               ...usuario,
@@ -519,8 +519,8 @@ export default function GerenciarTrilha() {
   });
 
   // ================== JSX ==================
-  // Se for ADMINISTRADOR, mostrar interface de administrador
-  if (tipoUsuario === "ADMINISTRADOR") {
+  // Se for ADMINISTRADOR ou OWNER, mostrar interface de administrador
+  if (tipoUsuario === "ADMINISTRADOR" || tipoUsuario === "OWNER") {
     return (
       <div className="flex flex-col items-center p-2 sm:p-4 mx-auto w-full max-w-6xl relative">
         {/* ================= Botões criar / IA ================= */}
@@ -604,9 +604,9 @@ export default function GerenciarTrilha() {
               <p className="text-center">Nenhum usuário encontrado.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {usuariosFiltrados.map((usuario) => (
+                {usuariosFiltrados.map((usuario, index) => (
                   <div
-                    key={usuario._id}
+                    key={usuario._id || `user-index-${index}`}
                     onClick={() => setUsuarioSelecionado(usuario._id)}
                     className="bg-[var(--bg-card)] rounded shadow-md p-4 cursor-pointer hover:shadow-lg transition border-2 border-transparent hover:border-blue-500 border-[var(--border-color)]"
                     style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
@@ -1041,7 +1041,8 @@ export default function GerenciarTrilha() {
           {trilhas.map((t) => (
             <div
               key={t.id ?? (t as any)._id} // usa id ou _id do MongoDB
-              className="bg-white rounded shadow-md p-3 sm:p-4 flex flex-col gap-2 overflow-hidden w-full max-w-sm"
+              className="bg-[var(--bg-card)] rounded shadow-md p-3 sm:p-4 flex flex-col gap-2 overflow-hidden w-full max-w-sm border border-[var(--border-color)] transition-colors duration-300"
+              style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
             >
               {t.imagem && (
                 <img
@@ -1102,7 +1103,7 @@ export default function GerenciarTrilha() {
           />
 
           {/* Formulário */}
-          <div className="fixed inset-x-0 top-0 sm:relative sm:inset-auto bg-white p-3 sm:p-4 md:p-6 rounded shadow-lg w-full max-w-3xl mb-8 overflow-y-auto max-h-screen sm:max-h-none z-50 sm:z-auto mx-auto sm:shadow-md">
+          <div className="fixed inset-x-0 top-0 sm:relative sm:inset-auto bg-[var(--bg-card)] p-3 sm:p-4 md:p-6 rounded shadow-lg w-full max-w-3xl mb-8 overflow-y-auto max-h-screen sm:max-h-none z-50 sm:z-auto mx-auto sm:shadow-md border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
                 {modoEdicao ? "Editar" : "Criar nova"}{" "}

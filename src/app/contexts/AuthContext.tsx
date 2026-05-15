@@ -28,13 +28,16 @@ interface User {
   email: string;
   username: string | null;
   personagem: string | null;
-  tipoUsuario: 'ALUNO' | 'PROFESSOR' | 'ADMINISTRADOR' | null;
+  tipoUsuario: 'ALUNO' | 'PROFESSOR' | 'ADMINISTRADOR' | 'OWNER' | null;
   tema?: string;
   idioma?: string;
   fotoPerfil?: string;
   xpTotal?: number;
   isVerified?: boolean;
   twoFactorEnabled?: boolean;
+  status?: 'ATIVO' | 'BLOQUEADO' | 'BANIDO';
+  bloqueadoAte?: Date | null;
+  canPromoteToAdmin?: boolean;
 }
 
 interface AuthContextType {
@@ -114,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        const isProfAdmin = cachedTipoUsuario === 'PROFESSOR' || cachedTipoUsuario === 'ADMINISTRADOR';
+        const isProfAdmin = cachedTipoUsuario === 'PROFESSOR' || cachedTipoUsuario === 'ADMINISTRADOR' || cachedTipoUsuario === 'OWNER';
         
         if (isProfAdmin && !isProfessorRoute) {
           // Professor e Admin pulam o fetch, EXCETO nas rotas sensíveis

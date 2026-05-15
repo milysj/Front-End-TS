@@ -20,6 +20,7 @@ import {
   Menu,
   LogOut,
   Bot,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -135,12 +136,21 @@ const ModernNavbar = () => {
       separator: true,
     },
     { href: "/salvas", icon: Bookmark, label: "Lições Salvas" },
-    ...(tipoUsuario === "PROFESSOR" || tipoUsuario === "ADMINISTRADOR"
+    ...(tipoUsuario === "PROFESSOR" || tipoUsuario === "ADMINISTRADOR" || tipoUsuario === "OWNER"
       ? [
           {
             href: "/gerenciarTrilha",
             icon: Backpack,
             label: "Gerenciar Trilhas",
+          },
+        ]
+      : []),
+    ...(tipoUsuario === "ADMINISTRADOR" || tipoUsuario === "OWNER"
+      ? [
+          {
+            href: "/painel-admin",
+            icon: Shield,
+            label: "Painel Admin",
           },
         ]
       : []),
