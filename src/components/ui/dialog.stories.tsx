@@ -50,14 +50,11 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // O modal inicia fechado. O gatilho para abri-lo está no canvas.
     const trigger = canvas.getByRole('button', { name: /Edit Profile/i });
     await userEvent.click(trigger);
 
-    // Como o Dialog usa um Portal, o conteúdo é renderizado no document.body
     const body = within(document.body);
     
-    // Verificamos se o conteúdo de fato apareceu na tela (garante a execução do código de dentro do modal)
     const title = await body.findByText('Edit profile');
     await expect(title).toBeInTheDocument();
     

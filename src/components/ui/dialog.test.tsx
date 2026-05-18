@@ -33,24 +33,19 @@ describe('Dialog Component', () => {
       </Dialog>
     );
 
-    // O dialog não deve estar visível no DOM inicial (RadixUI não renderiza o portal até abrir)
     expect(screen.queryByText('My Test Title')).not.toBeInTheDocument();
 
-    // Clica para abrir o modal
     const triggerButton = screen.getByText('Open Dialog');
     await user.click(triggerButton);
 
-    // Verifica se todos os sub-componentes foram renderizados no DOM
     expect(screen.getByText('My Test Title')).toBeInTheDocument();
     expect(screen.getByText('This is a test description.')).toBeInTheDocument();
     expect(screen.getByText('Main Content Here')).toBeInTheDocument();
     expect(screen.getByText('Cancel')).toBeInTheDocument();
 
-    // Fecha o modal pelo botão "Cancel"
     const closeButton = screen.getByText('Cancel');
     await user.click(closeButton);
 
-    // Aguarda a remoção do modal devido às possíveis animações de fechamento
     await waitFor(() => {
       expect(screen.queryByText('My Test Title')).not.toBeInTheDocument();
     });
