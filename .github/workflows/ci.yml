@@ -30,8 +30,14 @@ jobs:
       - name: Rodar build
         run: npm run build
 
-      - name: Testes unitarios
-        run: npm test    
+      - name: Testes unitarios e Cobertura
+        run: npm run test:coverage    
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Necessário para ler o repositório
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Necessário para autenticar com o SonarCloud
       #PARTE 1 - Até aqui
 
       #PARTE 2 - A partir daqui (descomentar)
