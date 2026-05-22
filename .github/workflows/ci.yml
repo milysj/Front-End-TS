@@ -38,7 +38,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Necessário para ler o repositório
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Necessário para autenticar com o SonarCloud
-      #PARTE 1 - Até aqui
+        with:
+          args: >
+            -Dsonar.projectKey=milysj_Front-End-TS
+            -Dsonar.organization=milysj
+            -Dsonar.sources=src
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.test.ts,**/*.spec.ts
 
       #PARTE 2 - A partir daqui (descomentar)
       - name: Checkout do código
