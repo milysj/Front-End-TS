@@ -2,7 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/app/contexts/AuthContext";
+<<<<<<< Updated upstream
 import { Lock, Unlock, Ban, Trash2, CheckCircle, BookOpen, Plus, Search, Users, Pencil, Check, X } from "lucide-react";
+=======
+import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
+import { Lock, Unlock, Ban, Trash2, CheckCircle, Plus, BookOpen, ArrowLeft } from "lucide-react";
+>>>>>>> Stashed changes
 
 interface UserData {
   _id: string;
@@ -19,13 +25,38 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function PainelAdmin() {
   const { user, token } = useAuth();
+<<<<<<< Updated upstream
   const [activeTab, setActiveTab] = useState<"usuarios" | "materias">("usuarios");
+=======
+  const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const backgroundImage = resolvedTheme === "dark" 
+    ? "/img/backgrounds/background_login_darkmode.jpg"
+    : "/img/backgrounds/background_login_lightmode.png";
+
+>>>>>>> Stashed changes
   const [usuarios, setUsuarios] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Filtros
+  // Abas
+  const [activeTab, setActiveTab] = useState<"usuarios" | "materias">("usuarios");
+
+  // Matérias
+  const [materias, setMaterias] = useState<string[]>([]);
+  const [materiaLoading, setMateriaLoading] = useState(false);
+  const [newMateriaName, setNewMateriaName] = useState("");
+  const [addingMateria, setAddingMateria] = useState(false);
+  const [deletingMateriaName, setDeletingMateriaName] = useState<string | null>(null);
+
+  // Filtros de Usuários
   const [searchTerm, setSearchTerm] = useState("");
   const [filterTipo, setFilterTipo] = useState("TODOS");
   const [filterStatus, setFilterStatus] = useState("TODOS");
@@ -73,7 +104,11 @@ export default function PainelAdmin() {
 
   const fetchMaterias = async () => {
     try {
+<<<<<<< Updated upstream
       setLoadingMaterias(true);
+=======
+      setMateriaLoading(true);
+>>>>>>> Stashed changes
       const res = await fetch(`${API_URL}/api/materias`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -86,7 +121,11 @@ export default function PainelAdmin() {
     } catch (err) {
       setError("Erro de conexão ao carregar matérias.");
     } finally {
+<<<<<<< Updated upstream
       setLoadingMaterias(false);
+=======
+      setMateriaLoading(false);
+>>>>>>> Stashed changes
     }
   };
 
@@ -193,6 +232,7 @@ export default function PainelAdmin() {
     }
   };
 
+<<<<<<< Updated upstream
   const handleAddMateria = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMateriaName.trim()) return;
@@ -200,6 +240,13 @@ export default function PainelAdmin() {
     try {
       setAddingMateria(true);
       setError("");
+=======
+  const handleCreateMateria = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMateriaName.trim()) return;
+    try {
+      setAddingMateria(true);
+>>>>>>> Stashed changes
       const res = await fetch(`${API_URL}/api/admin/materias`, {
         method: "POST",
         headers: {
@@ -208,22 +255,34 @@ export default function PainelAdmin() {
         },
         body: JSON.stringify({ nome: newMateriaName.trim() }),
       });
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
       if (res.ok) {
         showSuccess(`Matéria "${newMateriaName.trim()}" adicionada com sucesso.`);
         setNewMateriaName("");
         fetchMaterias();
       } else {
+<<<<<<< Updated upstream
         const data = await res.json().catch(() => ({}));
         setError(data.message || "Erro ao adicionar matéria.");
       }
     } catch (err) {
       setError("Erro de conexão ao adicionar matéria.");
+=======
+        const errData = await res.json();
+        alert(`Erro: ${errData.message}`);
+      }
+    } catch (err) {
+      alert("Erro ao cadastrar matéria.");
+>>>>>>> Stashed changes
     } finally {
       setAddingMateria(false);
     }
   };
 
+<<<<<<< Updated upstream
   const handleEditMateria = async (nomeAntigo: string) => {
     const novoNome = editedMateriaValue.trim();
     if (!novoNome || novoNome.toLowerCase() === nomeAntigo.toLowerCase()) {
@@ -270,15 +329,35 @@ export default function PainelAdmin() {
         },
       });
 
+=======
+  const handleDeleteMateria = async (nome: string) => {
+    if (!window.confirm(`Deseja realmente excluir a matéria "${nome}"?`)) return;
+    try {
+      setDeletingMateriaName(nome);
+      const res = await fetch(`${API_URL}/api/admin/materias/${encodeURIComponent(nome)}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+>>>>>>> Stashed changes
       if (res.ok) {
         showSuccess(`Matéria "${nome}" excluída com sucesso.`);
         fetchMaterias();
       } else {
+<<<<<<< Updated upstream
         const data = await res.json().catch(() => ({}));
         setError(data.message || "Erro ao excluir matéria.");
       }
     } catch (err) {
       setError("Erro de conexão ao excluir matéria.");
+=======
+        const errData = await res.json();
+        alert(`Erro: ${errData.message}`);
+      }
+    } catch (err) {
+      alert("Erro ao excluir matéria.");
+    } finally {
+      setDeletingMateriaName(null);
+>>>>>>> Stashed changes
     }
   };
 
@@ -294,7 +373,9 @@ export default function PainelAdmin() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-xl text-[var(--text-primary)]">Carregando painel...</div>;
+  if (loading && usuarios.length === 0) {
+    return <div className="p-8 text-center text-xl text-[var(--text-primary)]">Carregando painel...</div>;
+  }
 
   const filteredUsuarios = usuarios.filter((u) => {
     const term = searchTerm.toLowerCase();
@@ -314,11 +395,24 @@ export default function PainelAdmin() {
   );
 
   return (
-    <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] p-6 md:p-12 transition-colors duration-300 relative">
+    <div 
+      className="min-h-screen text-[var(--text-primary)] p-6 md:p-12 transition-colors duration-300 relative bg-cover bg-center bg-no-repeat bg-fixed"
+      style={{
+        backgroundImage: mounted ? `url('${backgroundImage}')` : "none",
+      }}
+    >
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 flex items-center gap-3">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+        <h1 className="text-4xl font-bold flex items-center gap-3">
           <Lock className="text-purple-500 w-8 h-8" /> Painel de Administração
         </h1>
+        <button
+          onClick={() => router.push("/home")}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-all font-bold shadow-sm w-fit cursor-pointer text-sm"
+        >
+          <ArrowLeft className="w-4 h-4" /> Voltar
+        </button>
+      </div>
 
         {error && (
           <div className="bg-red-500/20 text-red-500 border border-red-500/50 p-4 rounded-xl mb-6 relative flex justify-between items-center">
@@ -332,6 +426,7 @@ export default function PainelAdmin() {
           </div>
         )}
 
+<<<<<<< Updated upstream
         {/* Abas */}
         <div className="flex gap-4 mb-8 border-b border-[var(--border-color)] pb-4">
           <button
@@ -353,6 +448,29 @@ export default function PainelAdmin() {
             }`}
           >
             <BookOpen className="w-5 h-5" /> Matérias
+=======
+        {/* Abas Modernas com Glassmorphism */}
+        <div className="flex gap-4 mb-8 border-b border-[var(--border-color)] pb-3">
+          <button
+            onClick={() => setActiveTab("usuarios")}
+            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
+              activeTab === "usuarios"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/30"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]"
+            }`}
+          >
+            Usuários
+          </button>
+          <button
+            onClick={() => setActiveTab("materias")}
+            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-2 ${
+              activeTab === "materias"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/30"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]"
+            }`}
+          >
+            <BookOpen className="w-4 h-4" /> Matérias
+>>>>>>> Stashed changes
           </button>
         </div>
 
@@ -528,6 +646,7 @@ export default function PainelAdmin() {
             </div>
           </>
         ) : (
+<<<<<<< Updated upstream
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Esquerda: Adicionar / Editar */}
             <div className="lg:col-span-5 bg-[var(--bg-card)] rounded-2xl p-6 border border-[var(--border-color)] shadow-xl">
@@ -682,6 +801,81 @@ export default function PainelAdmin() {
                 )}
               </div>
             </div>
+=======
+          /* ABA DE MATÉRIAS: CRUD Dinâmico */
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fadeIn">
+            {/* Card para Adicionar Matéria */}
+            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-6 rounded-2xl shadow-xl h-fit">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Plus className="text-purple-500 w-5 h-5" /> Nova Matéria
+              </h2>
+              <form onSubmit={handleCreateMateria} className="flex flex-col gap-4">
+                <div>
+                  <label className="text-sm text-[var(--text-secondary)] mb-1 block">Nome da Matéria</label>
+                  <input
+                    type="text"
+                    value={newMateriaName}
+                    onChange={(e) => setNewMateriaName(e.target.value)}
+                    placeholder="Ex: Banco de Dados, Redes..."
+                    required
+                    className="w-full p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={addingMateria || !newMateriaName.trim()}
+                  className="w-full py-3 rounded-lg font-bold bg-purple-600 hover:bg-purple-500 text-white transition-all shadow-lg shadow-purple-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {addingMateria ? (
+                    <>
+                      <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+                      Adicionando...
+                    </>
+                  ) : (
+                    "Adicionar Matéria"
+                  )}
+                </button>
+              </form>
+            </div>
+
+            {/* Listagem de Matérias */}
+            <div className="lg:col-span-2 bg-[var(--bg-card)] border border-[var(--border-color)] p-6 rounded-2xl shadow-xl">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <BookOpen className="text-purple-500 w-5 h-5" /> Matérias Cadastradas ({materias.length})
+              </h2>
+              {materiaLoading && materias.length === 0 ? (
+                <div className="p-8 text-center text-[var(--text-secondary)] flex items-center justify-center gap-2">
+                  <span className="animate-spin inline-block w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full" />
+                  Carregando matérias...
+                </div>
+              ) : materias.length === 0 ? (
+                <div className="p-8 text-center text-[var(--text-secondary)]">Nenhuma matéria cadastrada.</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[550px] overflow-y-auto pr-2">
+                  {materias.map((mat) => (
+                    <div
+                      key={mat}
+                      className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] hover:border-purple-500/50 transition-all group shadow-sm hover:shadow-purple-500/5"
+                    >
+                      <span className="font-semibold text-[var(--text-primary)]">{mat}</span>
+                      <button
+                        onClick={() => handleDeleteMateria(mat)}
+                        disabled={deletingMateriaName === mat}
+                        className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-50"
+                        title="Excluir Matéria"
+                      >
+                        {deletingMateriaName === mat ? (
+                          <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+>>>>>>> Stashed changes
           </div>
         )}
       </div>

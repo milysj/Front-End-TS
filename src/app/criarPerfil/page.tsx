@@ -8,11 +8,13 @@ import ThemeToggle from "@/app/components/ThemeToggle";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { PageWrapper } from "@/app/components/accessibility/PageWrapper";
 import { useKeyboardNavigation } from "@/app/hooks/useAccessibility";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 export default function CriarPerfil() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useLanguage();
+  const { refreshUser } = useAuth();
   const [personagem, setPersonagem] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [fotoPerfil, setFotoPerfil] = useState<string | null>(null);
@@ -71,6 +73,7 @@ export default function CriarPerfil() {
             dadosUsuario.personagem.trim() !== "" &&
             dadosUsuario.username.trim() !== ""
           ) {
+            await refreshUser();
             router.push("/home");
             return;
           }
@@ -118,8 +121,9 @@ export default function CriarPerfil() {
 
       if (resposta.ok) {
         setMensagem(`✅ ${t("profile.success")}`);
-        // Invalidar cache de perfil para forçar nova verificação
-        localStorage.setItem("perfilCriadoTimestamp", Date.now().toString());
+        // Atualizar o AuthContext com a nova função refreshUser (sem disparar tela de carregamento)
+        await refreshUser();
+        
         setTimeout(() => {
           router.push("/home");
         }, 1500);
@@ -127,8 +131,8 @@ export default function CriarPerfil() {
         // Se o perfil já foi criado (erro 409), redireciona para home
         if (resposta.status === 409 && data.perfilCriado) {
           setMensagem("ℹ️ Seu perfil já foi criado. Redirecionando...");
-          // Invalidar cache de perfil para forçar nova verificação
-          localStorage.setItem("perfilCriadoTimestamp", Date.now().toString());
+          await refreshUser();
+          
           setTimeout(() => {
             router.push("/home");
           }, 1500);
