@@ -29,19 +29,35 @@ export default function TestGamePi() {
             // O GameMaker espera um índice (0, 1, 2, 3), mas o banco salva o texto exato.
             // Aqui encontramos qual é a posição da resposta correta no array de alternativas.
             const indexCorreta = p.alternativas.findIndex((alt: string) => alt === p.respostaCorreta);
+            const index = indexCorreta >= 0 ? indexCorreta : 0;
             return {
               ...p,
               // Mantém o texto para compatibilidade, mas adiciona o índice que o GameMaker precisa
-              indiceRespostaCorreta: indexCorreta >= 0 ? indexCorreta : 0,
-              // Opcional: Se o GameMaker estiver lendo diretamente "respostaCorreta" achando que é número:
-              respostaCorretaIndex: indexCorreta >= 0 ? indexCorreta : 0
+              indiceRespostaCorreta: index,
+              indiceRespostaCorrecta: index, // com 'c' conforme esperado pelo GameMaker
+              respostaCorretaIndex: index,
+
+              // Chaves minificadas que o compilador do GameMaker espera para o objeto pergunta
+              _T5: p.enunciado,      // enunciado
+              _U5: p.alternativas,   // alternativas
+              _V5: index             // indiceRespostaCorreta
             };
           });
 
           (window as any).gameData = {
+            // Chaves amigáveis normais
             faseId: faseTeste._id,
             titulo: faseTeste.titulo,
-            perguntas: perguntasTransformadas
+            personagem_selecionado: faseTeste.personagem_selecionado || "samurai",
+            cenario: faseTeste.cenario || "bg_dojo",
+            perguntas: perguntasTransformadas,
+
+            // Chaves minificadas que o compilador do GameMaker espera no objeto principal
+            _q5: faseTeste._id,                                 // faseId
+            _s5: faseTeste.titulo,                              // titulo
+            _u5: faseTeste.personagem_selecionado || "samurai", // personagem_selecionado
+            _D5: faseTeste.cenario || "bg_dojo",                // cenario
+            _M5: perguntasTransformadas                         // perguntas
           };
           
           console.log("Dados injetados para o GameMaker:", (window as any).gameData);

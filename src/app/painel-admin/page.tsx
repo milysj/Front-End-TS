@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/app/contexts/AuthContext";
-import { Lock, Unlock, Ban, Trash2, CheckCircle } from "lucide-react";
+import { Lock, Unlock, Ban, Trash2, CheckCircle, BookOpen, Plus, Search, Users, Pencil, Check, X } from "lucide-react";
 
 interface UserData {
   _id: string;
@@ -19,6 +19,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function PainelAdmin() {
   const { user, token } = useAuth();
+  const [activeTab, setActiveTab] = useState<"usuarios" | "materias">("usuarios");
   const [usuarios, setUsuarios] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -34,8 +35,21 @@ export default function PainelAdmin() {
   const [userToBlock, setUserToBlock] = useState<UserData | null>(null);
   const [blockDate, setBlockDate] = useState("");
 
+  // Estados de matérias
+  const [materias, setMaterias] = useState<string[]>([]);
+  const [loadingMaterias, setLoadingMaterias] = useState(false);
+  const [newMateriaName, setNewMateriaName] = useState("");
+  const [addingMateria, setAddingMateria] = useState(false);
+  const [searchMateriaTerm, setSearchMateriaTerm] = useState("");
+
+  // Estados para Edição de Matéria
+  const [editingMateriaName, setEditingMateriaName] = useState<string | null>(null);
+  const [editedMateriaValue, setEditedMateriaValue] = useState("");
+  const [updatingMateria, setUpdatingMateria] = useState(false);
+
   useEffect(() => {
     fetchUsuarios();
+    fetchMaterias();
   }, []);
 
   const fetchUsuarios = async () => {
@@ -54,6 +68,25 @@ export default function PainelAdmin() {
       setError("Erro de conexão ao carregar usuários.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMaterias = async () => {
+    try {
+      setLoadingMaterias(true);
+      const res = await fetch(`${API_URL}/api/materias`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMaterias(data);
+      } else {
+        setError("Erro ao carregar matérias.");
+      }
+    } catch (err) {
+      setError("Erro de conexão ao carregar matérias.");
+    } finally {
+      setLoadingMaterias(false);
     }
   };
 
@@ -160,6 +193,95 @@ export default function PainelAdmin() {
     }
   };
 
+  const handleAddMateria = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMateriaName.trim()) return;
+
+    try {
+      setAddingMateria(true);
+      setError("");
+      const res = await fetch(`${API_URL}/api/admin/materias`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ nome: newMateriaName.trim() }),
+      });
+
+      if (res.ok) {
+        showSuccess(`Matéria "${newMateriaName.trim()}" adicionada com sucesso.`);
+        setNewMateriaName("");
+        fetchMaterias();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.message || "Erro ao adicionar matéria.");
+      }
+    } catch (err) {
+      setError("Erro de conexão ao adicionar matéria.");
+    } finally {
+      setAddingMateria(false);
+    }
+  };
+
+  const handleEditMateria = async (nomeAntigo: string) => {
+    const novoNome = editedMateriaValue.trim();
+    if (!novoNome || novoNome.toLowerCase() === nomeAntigo.toLowerCase()) {
+      setEditingMateriaName(null);
+      return;
+    }
+
+    try {
+      setUpdatingMateria(true);
+      setError("");
+      const res = await fetch(`${API_URL}/api/admin/materias/${encodeURIComponent(nomeAntigo)}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ novoNome }),
+      });
+
+      if (res.ok) {
+        showSuccess(`Matéria atualizada de "${nomeAntigo}" para "${novoNome}".`);
+        setEditingMateriaName(null);
+        fetchMaterias();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.message || "Erro ao atualizar matéria.");
+      }
+    } catch (err) {
+      setError("Erro de conexão ao atualizar matéria.");
+    } finally {
+      setUpdatingMateria(false);
+    }
+  };
+
+  const handleDeleteMateria = async (nome: string) => {
+    if (!window.confirm(`Deseja realmente excluir a matéria "${nome}"?`)) return;
+
+    try {
+      setError("");
+      const res = await fetch(`${API_URL}/api/admin/materias/${encodeURIComponent(nome)}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        showSuccess(`Matéria "${nome}" excluída com sucesso.`);
+        fetchMaterias();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.message || "Erro ao excluir matéria.");
+      }
+    } catch (err) {
+      setError("Erro de conexão ao excluir matéria.");
+    }
+  };
+
   const openBlockModal = (u: UserData) => {
     setUserToBlock(u);
     setBlockDate("");
@@ -187,6 +309,10 @@ export default function PainelAdmin() {
     return matchesSearch && matchesStatus && matchesTipo;
   });
 
+  const filteredMaterias = materias.filter((m) =>
+    m.toLowerCase().includes(searchMateriaTerm.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] p-6 md:p-12 transition-colors duration-300 relative">
       <div className="max-w-7xl mx-auto">
@@ -194,182 +320,370 @@ export default function PainelAdmin() {
           <Lock className="text-purple-500 w-8 h-8" /> Painel de Administração
         </h1>
 
-        {error && <div className="bg-red-500/20 text-red-500 border border-red-500/50 p-4 rounded-xl mb-6">{error}</div>}
+        {error && (
+          <div className="bg-red-500/20 text-red-500 border border-red-500/50 p-4 rounded-xl mb-6 relative flex justify-between items-center">
+            <span>{error}</span>
+            <button onClick={() => setError("")} className="hover:opacity-75 font-bold text-lg px-2">✕</button>
+          </div>
+        )}
         {successMsg && (
           <div className="bg-green-500/20 text-green-500 border border-green-500/50 p-4 rounded-xl mb-6 flex items-center gap-2">
             <CheckCircle className="w-5 h-5" /> {successMsg}
           </div>
         )}
 
-        {/* Barra de Filtros */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6 p-4 bg-[var(--bg-card)] rounded-2xl shadow-sm border border-[var(--border-color)]">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Buscar por nome, username ou email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
-            />
-          </div>
-          <div className="flex gap-4">
-            <select
-              value={filterTipo}
-              onChange={(e) => setFilterTipo(e.target.value)}
-              className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
-            >
-              <option value="TODOS">Todos os Tipos</option>
-              <option value="ALUNO">Aluno</option>
-              <option value="PROFESSOR">Professor</option>
-              <option value="ADMINISTRADOR">Administrador</option>
-              <option value="OWNER">Owner</option>
-            </select>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
-            >
-              <option value="TODOS">Todos os Status</option>
-              <option value="ATIVO">Ativo</option>
-              <option value="BLOQUEADO">Bloqueado</option>
-              <option value="BANIDO">Banido</option>
-            </select>
-          </div>
+        {/* Abas */}
+        <div className="flex gap-4 mb-8 border-b border-[var(--border-color)] pb-4">
+          <button
+            onClick={() => setActiveTab("usuarios")}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+              activeTab === "usuarios"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
+                : "text-[var(--text-secondary)] hover:bg-[var(--bg-card)]"
+            }`}
+          >
+            <Users className="w-5 h-5" /> Usuários
+          </button>
+          <button
+            onClick={() => setActiveTab("materias")}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+              activeTab === "materias"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
+                : "text-[var(--text-secondary)] hover:bg-[var(--bg-card)]"
+            }`}
+          >
+            <BookOpen className="w-5 h-5" /> Matérias
+          </button>
         </div>
 
-        <div className="overflow-x-auto bg-[var(--bg-card)] rounded-2xl shadow-xl border border-[var(--border-color)]">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[var(--bg-card-hover)] border-b border-[var(--border-color)]">
-                <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Usuário</th>
-                <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Contato</th>
-                <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Tipo</th>
-                <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Status</th>
-                <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsuarios.map((u) => {
-                const disableActions = !canModify(u);
-                
-                return (
-                  <tr key={u._id} className="border-b border-[var(--border-color)] hover:bg-[var(--bg-page)] transition-colors">
-                    <td className="p-4">
-                      <div className="font-bold">{u.nome}</div>
-                      <div className="text-xs text-[var(--text-secondary)]">@{u.username || "sem_user"}</div>
-                    </td>
-                    <td className="p-4 text-sm">{u.email}</td>
-                    <td className="p-4">
-                      <select
-                        value={u.tipoUsuario}
-                        disabled={disableActions}
-                        onChange={(e) => handleChangeTipo(u._id, e.target.value)}
-                        className={`p-2 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-sm outline-none focus:border-purple-500 transition-colors ${disableActions ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                      >
-                        <option value="ALUNO">Aluno</option>
-                        <option value="PROFESSOR">Professor</option>
-                        {/* Se for Owner ou tiver permissão de promover, exibe Administrador */}
-                        {(user?.tipoUsuario === "OWNER" || user?.canPromoteToAdmin || u.tipoUsuario === "ADMINISTRADOR") && (
-                          <option value="ADMINISTRADOR">Administrador</option>
-                        )}
-                        {user?.tipoUsuario === "OWNER" && <option value="OWNER">Owner</option>}
-                      </select>
-                      
-                      {user?.tipoUsuario === "OWNER" && u.tipoUsuario === "ADMINISTRADOR" && (
-                        <div className="mt-2 flex items-center gap-2">
-                          <label className="text-xs text-[var(--text-secondary)] flex items-center gap-1 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={u.canPromoteToAdmin || false}
-                              onChange={(e) => handleTogglePermission(u._id, e.target.checked)}
-                              className="w-3 h-3 accent-purple-500"
-                            />
-                            Pode promover Admins
-                          </label>
-                        </div>
-                      )}
-                    </td>
-                    <td className="p-4">
-                      <div className="flex flex-col gap-1">
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-center w-max ${
-                          u.status === "ATIVO" ? "bg-green-500/20 text-green-500" :
-                          u.status === "BLOQUEADO" ? "bg-yellow-500/20 text-yellow-500" :
-                          "bg-red-500/20 text-red-500"
-                        }`}>
-                          {u.status}
-                        </span>
-                        {u.status === "BLOQUEADO" && u.bloqueadoAte && (
-                          <span className="text-[10px] text-[var(--text-secondary)]">
-                            Até: {new Date(u.bloqueadoAte).toLocaleString()}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        {u.status === "BLOQUEADO" ? (
-                          <button
-                            onClick={() => handleStatusChange(u._id, "ATIVO")}
-                            disabled={disableActions}
-                            title="Desbloquear"
-                            className={`p-2 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
-                          >
-                            <Unlock className="w-4 h-4" />
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => openBlockModal(u)}
-                            disabled={disableActions || u.status === "BANIDO"}
-                            title="Bloquear"
-                            className={`p-2 rounded-lg bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-white transition-all ${(disableActions || u.status === "BANIDO") ? 'opacity-30 cursor-not-allowed' : ''}`}
-                          >
-                            <Lock className="w-4 h-4" />
-                          </button>
-                        )}
+        {activeTab === "usuarios" ? (
+          <>
+            {/* Barra de Filtros */}
+            <div className="flex flex-col md:flex-row gap-4 mb-6 p-4 bg-[var(--bg-card)] rounded-2xl shadow-sm border border-[var(--border-color)]">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Buscar por nome, username ou email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
+                />
+              </div>
+              <div className="flex gap-4">
+                <select
+                  value={filterTipo}
+                  onChange={(e) => setFilterTipo(e.target.value)}
+                  className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
+                >
+                  <option value="TODOS">Todos os Tipos</option>
+                  <option value="ALUNO">Aluno</option>
+                  <option value="PROFESSOR">Professor</option>
+                  <option value="ADMINISTRADOR">Administrador</option>
+                  <option value="OWNER">Owner</option>
+                </select>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
+                >
+                  <option value="TODOS">Todos os Status</option>
+                  <option value="ATIVO">Ativo</option>
+                  <option value="BLOQUEADO">Bloqueado</option>
+                  <option value="BANIDO">Banido</option>
+                </select>
+              </div>
+            </div>
 
-                        {u.status === "BANIDO" ? (
-                          <button
-                            onClick={() => handleStatusChange(u._id, "ATIVO")}
-                            disabled={disableActions}
-                            title="Desbanir"
-                            className={`p-2 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleStatusChange(u._id, "BANIDO")}
-                            disabled={disableActions}
-                            title="Banir"
-                            className={`p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
-                          >
-                            <Ban className="w-4 h-4" />
-                          </button>
-                        )}
-
-                        <button
-                          onClick={() => handleDelete(u._id)}
-                          disabled={disableActions}
-                          title="Excluir Definitivamente"
-                          className={`p-2 rounded-lg bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
+            <div className="overflow-x-auto bg-[var(--bg-card)] rounded-2xl shadow-xl border border-[var(--border-color)]">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[var(--bg-card-hover)] border-b border-[var(--border-color)]">
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Usuário</th>
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Contato</th>
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Tipo</th>
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Status</th>
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Ações</th>
                   </tr>
-                );
-              })}
-              {filteredUsuarios.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-[var(--text-secondary)]">
-                    Nenhum usuário encontrado com os filtros atuais.
-                  </td>
-                </tr>
+                </thead>
+                <tbody>
+                  {filteredUsuarios.map((u) => {
+                    const disableActions = !canModify(u);
+                    
+                    return (
+                      <tr key={u._id} className="border-b border-[var(--border-color)] hover:bg-[var(--bg-page)] transition-colors">
+                        <td className="p-4">
+                          <div className="font-bold">{u.nome}</div>
+                          <div className="text-xs text-[var(--text-secondary)]">@{u.username || "sem_user"}</div>
+                        </td>
+                        <td className="p-4 text-sm">{u.email}</td>
+                        <td className="p-4">
+                          <select
+                            value={u.tipoUsuario}
+                            disabled={disableActions}
+                            onChange={(e) => handleChangeTipo(u._id, e.target.value)}
+                            className={`p-2 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-sm outline-none focus:border-purple-500 transition-colors ${disableActions ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                          >
+                            <option value="ALUNO">Aluno</option>
+                            <option value="PROFESSOR">Professor</option>
+                            {(user?.tipoUsuario === "OWNER" || user?.canPromoteToAdmin || u.tipoUsuario === "ADMINISTRADOR") && (
+                              <option value="ADMINISTRADOR">Administrador</option>
+                            )}
+                            {user?.tipoUsuario === "OWNER" && <option value="OWNER">Owner</option>}
+                          </select>
+                          
+                          {user?.tipoUsuario === "OWNER" && u.tipoUsuario === "ADMINISTRADOR" && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <label className="text-xs text-[var(--text-secondary)] flex items-center gap-1 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={u.canPromoteToAdmin || false}
+                                  onChange={(e) => handleTogglePermission(u._id, e.target.checked)}
+                                  className="w-3 h-3 accent-purple-500"
+                                />
+                                Pode promover Admins
+                              </label>
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <div className="flex flex-col gap-1">
+                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-center w-max ${
+                              u.status === "ATIVO" ? "bg-green-500/20 text-green-500" :
+                              u.status === "BLOQUEADO" ? "bg-yellow-500/20 text-yellow-500" :
+                              "bg-red-500/20 text-red-500"
+                            }`}>
+                              {u.status}
+                            </span>
+                            {u.status === "BLOQUEADO" && u.bloqueadoAte && (
+                              <span className="text-[10px] text-[var(--text-secondary)]">
+                                Até: {new Date(u.bloqueadoAte).toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            {u.status === "BLOQUEADO" ? (
+                              <button
+                                onClick={() => handleStatusChange(u._id, "ATIVO")}
+                                disabled={disableActions}
+                                title="Desbloquear"
+                                className={`p-2 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
+                              >
+                                <Unlock className="w-4 h-4" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => openBlockModal(u)}
+                                disabled={disableActions || u.status === "BANIDO"}
+                                title="Bloquear"
+                                className={`p-2 rounded-lg bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-white transition-all ${(disableActions || u.status === "BANIDO") ? 'opacity-30 cursor-not-allowed' : ''}`}
+                              >
+                                <Lock className="w-4 h-4" />
+                              </button>
+                            )}
+
+                            {u.status === "BANIDO" ? (
+                              <button
+                                onClick={() => handleStatusChange(u._id, "ATIVO")}
+                                disabled={disableActions}
+                                title="Desbanir"
+                                className={`p-2 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleStatusChange(u._id, "BANIDO")}
+                                disabled={disableActions}
+                                title="Banir"
+                                className={`p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
+                              >
+                                <Ban className="w-4 h-4" />
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => handleDelete(u._id)}
+                              disabled={disableActions}
+                              title="Excluir Definitivamente"
+                              className={`p-2 rounded-lg bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {filteredUsuarios.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-[var(--text-secondary)]">
+                        Nenhum usuário encontrado com os filtros atuais.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Esquerda: Adicionar / Editar */}
+            <div className="lg:col-span-5 bg-[var(--bg-card)] rounded-2xl p-6 border border-[var(--border-color)] shadow-xl">
+              {editingMateriaName ? (
+                <div>
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Pencil className="text-blue-500 w-5 h-5" /> Editar Matéria
+                  </h2>
+                  <p className="text-xs text-[var(--text-secondary)] mb-4">
+                    Alterando o nome da matéria: <strong className="text-[var(--text-primary)]">{editingMateriaName}</strong>
+                  </p>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleEditMateria(editingMateriaName);
+                    }}
+                    className="flex flex-col gap-4"
+                  >
+                    <input
+                      type="text"
+                      placeholder="Novo nome da matéria..."
+                      value={editedMateriaValue}
+                      onChange={(e) => setEditedMateriaValue(e.target.value)}
+                      className="w-full p-3 rounded-lg text-sm bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-blue-500 outline-none transition-colors"
+                      required
+                      autoFocus
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={updatingMateria || !editedMateriaValue.trim()}
+                        className="flex-1 py-2.5 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                      >
+                        {updatingMateria ? "Salvando..." : (
+                          <>
+                            <Check className="w-4 h-4" /> Salvar
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingMateriaName(null);
+                          setEditedMateriaValue("");
+                        }}
+                        className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-gray-500/10 hover:bg-gray-500/20 text-[var(--text-secondary)] transition-all flex items-center justify-center gap-2"
+                      >
+                        <X className="w-4 h-4" /> Cancelar
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <div>
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Plus className="text-purple-500 w-5 h-5" /> Adicionar Matéria
+                  </h2>
+                  <p className="text-xs text-[var(--text-secondary)] mb-4">
+                    Cadastre uma nova disciplina no sistema para associar a futuras trilhas de aprendizado.
+                  </p>
+                  <form onSubmit={handleAddMateria} className="flex flex-col gap-4">
+                    <input
+                      type="text"
+                      placeholder="Nome da matéria (ex: Biologia, Matemática...)"
+                      value={newMateriaName}
+                      onChange={(e) => setNewMateriaName(e.target.value)}
+                      className="w-full p-3 rounded-lg text-sm bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      disabled={addingMateria || !newMateriaName.trim()}
+                      className="w-full py-2.5 rounded-lg text-sm font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/20 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                    >
+                      {addingMateria ? "Adicionando..." : (
+                        <>
+                          <Plus className="w-4 h-4" /> Adicionar Matéria
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </div>
               )}
-            </tbody>
-          </table>
-        </div>
+            </div>
+
+            {/* Direita: Matérias Cadastradas */}
+            <div className="lg:col-span-7 bg-[var(--bg-card)] rounded-2xl shadow-xl border border-[var(--border-color)] overflow-hidden">
+              {/* Cabeçalho compacto */}
+              <div className="p-4 border-b border-[var(--border-color)] bg-[var(--bg-card-hover)] flex flex-col sm:flex-row justify-between items-center gap-4">
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <BookOpen className="text-purple-500 w-5 h-5" /> Matérias Cadastradas ({materias.length})
+                </h2>
+                <div className="relative w-full sm:w-48">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-3.5 h-3.5" />
+                  <input
+                    type="text"
+                    placeholder="Buscar..."
+                    value={searchMateriaTerm}
+                    onChange={(e) => setSearchMateriaTerm(e.target.value)}
+                    className="w-full pl-8 pr-2 py-1.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Lista com scroll se necessário */}
+              <div className="max-h-[400px] overflow-y-auto divide-y divide-[var(--border-color)]">
+                {loadingMaterias ? (
+                  <div className="p-6 text-center text-sm text-[var(--text-secondary)]">Carregando matérias...</div>
+                ) : filteredMaterias.length === 0 ? (
+                  <div className="p-6 text-center text-sm text-[var(--text-secondary)]">
+                    Nenhuma matéria encontrada.
+                  </div>
+                ) : (
+                  filteredMaterias.map((materiaNome) => {
+                    const isSelectedForEdit = editingMateriaName === materiaNome;
+                    return (
+                      <div
+                        key={materiaNome}
+                        className={`p-3 flex justify-between items-center hover:bg-[var(--bg-card-hover)] transition-colors gap-2 ${
+                          isSelectedForEdit ? "bg-purple-500/5 border-l-4 border-purple-500 pl-2" : ""
+                        }`}
+                      >
+                        <span className={`text-sm font-medium truncate ${isSelectedForEdit ? "text-purple-500 font-bold" : "text-[var(--text-primary)]"}`}>
+                          {materiaNome}
+                        </span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            onClick={() => {
+                              setEditingMateriaName(materiaNome);
+                              setEditedMateriaValue(materiaNome);
+                            }}
+                            title="Editar Matéria"
+                            className={`p-1.5 rounded-lg transition-all inline-flex items-center ${
+                              isSelectedForEdit
+                                ? "bg-purple-500 text-white"
+                                : "bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white"
+                            }`}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteMateria(materiaNome)}
+                            title="Excluir Matéria"
+                            className="p-1.5 rounded-lg bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white transition-all inline-flex items-center"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal de Bloqueio */}

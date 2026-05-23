@@ -182,14 +182,14 @@ const ModernNavbar = () => {
   const navAnimation = {
     initial: { y: -20, opacity: 0 },
     animate: { y: 0, opacity: 1 },
-    transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+    transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] as any },
   };
 
   const menuAnimation = {
     initial: { opacity: 0, height: 0 },
     animate: { opacity: 1, height: "auto" },
     exit: { opacity: 0, height: 0 },
-    transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+    transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] as any },
   };
 
   const itemAnimation = {
@@ -202,7 +202,7 @@ const ModernNavbar = () => {
     initial: { width: 0, opacity: 0 },
     animate: { width: "100%", opacity: 1 },
     exit: { width: 0, opacity: 0 },
-    transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+    transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] as any },
   };
 
   return (
