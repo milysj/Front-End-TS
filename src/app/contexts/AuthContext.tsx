@@ -28,13 +28,16 @@ interface User {
   email: string;
   username: string | null;
   personagem: string | null;
-  tipoUsuario: 'ALUNO' | 'PROFESSOR' | 'ADMINISTRADOR' | null;
+  tipoUsuario: 'ALUNO' | 'PROFESSOR' | 'ADMINISTRADOR' | 'OWNER' | null;
   tema?: string;
   idioma?: string;
   fotoPerfil?: string;
   xpTotal?: number;
   isVerified?: boolean;
   twoFactorEnabled?: boolean;
+  status?: 'ATIVO' | 'BLOQUEADO' | 'BANIDO';
+  bloqueadoAte?: Date | null;
+  canPromoteToAdmin?: boolean;
 }
 
 interface AuthContextType {
@@ -43,6 +46,7 @@ interface AuthContextType {
   token: string | null;
   login: (token: string, userData?: User) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   loading: boolean;
   updateUserTheme: (novoTema: string) => Promise<void>;
 }
@@ -114,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        const isProfAdmin = cachedTipoUsuario === 'PROFESSOR' || cachedTipoUsuario === 'ADMINISTRADOR';
+        const isProfAdmin = cachedTipoUsuario === 'PROFESSOR' || cachedTipoUsuario === 'ADMINISTRADOR' || cachedTipoUsuario === 'OWNER';
         
         if (isProfAdmin && !isProfessorRoute) {
           // Professor e Admin pulam o fetch, EXCETO nas rotas sensíveis
@@ -192,6 +196,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = '/login';
   };
 
+  const refreshUser = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_URL}/api/users/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.ok) {
+        const fetchedUserData = await res.json();
+        handleSetUser(fetchedUserData);
+        saveSafeCookie(fetchedUserData);
+      }
+    } catch (error) {
+      console.error("Erro ao dar refresh no usuário:", error);
+    }
+  };
+
   const updateUserTheme = async (novoTema: string) => {
     if (!user || !token) return;
 
@@ -214,7 +236,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated: !!token, user, token, login, logout, loading, updateUserTheme }}>
+    <AuthContext.Provider value={{ isAuthenticated: !!token, user, token, login, logout, refreshUser, loading, updateUserTheme }}>
       {children}
     </AuthContext.Provider>
   );

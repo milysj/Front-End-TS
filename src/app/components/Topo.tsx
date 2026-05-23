@@ -29,6 +29,7 @@ import {
   ArrowLeft, // NOVO: Ícone para fechar a pesquisa mobile
   ChevronDown,
   // Cart,
+  Shield,
 } from "react-bootstrap-icons";
 import { styleEffect } from "framer-motion";
 
@@ -126,13 +127,23 @@ const Topo = () => {
       icon: <BookmarkFill size={18} />,
       label: "Lições Salvas",
     },
-    // Apenas mostrar "Gerenciar Trilhas" se for PROFESSOR ou ADMINISTRADOR
-    ...(tipoUsuario === "PROFESSOR" || tipoUsuario === "ADMINISTRADOR"
+    // Apenas mostrar "Gerenciar Trilhas" se for PROFESSOR, ADMINISTRADOR ou OWNER
+    ...(tipoUsuario === "PROFESSOR" || tipoUsuario === "ADMINISTRADOR" || tipoUsuario === "OWNER"
       ? [
           {
             href: "/gerenciarTrilha",
             icon: <BackpackFill size={18} />,
             label: "Gerenciar Trilhas",
+          },
+        ]
+      : []),
+    // Apenas mostrar "Painel Admin" se for ADMINISTRADOR ou OWNER
+    ...(tipoUsuario === "ADMINISTRADOR" || tipoUsuario === "OWNER"
+      ? [
+          {
+            href: "/painel-admin",
+            icon: <Shield size={18} />,
+            label: "Painel Admin",
           },
         ]
       : []),

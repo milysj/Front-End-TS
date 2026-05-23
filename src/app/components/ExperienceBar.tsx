@@ -8,31 +8,37 @@ import React from 'react';
  * @param {number} props.currentXp - Experiência atual acumulada no nível (ex: 300).
  * @param {number} props.xpToNextLevel - Total de experiência necessária para o próximo nível (ex: 1000).
  */
-const ExperienceBar = ({ currentLevel, currentXp, xpToNextLevel }) => {
+interface ExperienceBarProps {
+    currentLevel: number;
+    currentXp: number;
+    xpToNextLevel: number;
+}
+
+const ExperienceBar = ({ currentLevel, currentXp, xpToNextLevel }: ExperienceBarProps) => {
     // Calcula a porcentagem de preenchimento da barra
     const progressPercentage = (currentXp / xpToNextLevel) * 100;
 
     // Estilos básicos para a barra (fáceis de customizar)
-    const containerStyle = {
+    const containerStyle: React.CSSProperties = {
         width: '100%',
         fontFamily: 'Arial, sans-serif',
         margin: '20px 0',
     };
 
-    const levelInfoStyle = {
+    const levelInfoStyle: React.CSSProperties = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: '8px',
     };
 
-    const levelTextStyle = {
+    const levelTextStyle: React.CSSProperties = {
         fontWeight: 'bold',
         fontSize: '1.2rem',
         color: 'var(--text-primary)',
     };
 
-    const barContainerStyle = {
+    const barContainerStyle: React.CSSProperties = {
         width: '100%',
         height: '10px',
         backgroundColor: 'var(--bg-input)',
@@ -40,7 +46,7 @@ const ExperienceBar = ({ currentLevel, currentXp, xpToNextLevel }) => {
         position: 'relative',
     };
 
-    const barFillStyle = {
+    const barFillStyle: React.CSSProperties = {
         height: '100%',
         width: `${progressPercentage}%`,
         backgroundColor: '#007bff', // Cor de progresso (azul)
@@ -48,7 +54,7 @@ const ExperienceBar = ({ currentLevel, currentXp, xpToNextLevel }) => {
         transition: 'width 0.5s ease-in-out',
     };
 
-    const xpInfoStyle = {
+    const xpInfoStyle: React.CSSProperties = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -58,11 +64,11 @@ const ExperienceBar = ({ currentLevel, currentXp, xpToNextLevel }) => {
         gap: '8px',
     };
 
-    const currentXpStyle = {
+    const currentXpStyle: React.CSSProperties = {
         color: '#007bff',
     };
 
-    const nextXpStyle = {
+    const nextXpStyle: React.CSSProperties = {
         color: 'var(--text-secondary)',
     };
 
