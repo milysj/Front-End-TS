@@ -67,7 +67,7 @@ const Login = () => {
       }
 
       // Usa a função de login do AuthContext para atualizar o estado global
-      await login(data.token);
+      await login(data.token, data.usuario || data.user);
 
       // Redireciona dependendo se o perfil já foi criado
       if (data.perfilCriado) {

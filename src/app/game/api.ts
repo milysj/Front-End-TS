@@ -25,12 +25,21 @@ export function formatarPerguntas(perguntasAPI: PerguntaAPI[]): PerguntaFormatad
     if (typeof p.respostaCorreta === "number") {
       respostaIndex = p.respostaCorreta;
     } else if (typeof p.respostaCorreta === "string") {
-      const parsed = parseInt(p.respostaCorreta);
-      if (!isNaN(parsed)) {
-        respostaIndex = parsed;
+      // Tentar encontrar por texto exato primeiro
+      const idx = p.alternativas?.findIndex((alt: string) => alt === p.respostaCorreta);
+      
+      if (idx >= 0) {
+        respostaIndex = idx;
       } else {
-        const idx = p.alternativas?.findIndex((alt: string) => alt === p.respostaCorreta);
-        respostaIndex = idx >= 0 ? idx : 0;
+        // Se não achou por texto, verifica se a string é apenas um número de índice (ex: "0", "1", "2", "3")
+        // Não podemos usar parseInt puro pois ele converte "56.088" em 56, quebrando o jogo.
+        const ehNumeroExato = /^\d+$/.test(p.respostaCorreta.trim());
+        if (ehNumeroExato) {
+          const parsed = parseInt(p.respostaCorreta.trim());
+          if (!isNaN(parsed)) {
+            respostaIndex = parsed;
+          }
+        }
       }
     }
 

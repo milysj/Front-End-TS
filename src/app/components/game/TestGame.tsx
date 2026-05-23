@@ -26,7 +26,7 @@ export default function TestGame() {
           height: 600,
           backgroundColor: "#ff0000", // VERMELHO para debug
           scene: {
-            create: function() {
+            create: function(this: any) {
               console.log("TESTE: CREATE chamado!");
               this.add.text(400, 300, "TESTE FUNCIONANDO!", {
                 fontSize: "48px",

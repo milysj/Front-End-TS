@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/app/contexts/LanguageContext";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 // ===============================
 // Componente de Configurações do usuário
@@ -31,6 +32,11 @@ export default function Configuracoes() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const router = useRouter();
+  
+  let auth: ReturnType<typeof useAuth> | null = null;
+  try {
+    auth = useAuth();
+  } catch (e) {}
   
   // Estado do formulário
   const [formData, setFormData] = useState({
@@ -320,6 +326,9 @@ export default function Configuracoes() {
                     e.stopPropagation();
                     const scrollPosition = window.scrollY || window.pageYOffset;
                     setTheme("light");
+                    if (auth?.isAuthenticated && auth?.updateUserTheme) {
+                      auth.updateUserTheme("light");
+                    }
                     setFormData((prev) => ({ ...prev, theme: "light" }));
                     requestAnimationFrame(() => {
                       window.scrollTo(0, scrollPosition);
@@ -349,6 +358,9 @@ export default function Configuracoes() {
                     e.stopPropagation();
                     const scrollPosition = window.scrollY || window.pageYOffset;
                     setTheme("dark");
+                    if (auth?.isAuthenticated && auth?.updateUserTheme) {
+                      auth.updateUserTheme("dark");
+                    }
                     setFormData((prev) => ({ ...prev, theme: "dark" }));
                     requestAnimationFrame(() => {
                       window.scrollTo(0, scrollPosition);

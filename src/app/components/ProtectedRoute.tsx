@@ -27,6 +27,11 @@ const PROFESSOR_ROUTES = [
   "/gerenciarPerguntas",
 ];
 
+// Rotas restritas para ADMINISTRADOR e OWNER
+const ADMIN_ROUTES = [
+  "/painel-admin",
+];
+
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -66,6 +71,13 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
       
       // e o usuário é um ALUNO tentando acessar uma rota de professor...
       if (user?.tipoUsuario === 'ALUNO' && isProfessorRoute) {
+        router.push("/home");
+        return;
+      }
+
+      // Se é uma rota de admin e o usuário não é ADMINISTRADOR nem OWNER
+      const isAdminRoute = ADMIN_ROUTES.some(route => pathname?.startsWith(route));
+      if (isAdminRoute && user?.tipoUsuario !== 'ADMINISTRADOR' && user?.tipoUsuario !== 'OWNER') {
         router.push("/home");
         return;
       }

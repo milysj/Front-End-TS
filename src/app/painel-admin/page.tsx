@@ -1,0 +1,920 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useAuth } from "@/app/contexts/AuthContext";
+<<<<<<< Updated upstream
+import { Lock, Unlock, Ban, Trash2, CheckCircle, BookOpen, Plus, Search, Users, Pencil, Check, X } from "lucide-react";
+=======
+import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
+import { Lock, Unlock, Ban, Trash2, CheckCircle, Plus, BookOpen, ArrowLeft } from "lucide-react";
+>>>>>>> Stashed changes
+
+interface UserData {
+  _id: string;
+  nome: string;
+  email: string;
+  username: string;
+  tipoUsuario: "ALUNO" | "PROFESSOR" | "ADMINISTRADOR" | "OWNER";
+  status: "ATIVO" | "BLOQUEADO" | "BANIDO";
+  bloqueadoAte?: string | null;
+  canPromoteToAdmin?: boolean;
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+export default function PainelAdmin() {
+  const { user, token } = useAuth();
+<<<<<<< Updated upstream
+  const [activeTab, setActiveTab] = useState<"usuarios" | "materias">("usuarios");
+=======
+  const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const backgroundImage = resolvedTheme === "dark" 
+    ? "/img/backgrounds/background_login_darkmode.jpg"
+    : "/img/backgrounds/background_login_lightmode.png";
+
+>>>>>>> Stashed changes
+  const [usuarios, setUsuarios] = useState<UserData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  // Abas
+  const [activeTab, setActiveTab] = useState<"usuarios" | "materias">("usuarios");
+
+  // Matérias
+  const [materias, setMaterias] = useState<string[]>([]);
+  const [materiaLoading, setMateriaLoading] = useState(false);
+  const [newMateriaName, setNewMateriaName] = useState("");
+  const [addingMateria, setAddingMateria] = useState(false);
+  const [deletingMateriaName, setDeletingMateriaName] = useState<string | null>(null);
+
+  // Filtros de Usuários
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterTipo, setFilterTipo] = useState("TODOS");
+  const [filterStatus, setFilterStatus] = useState("TODOS");
+
+  // Estado para o modal de bloqueio
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [userToBlock, setUserToBlock] = useState<UserData | null>(null);
+  const [blockDate, setBlockDate] = useState("");
+
+  // Estados de matérias
+  const [materias, setMaterias] = useState<string[]>([]);
+  const [loadingMaterias, setLoadingMaterias] = useState(false);
+  const [newMateriaName, setNewMateriaName] = useState("");
+  const [addingMateria, setAddingMateria] = useState(false);
+  const [searchMateriaTerm, setSearchMateriaTerm] = useState("");
+
+  // Estados para Edição de Matéria
+  const [editingMateriaName, setEditingMateriaName] = useState<string | null>(null);
+  const [editedMateriaValue, setEditedMateriaValue] = useState("");
+  const [updatingMateria, setUpdatingMateria] = useState(false);
+
+  useEffect(() => {
+    fetchUsuarios();
+    fetchMaterias();
+  }, []);
+
+  const fetchUsuarios = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_URL}/api/admin/usuarios`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUsuarios(data);
+      } else {
+        setError("Erro ao carregar usuários.");
+      }
+    } catch (err) {
+      setError("Erro de conexão ao carregar usuários.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMaterias = async () => {
+    try {
+<<<<<<< Updated upstream
+      setLoadingMaterias(true);
+=======
+      setMateriaLoading(true);
+>>>>>>> Stashed changes
+      const res = await fetch(`${API_URL}/api/materias`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMaterias(data);
+      } else {
+        setError("Erro ao carregar matérias.");
+      }
+    } catch (err) {
+      setError("Erro de conexão ao carregar matérias.");
+    } finally {
+<<<<<<< Updated upstream
+      setLoadingMaterias(false);
+=======
+      setMateriaLoading(false);
+>>>>>>> Stashed changes
+    }
+  };
+
+  const showSuccess = (msg: string) => {
+    setSuccessMsg(msg);
+    setTimeout(() => setSuccessMsg(""), 3000);
+  };
+
+  const canModify = (target: UserData) => {
+    if (user?.id === target._id || user?._id === target._id) return false;
+    if (user?.tipoUsuario === "OWNER") return true;
+    if (user?.tipoUsuario === "ADMINISTRADOR") {
+      if (target.tipoUsuario === "OWNER" || target.tipoUsuario === "ADMINISTRADOR") {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  };
+
+  const handleChangeTipo = async (id: string, novoTipo: string) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/usuarios/${id}/tipo`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ tipoUsuario: novoTipo }),
+      });
+      if (res.ok) {
+        showSuccess("Tipo de usuário atualizado.");
+        fetchUsuarios();
+      } else {
+        const errData = await res.json();
+        alert(`Erro: ${errData.message}`);
+      }
+    } catch (err) {
+      alert("Erro ao alterar tipo de usuário.");
+    }
+  };
+
+  const handleTogglePermission = async (id: string, canPromote: boolean) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/usuarios/${id}/permissoes`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ canPromoteToAdmin: canPromote }),
+      });
+      if (res.ok) {
+        showSuccess("Permissões atualizadas com sucesso.");
+        fetchUsuarios();
+      } else {
+        const errData = await res.json();
+        alert(`Erro: ${errData.message}`);
+      }
+    } catch (err) {
+      alert("Erro ao atualizar permissões.");
+    }
+  };
+
+  const handleStatusChange = async (id: string, novoStatus: string, bloqueadoAte: string | null = null) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/usuarios/${id}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: novoStatus, bloqueadoAte }),
+      });
+      if (res.ok) {
+        showSuccess(`Status alterado para ${novoStatus}.`);
+        fetchUsuarios();
+        setShowBlockModal(false);
+      } else {
+        const errData = await res.json();
+        alert(`Erro: ${errData.message}`);
+      }
+    } catch (err) {
+      alert("Erro ao alterar status.");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("ATENÇÃO: Deseja realmente excluir esta conta permanentemente?")) return;
+    try {
+      const res = await fetch(`${API_URL}/api/admin/usuarios/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        showSuccess("Usuário excluído com sucesso.");
+        fetchUsuarios();
+      } else {
+        const errData = await res.json();
+        alert(`Erro: ${errData.message}`);
+      }
+    } catch (err) {
+      alert("Erro ao excluir usuário.");
+    }
+  };
+
+<<<<<<< Updated upstream
+  const handleAddMateria = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMateriaName.trim()) return;
+
+    try {
+      setAddingMateria(true);
+      setError("");
+=======
+  const handleCreateMateria = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMateriaName.trim()) return;
+    try {
+      setAddingMateria(true);
+>>>>>>> Stashed changes
+      const res = await fetch(`${API_URL}/api/admin/materias`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ nome: newMateriaName.trim() }),
+      });
+<<<<<<< Updated upstream
+
+=======
+>>>>>>> Stashed changes
+      if (res.ok) {
+        showSuccess(`Matéria "${newMateriaName.trim()}" adicionada com sucesso.`);
+        setNewMateriaName("");
+        fetchMaterias();
+      } else {
+<<<<<<< Updated upstream
+        const data = await res.json().catch(() => ({}));
+        setError(data.message || "Erro ao adicionar matéria.");
+      }
+    } catch (err) {
+      setError("Erro de conexão ao adicionar matéria.");
+=======
+        const errData = await res.json();
+        alert(`Erro: ${errData.message}`);
+      }
+    } catch (err) {
+      alert("Erro ao cadastrar matéria.");
+>>>>>>> Stashed changes
+    } finally {
+      setAddingMateria(false);
+    }
+  };
+
+<<<<<<< Updated upstream
+  const handleEditMateria = async (nomeAntigo: string) => {
+    const novoNome = editedMateriaValue.trim();
+    if (!novoNome || novoNome.toLowerCase() === nomeAntigo.toLowerCase()) {
+      setEditingMateriaName(null);
+      return;
+    }
+
+    try {
+      setUpdatingMateria(true);
+      setError("");
+      const res = await fetch(`${API_URL}/api/admin/materias/${encodeURIComponent(nomeAntigo)}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ novoNome }),
+      });
+
+      if (res.ok) {
+        showSuccess(`Matéria atualizada de "${nomeAntigo}" para "${novoNome}".`);
+        setEditingMateriaName(null);
+        fetchMaterias();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.message || "Erro ao atualizar matéria.");
+      }
+    } catch (err) {
+      setError("Erro de conexão ao atualizar matéria.");
+    } finally {
+      setUpdatingMateria(false);
+    }
+  };
+
+  const handleDeleteMateria = async (nome: string) => {
+    if (!window.confirm(`Deseja realmente excluir a matéria "${nome}"?`)) return;
+
+    try {
+      setError("");
+      const res = await fetch(`${API_URL}/api/admin/materias/${encodeURIComponent(nome)}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+=======
+  const handleDeleteMateria = async (nome: string) => {
+    if (!window.confirm(`Deseja realmente excluir a matéria "${nome}"?`)) return;
+    try {
+      setDeletingMateriaName(nome);
+      const res = await fetch(`${API_URL}/api/admin/materias/${encodeURIComponent(nome)}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+>>>>>>> Stashed changes
+      if (res.ok) {
+        showSuccess(`Matéria "${nome}" excluída com sucesso.`);
+        fetchMaterias();
+      } else {
+<<<<<<< Updated upstream
+        const data = await res.json().catch(() => ({}));
+        setError(data.message || "Erro ao excluir matéria.");
+      }
+    } catch (err) {
+      setError("Erro de conexão ao excluir matéria.");
+=======
+        const errData = await res.json();
+        alert(`Erro: ${errData.message}`);
+      }
+    } catch (err) {
+      alert("Erro ao excluir matéria.");
+    } finally {
+      setDeletingMateriaName(null);
+>>>>>>> Stashed changes
+    }
+  };
+
+  const openBlockModal = (u: UserData) => {
+    setUserToBlock(u);
+    setBlockDate("");
+    setShowBlockModal(true);
+  };
+
+  const confirmBlock = () => {
+    if (userToBlock) {
+      handleStatusChange(userToBlock._id, "BLOQUEADO", blockDate || null);
+    }
+  };
+
+  if (loading && usuarios.length === 0) {
+    return <div className="p-8 text-center text-xl text-[var(--text-primary)]">Carregando painel...</div>;
+  }
+
+  const filteredUsuarios = usuarios.filter((u) => {
+    const term = searchTerm.toLowerCase();
+    const matchesSearch =
+      (u.nome?.toLowerCase() || "").includes(term) ||
+      (u.email?.toLowerCase() || "").includes(term) ||
+      (u.username?.toLowerCase() || "").includes(term);
+
+    const matchesStatus = filterStatus === "TODOS" || u.status === filterStatus;
+    const matchesTipo = filterTipo === "TODOS" || u.tipoUsuario === filterTipo;
+
+    return matchesSearch && matchesStatus && matchesTipo;
+  });
+
+  const filteredMaterias = materias.filter((m) =>
+    m.toLowerCase().includes(searchMateriaTerm.toLowerCase())
+  );
+
+  return (
+    <div 
+      className="min-h-screen text-[var(--text-primary)] p-6 md:p-12 transition-colors duration-300 relative bg-cover bg-center bg-no-repeat bg-fixed"
+      style={{
+        backgroundImage: mounted ? `url('${backgroundImage}')` : "none",
+      }}
+    >
+      <div className="max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+        <h1 className="text-4xl font-bold flex items-center gap-3">
+          <Lock className="text-purple-500 w-8 h-8" /> Painel de Administração
+        </h1>
+        <button
+          onClick={() => router.push("/home")}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-all font-bold shadow-sm w-fit cursor-pointer text-sm"
+        >
+          <ArrowLeft className="w-4 h-4" /> Voltar
+        </button>
+      </div>
+
+        {error && (
+          <div className="bg-red-500/20 text-red-500 border border-red-500/50 p-4 rounded-xl mb-6 relative flex justify-between items-center">
+            <span>{error}</span>
+            <button onClick={() => setError("")} className="hover:opacity-75 font-bold text-lg px-2">✕</button>
+          </div>
+        )}
+        {successMsg && (
+          <div className="bg-green-500/20 text-green-500 border border-green-500/50 p-4 rounded-xl mb-6 flex items-center gap-2">
+            <CheckCircle className="w-5 h-5" /> {successMsg}
+          </div>
+        )}
+
+<<<<<<< Updated upstream
+        {/* Abas */}
+        <div className="flex gap-4 mb-8 border-b border-[var(--border-color)] pb-4">
+          <button
+            onClick={() => setActiveTab("usuarios")}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+              activeTab === "usuarios"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
+                : "text-[var(--text-secondary)] hover:bg-[var(--bg-card)]"
+            }`}
+          >
+            <Users className="w-5 h-5" /> Usuários
+          </button>
+          <button
+            onClick={() => setActiveTab("materias")}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+              activeTab === "materias"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
+                : "text-[var(--text-secondary)] hover:bg-[var(--bg-card)]"
+            }`}
+          >
+            <BookOpen className="w-5 h-5" /> Matérias
+=======
+        {/* Abas Modernas com Glassmorphism */}
+        <div className="flex gap-4 mb-8 border-b border-[var(--border-color)] pb-3">
+          <button
+            onClick={() => setActiveTab("usuarios")}
+            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
+              activeTab === "usuarios"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/30"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]"
+            }`}
+          >
+            Usuários
+          </button>
+          <button
+            onClick={() => setActiveTab("materias")}
+            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-2 ${
+              activeTab === "materias"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/30"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]"
+            }`}
+          >
+            <BookOpen className="w-4 h-4" /> Matérias
+>>>>>>> Stashed changes
+          </button>
+        </div>
+
+        {activeTab === "usuarios" ? (
+          <>
+            {/* Barra de Filtros */}
+            <div className="flex flex-col md:flex-row gap-4 mb-6 p-4 bg-[var(--bg-card)] rounded-2xl shadow-sm border border-[var(--border-color)]">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Buscar por nome, username ou email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
+                />
+              </div>
+              <div className="flex gap-4">
+                <select
+                  value={filterTipo}
+                  onChange={(e) => setFilterTipo(e.target.value)}
+                  className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
+                >
+                  <option value="TODOS">Todos os Tipos</option>
+                  <option value="ALUNO">Aluno</option>
+                  <option value="PROFESSOR">Professor</option>
+                  <option value="ADMINISTRADOR">Administrador</option>
+                  <option value="OWNER">Owner</option>
+                </select>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
+                >
+                  <option value="TODOS">Todos os Status</option>
+                  <option value="ATIVO">Ativo</option>
+                  <option value="BLOQUEADO">Bloqueado</option>
+                  <option value="BANIDO">Banido</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto bg-[var(--bg-card)] rounded-2xl shadow-xl border border-[var(--border-color)]">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[var(--bg-card-hover)] border-b border-[var(--border-color)]">
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Usuário</th>
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Contato</th>
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Tipo</th>
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Status</th>
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUsuarios.map((u) => {
+                    const disableActions = !canModify(u);
+                    
+                    return (
+                      <tr key={u._id} className="border-b border-[var(--border-color)] hover:bg-[var(--bg-page)] transition-colors">
+                        <td className="p-4">
+                          <div className="font-bold">{u.nome}</div>
+                          <div className="text-xs text-[var(--text-secondary)]">@{u.username || "sem_user"}</div>
+                        </td>
+                        <td className="p-4 text-sm">{u.email}</td>
+                        <td className="p-4">
+                          <select
+                            value={u.tipoUsuario}
+                            disabled={disableActions}
+                            onChange={(e) => handleChangeTipo(u._id, e.target.value)}
+                            className={`p-2 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-sm outline-none focus:border-purple-500 transition-colors ${disableActions ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                          >
+                            <option value="ALUNO">Aluno</option>
+                            <option value="PROFESSOR">Professor</option>
+                            {(user?.tipoUsuario === "OWNER" || user?.canPromoteToAdmin || u.tipoUsuario === "ADMINISTRADOR") && (
+                              <option value="ADMINISTRADOR">Administrador</option>
+                            )}
+                            {user?.tipoUsuario === "OWNER" && <option value="OWNER">Owner</option>}
+                          </select>
+                          
+                          {user?.tipoUsuario === "OWNER" && u.tipoUsuario === "ADMINISTRADOR" && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <label className="text-xs text-[var(--text-secondary)] flex items-center gap-1 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={u.canPromoteToAdmin || false}
+                                  onChange={(e) => handleTogglePermission(u._id, e.target.checked)}
+                                  className="w-3 h-3 accent-purple-500"
+                                />
+                                Pode promover Admins
+                              </label>
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <div className="flex flex-col gap-1">
+                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-center w-max ${
+                              u.status === "ATIVO" ? "bg-green-500/20 text-green-500" :
+                              u.status === "BLOQUEADO" ? "bg-yellow-500/20 text-yellow-500" :
+                              "bg-red-500/20 text-red-500"
+                            }`}>
+                              {u.status}
+                            </span>
+                            {u.status === "BLOQUEADO" && u.bloqueadoAte && (
+                              <span className="text-[10px] text-[var(--text-secondary)]">
+                                Até: {new Date(u.bloqueadoAte).toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            {u.status === "BLOQUEADO" ? (
+                              <button
+                                onClick={() => handleStatusChange(u._id, "ATIVO")}
+                                disabled={disableActions}
+                                title="Desbloquear"
+                                className={`p-2 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
+                              >
+                                <Unlock className="w-4 h-4" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => openBlockModal(u)}
+                                disabled={disableActions || u.status === "BANIDO"}
+                                title="Bloquear"
+                                className={`p-2 rounded-lg bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-white transition-all ${(disableActions || u.status === "BANIDO") ? 'opacity-30 cursor-not-allowed' : ''}`}
+                              >
+                                <Lock className="w-4 h-4" />
+                              </button>
+                            )}
+
+                            {u.status === "BANIDO" ? (
+                              <button
+                                onClick={() => handleStatusChange(u._id, "ATIVO")}
+                                disabled={disableActions}
+                                title="Desbanir"
+                                className={`p-2 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleStatusChange(u._id, "BANIDO")}
+                                disabled={disableActions}
+                                title="Banir"
+                                className={`p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
+                              >
+                                <Ban className="w-4 h-4" />
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => handleDelete(u._id)}
+                              disabled={disableActions}
+                              title="Excluir Definitivamente"
+                              className={`p-2 rounded-lg bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {filteredUsuarios.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-[var(--text-secondary)]">
+                        Nenhum usuário encontrado com os filtros atuais.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
+        ) : (
+<<<<<<< Updated upstream
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Esquerda: Adicionar / Editar */}
+            <div className="lg:col-span-5 bg-[var(--bg-card)] rounded-2xl p-6 border border-[var(--border-color)] shadow-xl">
+              {editingMateriaName ? (
+                <div>
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Pencil className="text-blue-500 w-5 h-5" /> Editar Matéria
+                  </h2>
+                  <p className="text-xs text-[var(--text-secondary)] mb-4">
+                    Alterando o nome da matéria: <strong className="text-[var(--text-primary)]">{editingMateriaName}</strong>
+                  </p>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleEditMateria(editingMateriaName);
+                    }}
+                    className="flex flex-col gap-4"
+                  >
+                    <input
+                      type="text"
+                      placeholder="Novo nome da matéria..."
+                      value={editedMateriaValue}
+                      onChange={(e) => setEditedMateriaValue(e.target.value)}
+                      className="w-full p-3 rounded-lg text-sm bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-blue-500 outline-none transition-colors"
+                      required
+                      autoFocus
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={updatingMateria || !editedMateriaValue.trim()}
+                        className="flex-1 py-2.5 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                      >
+                        {updatingMateria ? "Salvando..." : (
+                          <>
+                            <Check className="w-4 h-4" /> Salvar
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingMateriaName(null);
+                          setEditedMateriaValue("");
+                        }}
+                        className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-gray-500/10 hover:bg-gray-500/20 text-[var(--text-secondary)] transition-all flex items-center justify-center gap-2"
+                      >
+                        <X className="w-4 h-4" /> Cancelar
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <div>
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Plus className="text-purple-500 w-5 h-5" /> Adicionar Matéria
+                  </h2>
+                  <p className="text-xs text-[var(--text-secondary)] mb-4">
+                    Cadastre uma nova disciplina no sistema para associar a futuras trilhas de aprendizado.
+                  </p>
+                  <form onSubmit={handleAddMateria} className="flex flex-col gap-4">
+                    <input
+                      type="text"
+                      placeholder="Nome da matéria (ex: Biologia, Matemática...)"
+                      value={newMateriaName}
+                      onChange={(e) => setNewMateriaName(e.target.value)}
+                      className="w-full p-3 rounded-lg text-sm bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      disabled={addingMateria || !newMateriaName.trim()}
+                      className="w-full py-2.5 rounded-lg text-sm font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/20 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                    >
+                      {addingMateria ? "Adicionando..." : (
+                        <>
+                          <Plus className="w-4 h-4" /> Adicionar Matéria
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
+
+            {/* Direita: Matérias Cadastradas */}
+            <div className="lg:col-span-7 bg-[var(--bg-card)] rounded-2xl shadow-xl border border-[var(--border-color)] overflow-hidden">
+              {/* Cabeçalho compacto */}
+              <div className="p-4 border-b border-[var(--border-color)] bg-[var(--bg-card-hover)] flex flex-col sm:flex-row justify-between items-center gap-4">
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <BookOpen className="text-purple-500 w-5 h-5" /> Matérias Cadastradas ({materias.length})
+                </h2>
+                <div className="relative w-full sm:w-48">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-3.5 h-3.5" />
+                  <input
+                    type="text"
+                    placeholder="Buscar..."
+                    value={searchMateriaTerm}
+                    onChange={(e) => setSearchMateriaTerm(e.target.value)}
+                    className="w-full pl-8 pr-2 py-1.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Lista com scroll se necessário */}
+              <div className="max-h-[400px] overflow-y-auto divide-y divide-[var(--border-color)]">
+                {loadingMaterias ? (
+                  <div className="p-6 text-center text-sm text-[var(--text-secondary)]">Carregando matérias...</div>
+                ) : filteredMaterias.length === 0 ? (
+                  <div className="p-6 text-center text-sm text-[var(--text-secondary)]">
+                    Nenhuma matéria encontrada.
+                  </div>
+                ) : (
+                  filteredMaterias.map((materiaNome) => {
+                    const isSelectedForEdit = editingMateriaName === materiaNome;
+                    return (
+                      <div
+                        key={materiaNome}
+                        className={`p-3 flex justify-between items-center hover:bg-[var(--bg-card-hover)] transition-colors gap-2 ${
+                          isSelectedForEdit ? "bg-purple-500/5 border-l-4 border-purple-500 pl-2" : ""
+                        }`}
+                      >
+                        <span className={`text-sm font-medium truncate ${isSelectedForEdit ? "text-purple-500 font-bold" : "text-[var(--text-primary)]"}`}>
+                          {materiaNome}
+                        </span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            onClick={() => {
+                              setEditingMateriaName(materiaNome);
+                              setEditedMateriaValue(materiaNome);
+                            }}
+                            title="Editar Matéria"
+                            className={`p-1.5 rounded-lg transition-all inline-flex items-center ${
+                              isSelectedForEdit
+                                ? "bg-purple-500 text-white"
+                                : "bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white"
+                            }`}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteMateria(materiaNome)}
+                            title="Excluir Matéria"
+                            className="p-1.5 rounded-lg bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white transition-all inline-flex items-center"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+=======
+          /* ABA DE MATÉRIAS: CRUD Dinâmico */
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fadeIn">
+            {/* Card para Adicionar Matéria */}
+            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-6 rounded-2xl shadow-xl h-fit">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Plus className="text-purple-500 w-5 h-5" /> Nova Matéria
+              </h2>
+              <form onSubmit={handleCreateMateria} className="flex flex-col gap-4">
+                <div>
+                  <label className="text-sm text-[var(--text-secondary)] mb-1 block">Nome da Matéria</label>
+                  <input
+                    type="text"
+                    value={newMateriaName}
+                    onChange={(e) => setNewMateriaName(e.target.value)}
+                    placeholder="Ex: Banco de Dados, Redes..."
+                    required
+                    className="w-full p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={addingMateria || !newMateriaName.trim()}
+                  className="w-full py-3 rounded-lg font-bold bg-purple-600 hover:bg-purple-500 text-white transition-all shadow-lg shadow-purple-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {addingMateria ? (
+                    <>
+                      <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+                      Adicionando...
+                    </>
+                  ) : (
+                    "Adicionar Matéria"
+                  )}
+                </button>
+              </form>
+            </div>
+
+            {/* Listagem de Matérias */}
+            <div className="lg:col-span-2 bg-[var(--bg-card)] border border-[var(--border-color)] p-6 rounded-2xl shadow-xl">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <BookOpen className="text-purple-500 w-5 h-5" /> Matérias Cadastradas ({materias.length})
+              </h2>
+              {materiaLoading && materias.length === 0 ? (
+                <div className="p-8 text-center text-[var(--text-secondary)] flex items-center justify-center gap-2">
+                  <span className="animate-spin inline-block w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full" />
+                  Carregando matérias...
+                </div>
+              ) : materias.length === 0 ? (
+                <div className="p-8 text-center text-[var(--text-secondary)]">Nenhuma matéria cadastrada.</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[550px] overflow-y-auto pr-2">
+                  {materias.map((mat) => (
+                    <div
+                      key={mat}
+                      className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] hover:border-purple-500/50 transition-all group shadow-sm hover:shadow-purple-500/5"
+                    >
+                      <span className="font-semibold text-[var(--text-primary)]">{mat}</span>
+                      <button
+                        onClick={() => handleDeleteMateria(mat)}
+                        disabled={deletingMateriaName === mat}
+                        className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-50"
+                        title="Excluir Matéria"
+                      >
+                        {deletingMateriaName === mat ? (
+                          <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+>>>>>>> Stashed changes
+          </div>
+        )}
+      </div>
+
+      {/* Modal de Bloqueio */}
+      {showBlockModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-6 rounded-2xl w-full max-w-md shadow-2xl transform scale-100 transition-transform">
+            <h2 className="text-2xl font-bold mb-4">Bloquear Usuário</h2>
+            <p className="mb-4 text-sm text-[var(--text-secondary)]">
+              Bloqueando: <strong className="text-[var(--text-primary)]">{userToBlock?.nome}</strong>
+            </p>
+            <div className="flex flex-col gap-2 mb-6">
+              <label className="text-sm font-semibold">Data de Expiração (Opcional)</label>
+              <input
+                type="datetime-local"
+                value={blockDate}
+                onChange={(e) => setBlockDate(e.target.value)}
+                className="w-full p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-yellow-500 outline-none transition-colors"
+              />
+              <span className="text-xs text-[var(--text-secondary)]">Deixe em branco para tempo indeterminado.</span>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowBlockModal(false)}
+                className="px-4 py-2 rounded-lg font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmBlock}
+                className="px-4 py-2 rounded-lg font-semibold bg-yellow-500 text-black hover:bg-yellow-400 transition-colors shadow-lg shadow-yellow-500/20"
+              >
+                Confirmar Bloqueio
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

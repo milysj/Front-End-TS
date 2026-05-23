@@ -51,18 +51,6 @@ export interface TrilhaSugestaoRespostaUi {
 
 type Step = "form" | "result";
 
-const MATERIAS_PADRAO = [
-  "Matemática",
-  "Português",
-  "Ciências",
-  "História",
-  "Geografia",
-  "Inglês",
-  "Física",
-  "Química",
-  "Biologia",
-];
-
 export interface GerarTrilhaIaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -96,6 +84,7 @@ export default function GerarTrilhaIaDialog({
   const [sugestao, setSugestao] = useState<TrilhaSugestaoRespostaUi | null>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [aplicando, setAplicando] = useState(false);
+  const [materiasDisponiveis, setMateriasDisponiveis] = useState<string[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -106,6 +95,19 @@ export default function GerarTrilhaIaDialog({
       setTituloOpcional(tituloTrilhaInicial || "");
       setTemaOuObjetivo("");
       setExpanded({});
+
+      // Buscar matérias permitidas
+      const token = localStorage.getItem("token");
+      if (token) {
+        fetch(`${API_URL}/api/materias`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (Array.isArray(data)) setMateriasDisponiveis(data);
+          })
+          .catch(err => console.error("Erro ao buscar matérias:", err));
+      }
     }
   }, [open, materiaInicial, tituloTrilhaInicial]);
 
@@ -279,7 +281,7 @@ export default function GerarTrilhaIaDialog({
                 className="mt-1 w-full rounded border border-[var(--border-color)] bg-[var(--bg-input)] px-3 py-2 text-sm"
               />
               <datalist id="materias-ia-list">
-                {MATERIAS_PADRAO.map((m) => (
+                {materiasDisponiveis.map((m) => (
                   <option key={m} value={m} />
                 ))}
               </datalist>
@@ -312,7 +314,7 @@ export default function GerarTrilhaIaDialog({
                 <select
                   value={dificuldade}
                   onChange={(e) => setDificuldade(e.target.value as DificuldadeIa)}
-                  className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded border border-[var(--border-color)] bg-[var(--bg-input)] px-3 py-2 text-sm"
                 >
                   <option value="Facil">Fácil</option>
                   <option value="Medio">Médio</option>
@@ -324,10 +326,10 @@ export default function GerarTrilhaIaDialog({
                 <input
                   type="number"
                   min={1}
-                  max={8}
+                  max={4}
                   value={numeroSecoes}
                   onChange={(e) => setNumeroSecoes(Number(e.target.value) || 1)}
-                  className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded border border-[var(--border-color)] bg-[var(--bg-input)] px-3 py-2 text-sm"
                 />
               </div>
               <div>
@@ -335,10 +337,10 @@ export default function GerarTrilhaIaDialog({
                 <input
                   type="number"
                   min={1}
-                  max={6}
+                  max={4}
                   value={fasesPorSecao}
                   onChange={(e) => setFasesPorSecao(Number(e.target.value) || 1)}
-                  className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded border border-[var(--border-color)] bg-[var(--bg-input)] px-3 py-2 text-sm"
                 />
               </div>
               <div className="col-span-2">
@@ -346,17 +348,24 @@ export default function GerarTrilhaIaDialog({
                 <input
                   type="number"
                   min={2}
-                  max={8}
+                  max={4}
                   value={perguntasPorFase}
                   onChange={(e) => setPerguntasPorFase(Number(e.target.value) || 2)}
-                  className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded border border-[var(--border-color)] bg-[var(--bg-input)] px-3 py-2 text-sm"
                 />
               </div>
             </div>
             {erro && (
-              <p className="rounded bg-red-100 px-3 py-2 text-sm text-red-800 dark:bg-red-950/50 dark:text-red-200">
-                {erro}
-              </p>
+              <div className="rounded bg-red-100 px-3 py-2 text-sm text-red-800 dark:bg-red-950/50 dark:text-red-200">
+                <p>{erro}</p>
+                {erro.toLowerCase().includes("suporte") && (
+                  <div className="mt-2 text-right">
+                    <a href="/faleConosco" className="underline font-bold text-red-900 dark:text-red-300 hover:text-red-700">
+                      Entrar em contato com o suporte &rarr;
+                    </a>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}

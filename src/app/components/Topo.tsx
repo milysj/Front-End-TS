@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
+import { useAuth } from "../contexts/AuthContext";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   List,
@@ -28,6 +29,7 @@ import {
   ArrowLeft, // NOVO: Ícone para fechar a pesquisa mobile
   ChevronDown,
   // Cart,
+  Shield,
 } from "react-bootstrap-icons";
 import { styleEffect } from "framer-motion";
 
@@ -42,11 +44,11 @@ const Topo = () => {
   // Estado para a barra de pesquisa
   const [searchTerm, setSearchTerm] = useState("");
 
-  // NOVO: Estado para controlar a barra de pesquisa no mobile
+  // Estado para controlar a barra de pesquisa no mobile
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
-  // Estado para o tipo de usuário
-  const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
+  const { user, logout } = useAuth();
+  const tipoUsuario = user?.tipoUsuario || null;
 
   const router = useRouter();
   const pathname = usePathname();
@@ -57,16 +59,7 @@ const Topo = () => {
     if (e) {
       e.preventDefault();
     }
-    // Remover token do localStorage
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("userData");
-    // Redirecionar para login
-    router.push("/login");
-    // Forçar reload para limpar estado
-    setTimeout(() => {
-      window.location.href = "/login";
-    }, 100);
+    logout();
   };
 
   // Função para lidar com a pesquisa
@@ -83,6 +76,7 @@ const Topo = () => {
       }
     }
   };
+
   // Hook para detectar se está em tela mobile
   useEffect(() => {
     const checkMobile = () => {
@@ -95,112 +89,6 @@ const Topo = () => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Hook para buscar o tipo de usuário (com cache para evitar requisições duplicadas)
-  useEffect(() => {
-    let isMounted = true;
-    let abortController: AbortController | null = null;
-
-    const buscarTipoUsuario = async () => {
-      const token = localStorage.getItem("token");
-      if (!token || !isMounted) {
-        return;
-      }
-
-      // Verificar cache simples
-      const cacheKey = 'userTipoUsuario';
-      const cacheTimestamp = localStorage.getItem(`${cacheKey}_timestamp`);
-      const cachedTipo = localStorage.getItem(cacheKey);
-      
-      // Cache válido por 30 segundos
-      if (cachedTipo && cacheTimestamp) {
-        const now = Date.now();
-        const cacheAge = now - parseInt(cacheTimestamp, 10);
-        if (cacheAge < 30000) {
-          if (isMounted) {
-            setTipoUsuario(cachedTipo);
-          }
-          return;
-        }
-      }
-
-      abortController = new AbortController();
-
-      try {
-        const API_URL =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-        const res = await fetch(`${API_URL}/api/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-          signal: abortController.signal,
-        });
-
-        if (!isMounted) return;
-
-        if (res.ok) {
-          const userData = await res.json();
-          const tipo = userData.tipoUsuario || null;
-          
-          if (isMounted) {
-            setTipoUsuario(tipo);
-            // Salvar no cache
-            if (tipo) {
-              localStorage.setItem(cacheKey, tipo);
-              localStorage.setItem(`${cacheKey}_timestamp`, Date.now().toString());
-            }
-          }
-        }
-      } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') return;
-        if (!isMounted) return;
-        console.error("Erro ao buscar tipo de usuário:", error);
-      }
-    };
-
-    buscarTipoUsuario();
-
-    return () => {
-      isMounted = false;
-      if (abortController) {
-        abortController.abort();
-      }
-    };
-  }, []);
-
-  // Dados dos menus laterais (sidebar) - Filtrar baseado no tipo de usuário
-  // const sidebarItems = [
-  //   {
-  //     icon: <Book size={18} />,
-  //     label: "Meus Cursos",
-  //     href: "/meusCursos",
-  //   },
-  //   { icon: <BarChart size={18} />, label: "Ranking", href: "/ranking" },
-  //   {
-  //     icon: <BookmarkFill size={18} />,
-  //     label: "Lições Salvas",
-  //     href: "/salvas",
-  //   },
-  //   // {
-  //   //   icon: <Envelope size={18} />,
-  //   //   label: "Caixa de Entrada",
-  //   //   href: "/mensagens",
-  //   // },
-  //   // Apenas mostrar "Gerenciar Trilhas" se for PROFESSOR ou ADMINISTRADOR
-  //   ...(tipoUsuario === "PROFESSOR" || tipoUsuario === "ADMINISTRADOR"
-  //     ? [
-  //         {
-  //           icon: <BackpackFill size={18} />,
-  //           label: "Gerenciar Trilhas",
-  //           href: "/gerenciarTrilha",
-  //         },
-  //       ]
-  //     : []),
-  //   // {
-  //   //   icon: <Cart size={18} />,
-  //   //   label: "Loja",
-  //   //   href: "/loja",
-  //   // },
-  // ];
-
-  // Dados dos menus superiores (navbar)
   const navItems = [
     {
       href: "/home",
@@ -239,13 +127,23 @@ const Topo = () => {
       icon: <BookmarkFill size={18} />,
       label: "Lições Salvas",
     },
-    // Apenas mostrar "Gerenciar Trilhas" se for PROFESSOR ou ADMINISTRADOR
-    ...(tipoUsuario === "PROFESSOR" || tipoUsuario === "ADMINISTRADOR"
+    // Apenas mostrar "Gerenciar Trilhas" se for PROFESSOR, ADMINISTRADOR ou OWNER
+    ...(tipoUsuario === "PROFESSOR" || tipoUsuario === "ADMINISTRADOR" || tipoUsuario === "OWNER"
       ? [
           {
             href: "/gerenciarTrilha",
             icon: <BackpackFill size={18} />,
             label: "Gerenciar Trilhas",
+          },
+        ]
+      : []),
+    // Apenas mostrar "Painel Admin" se for ADMINISTRADOR ou OWNER
+    ...(tipoUsuario === "ADMINISTRADOR" || tipoUsuario === "OWNER"
+      ? [
+          {
+            href: "/painel-admin",
+            icon: <Shield size={18} />,
+            label: "Painel Admin",
           },
         ]
       : []),
@@ -290,151 +188,6 @@ const Topo = () => {
 
   return (
     <div className="flex">
-      {/* SIDEBAR COMENTADA - Conteúdos movidos para o dropdown */}
-      {/* Botão para abrir o sidebar no mobile */}
-      {/* {isMobile && (
-        <button
-          onClick={() => setSidebarToggled(!sidebarToggled)}
-          style={{
-            position: "fixed",
-            top: "8px",
-            left: "8px",
-            zIndex: 1100,
-            background: "#00a2ff",
-            border: "none",
-            borderRadius: "6px",
-            padding: "6px 8px",
-            color: "white",
-            boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-            transition: "margin-left 0.3s",
-            minHeight: "32px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          aria-label="Toggle Sidebar"
-        >
-          <List size={16} />
-        </button>
-      )} */}
-      {/* Fundo escuro ao abrir o sidebar no mobile */}
-      {/* {isMobile && sidebarToggled && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 999,
-          }}
-          onClick={() => setSidebarToggled(false)}
-        />
-      )} */}
-      {/* Sidebar lateral (menu principal) - COMENTADA */}
-      {/* 
-      <Sidebar
-        collapsed={isMobile ? false : collapsed}
-        toggled={false}
-        onMouseEnter={() => !isMobile && setCollapsed(false)}
-        onMouseLeave={() => !isMobile && setCollapsed(true)}
-        width={isMobile ? "280px" : "280px"}
-        rootStyles={{
-          height: "100vh",
-          position: "fixed",
-          zIndex: 1000,
-          backgroundColor: "#007aff",
-          overflow: "hidden",
-          transform:
-            isMobile && !sidebarToggled ? "translateX(-100%)" : "translateX(0)",
-          transition: "transform margin-left 0.3s",
-          "& > div": {
-            backgroundColor: "#007aff",
-            overflow: "hidden !important",
-            "& ul": {
-              height: "100%",
-              overflow: "hidden",
-            },
-          },
-        }}
-      >
-        <Menu
-          menuItemStyles={{
-            button: {
-              transition: "all 0.2s ease-in-out",
-              "&:hover": {
-                backgroundColor: "#0063cc",
-                transform: "scale(0.95)",
-              },
-            },
-          }}
-        >
-          <div
-            style={{
-              marginTop: "50px",
-            }}
-          >
-            <div
-              style={{
-                height: "calc(100vh - 120px)",
-                overflowY: "auto",
-                scrollbarWidth: "none",
-              }}
-            >
-              {sidebarItems.map((item, index) => (
-                <MenuItem
-                  key={index}
-                  icon={<div className="text-white">{item.icon}</div>}
-                  component={<Link href={item.href} />}
-                  onClick={handleSidebarLinkClick}
-                  style={{
-                    padding: "8px 15px",
-                    color: "white",
-                  }}
-                >
-                  {(!collapsed || isMobile) && item.label}
-                </MenuItem>
-              ))}
-            </div>
-          </div>
-
-          <div
-            style={{
-              position: "absolute",
-              bottom: 0,
-              width: "100%",
-              backgroundColor: "#007aff",
-            }}
-          >
-            <MenuItem
-              icon={
-                <div className="w-6 h-6 relative">
-                  <Image
-                    width={24}
-                    height={24}
-                    src="/img/ConsultAi.png"
-                    alt="ConsultAI"
-                    className="object-contain"
-                    sizes="24px"
-                  />
-                </div>
-              }
-              component={<Link href="/consultAi" />}
-              onClick={handleSidebarLinkClick}
-              style={{
-                padding: "8px 15px",
-                color: "white",
-              }}
-            >
-              {(!collapsed || isMobile) && "ConsultAI"}
-            </MenuItem>
-          </div>
-        </Menu>
-      </Sidebar>
-      */}
-
-      {/* Conteúdo principal e navbar superior */}
       <div
         style={{
           marginLeft: "0px", // Sidebar removida, não precisa mais de margem

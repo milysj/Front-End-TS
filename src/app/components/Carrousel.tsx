@@ -125,12 +125,12 @@ export default function Carrousel({ items = [], onClick }: Props) {
       <div className="flex items-center gap-2 w-full">
         <button
           onClick={handleScrollLeft}
-          className={`flex-shrink-0 hover:bg-[var(--bg-input)] rounded transition-colors duration-300 z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] ${
-            isSmall ? "p-0.5" : isMobile ? "p-1" : "p-3"
-          }`}
-          style={{ color: 'var(--text-primary)' }}
-          aria-label="Rolar carrossel para a esquerda"
-        >
+          className={`flex-shrink-0 flex items-center justify-center hover:bg-[var(--bg-input)] rounded transition-colors duration-300 z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] ${
+              isSmall ? "p-0.5" : isMobile ? "p-1" : "p-3"
+            }`}
+            style={{ color: 'var(--text-primary)' }}
+            aria-label="Rolar carrossel para a esquerda"
+          >
           <ChevronLeftIcon
             className={isSmall ? "w-5 h-5" : isMobile ? "w-6 h-6" : "w-10 h-10"}
             aria-hidden="true"
@@ -182,20 +182,20 @@ export default function Carrousel({ items = [], onClick }: Props) {
           ))}
         </div>
 
-        <button
-          onClick={handleScrollRight}
-          className={`flex-shrink-0 hover:bg-[var(--bg-input)] rounded transition-colors duration-300 z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] ${
-            isSmall ? "p-0.5" : isMobile ? "p-1" : "p-3"
-          }`}
-          style={{ color: 'var(--text-primary)' }}
-          aria-label="Rolar carrossel para a direita"
-        >
-          <ChevronRightIcon
-            className={isSmall ? "w-5 h-5" : isMobile ? "w-6 h-6" : "w-10 h-10"}
-            aria-hidden="true"
-          />
-        </button>
-      </div>
+          <button
+            onClick={handleScrollRight}
+            className={`flex-shrink-0 flex items-center justify-center hover:bg-[var(--bg-input)] rounded transition-colors duration-300 z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] ${
+              isSmall ? "p-0.5" : isMobile ? "p-1" : "p-3"
+            }`}
+            style={{ color: 'var(--text-primary)' }}
+            aria-label="Rolar carrossel para a direita"
+          >
+            <ChevronRightIcon
+              className={`${isSmall ? "w-5 h-5" : isMobile ? "w-6 h-6" : "w-10 h-10"} translate-x-[2px]`}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
     </div>
   );
 }
