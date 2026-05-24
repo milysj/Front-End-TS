@@ -2,13 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/app/contexts/AuthContext";
-<<<<<<< Updated upstream
-import { Lock, Unlock, Ban, Trash2, CheckCircle, BookOpen, Plus, Search, Users, Pencil, Check, X } from "lucide-react";
-=======
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Lock, Unlock, Ban, Trash2, CheckCircle, Plus, BookOpen, ArrowLeft } from "lucide-react";
->>>>>>> Stashed changes
+import { Lock, Unlock, Ban, Trash2, CheckCircle, BookOpen, Plus, Search, Users, Pencil, Check, X, ArrowLeft } from "lucide-react";
 
 interface UserData {
   _id: string;
@@ -25,9 +21,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function PainelAdmin() {
   const { user, token } = useAuth();
-<<<<<<< Updated upstream
-  const [activeTab, setActiveTab] = useState<"usuarios" | "materias">("usuarios");
-=======
   const router = useRouter();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -40,7 +33,6 @@ export default function PainelAdmin() {
     ? "/img/backgrounds/background_login_darkmode.jpg"
     : "/img/backgrounds/background_login_lightmode.png";
 
->>>>>>> Stashed changes
   const [usuarios, setUsuarios] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -48,13 +40,6 @@ export default function PainelAdmin() {
 
   // Abas
   const [activeTab, setActiveTab] = useState<"usuarios" | "materias">("usuarios");
-
-  // Matérias
-  const [materias, setMaterias] = useState<string[]>([]);
-  const [materiaLoading, setMateriaLoading] = useState(false);
-  const [newMateriaName, setNewMateriaName] = useState("");
-  const [addingMateria, setAddingMateria] = useState(false);
-  const [deletingMateriaName, setDeletingMateriaName] = useState<string | null>(null);
 
   // Filtros de Usuários
   const [searchTerm, setSearchTerm] = useState("");
@@ -66,12 +51,13 @@ export default function PainelAdmin() {
   const [userToBlock, setUserToBlock] = useState<UserData | null>(null);
   const [blockDate, setBlockDate] = useState("");
 
-  // Estados de matérias
+  // Matérias
   const [materias, setMaterias] = useState<string[]>([]);
   const [loadingMaterias, setLoadingMaterias] = useState(false);
   const [newMateriaName, setNewMateriaName] = useState("");
   const [addingMateria, setAddingMateria] = useState(false);
   const [searchMateriaTerm, setSearchMateriaTerm] = useState("");
+  const [deletingMateriaName, setDeletingMateriaName] = useState<string | null>(null);
 
   // Estados para Edição de Matéria
   const [editingMateriaName, setEditingMateriaName] = useState<string | null>(null);
@@ -104,11 +90,7 @@ export default function PainelAdmin() {
 
   const fetchMaterias = async () => {
     try {
-<<<<<<< Updated upstream
       setLoadingMaterias(true);
-=======
-      setMateriaLoading(true);
->>>>>>> Stashed changes
       const res = await fetch(`${API_URL}/api/materias`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -121,11 +103,7 @@ export default function PainelAdmin() {
     } catch (err) {
       setError("Erro de conexão ao carregar matérias.");
     } finally {
-<<<<<<< Updated upstream
       setLoadingMaterias(false);
-=======
-      setMateriaLoading(false);
->>>>>>> Stashed changes
     }
   };
 
@@ -232,7 +210,6 @@ export default function PainelAdmin() {
     }
   };
 
-<<<<<<< Updated upstream
   const handleAddMateria = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMateriaName.trim()) return;
@@ -240,13 +217,6 @@ export default function PainelAdmin() {
     try {
       setAddingMateria(true);
       setError("");
-=======
-  const handleCreateMateria = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMateriaName.trim()) return;
-    try {
-      setAddingMateria(true);
->>>>>>> Stashed changes
       const res = await fetch(`${API_URL}/api/admin/materias`, {
         method: "POST",
         headers: {
@@ -255,34 +225,22 @@ export default function PainelAdmin() {
         },
         body: JSON.stringify({ nome: newMateriaName.trim() }),
       });
-<<<<<<< Updated upstream
 
-=======
->>>>>>> Stashed changes
       if (res.ok) {
         showSuccess(`Matéria "${newMateriaName.trim()}" adicionada com sucesso.`);
         setNewMateriaName("");
         fetchMaterias();
       } else {
-<<<<<<< Updated upstream
         const data = await res.json().catch(() => ({}));
         setError(data.message || "Erro ao adicionar matéria.");
       }
     } catch (err) {
       setError("Erro de conexão ao adicionar matéria.");
-=======
-        const errData = await res.json();
-        alert(`Erro: ${errData.message}`);
-      }
-    } catch (err) {
-      alert("Erro ao cadastrar matéria.");
->>>>>>> Stashed changes
     } finally {
       setAddingMateria(false);
     }
   };
 
-<<<<<<< Updated upstream
   const handleEditMateria = async (nomeAntigo: string) => {
     const novoNome = editedMateriaValue.trim();
     if (!novoNome || novoNome.toLowerCase() === nomeAntigo.toLowerCase()) {
@@ -321,6 +279,7 @@ export default function PainelAdmin() {
     if (!window.confirm(`Deseja realmente excluir a matéria "${nome}"?`)) return;
 
     try {
+      setDeletingMateriaName(nome);
       setError("");
       const res = await fetch(`${API_URL}/api/admin/materias/${encodeURIComponent(nome)}`, {
         method: "DELETE",
@@ -329,35 +288,17 @@ export default function PainelAdmin() {
         },
       });
 
-=======
-  const handleDeleteMateria = async (nome: string) => {
-    if (!window.confirm(`Deseja realmente excluir a matéria "${nome}"?`)) return;
-    try {
-      setDeletingMateriaName(nome);
-      const res = await fetch(`${API_URL}/api/admin/materias/${encodeURIComponent(nome)}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
->>>>>>> Stashed changes
       if (res.ok) {
         showSuccess(`Matéria "${nome}" excluída com sucesso.`);
         fetchMaterias();
       } else {
-<<<<<<< Updated upstream
         const data = await res.json().catch(() => ({}));
         setError(data.message || "Erro ao excluir matéria.");
       }
     } catch (err) {
       setError("Erro de conexão ao excluir matéria.");
-=======
-        const errData = await res.json();
-        alert(`Erro: ${errData.message}`);
-      }
-    } catch (err) {
-      alert("Erro ao excluir matéria.");
     } finally {
       setDeletingMateriaName(null);
->>>>>>> Stashed changes
     }
   };
 
@@ -402,17 +343,17 @@ export default function PainelAdmin() {
       }}
     >
       <div className="max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-        <h1 className="text-4xl font-bold flex items-center gap-3">
-          <Lock className="text-purple-500 w-8 h-8" /> Painel de Administração
-        </h1>
-        <button
-          onClick={() => router.push("/home")}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-all font-bold shadow-sm w-fit cursor-pointer text-sm"
-        >
-          <ArrowLeft className="w-4 h-4" /> Voltar
-        </button>
-      </div>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+          <h1 className="text-4xl font-bold flex items-center gap-3">
+            <Lock className="text-purple-500 w-8 h-8" /> Painel de Administração
+          </h1>
+          <button
+            onClick={() => router.push("/home")}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-all font-bold shadow-sm w-fit cursor-pointer text-sm"
+          >
+            <ArrowLeft className="w-4 h-4" /> Voltar
+          </button>
+        </div>
 
         {error && (
           <div className="bg-red-500/20 text-red-500 border border-red-500/50 p-4 rounded-xl mb-6 relative flex justify-between items-center">
@@ -426,40 +367,17 @@ export default function PainelAdmin() {
           </div>
         )}
 
-<<<<<<< Updated upstream
-        {/* Abas */}
-        <div className="flex gap-4 mb-8 border-b border-[var(--border-color)] pb-4">
-          <button
-            onClick={() => setActiveTab("usuarios")}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
-              activeTab === "usuarios"
-                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
-                : "text-[var(--text-secondary)] hover:bg-[var(--bg-card)]"
-            }`}
-          >
-            <Users className="w-5 h-5" /> Usuários
-          </button>
-          <button
-            onClick={() => setActiveTab("materias")}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
-              activeTab === "materias"
-                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
-                : "text-[var(--text-secondary)] hover:bg-[var(--bg-card)]"
-            }`}
-          >
-            <BookOpen className="w-5 h-5" /> Matérias
-=======
         {/* Abas Modernas com Glassmorphism */}
         <div className="flex gap-4 mb-8 border-b border-[var(--border-color)] pb-3">
           <button
             onClick={() => setActiveTab("usuarios")}
-            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
+            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-2 ${
               activeTab === "usuarios"
                 ? "bg-purple-600 text-white shadow-lg shadow-purple-600/30"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]"
             }`}
           >
-            Usuários
+            <Users className="w-4 h-4" /> Usuários
           </button>
           <button
             onClick={() => setActiveTab("materias")}
@@ -470,7 +388,6 @@ export default function PainelAdmin() {
             }`}
           >
             <BookOpen className="w-4 h-4" /> Matérias
->>>>>>> Stashed changes
           </button>
         </div>
 
@@ -646,10 +563,9 @@ export default function PainelAdmin() {
             </div>
           </>
         ) : (
-<<<<<<< Updated upstream
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fadeIn">
             {/* Esquerda: Adicionar / Editar */}
-            <div className="lg:col-span-5 bg-[var(--bg-card)] rounded-2xl p-6 border border-[var(--border-color)] shadow-xl">
+            <div className="lg:col-span-5 bg-[var(--bg-card)] border border-[var(--border-color)] p-6 rounded-2xl shadow-xl h-fit">
               {editingMateriaName ? (
                 <div>
                   <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
@@ -665,22 +581,30 @@ export default function PainelAdmin() {
                     }}
                     className="flex flex-col gap-4"
                   >
-                    <input
-                      type="text"
-                      placeholder="Novo nome da matéria..."
-                      value={editedMateriaValue}
-                      onChange={(e) => setEditedMateriaValue(e.target.value)}
-                      className="w-full p-3 rounded-lg text-sm bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-blue-500 outline-none transition-colors"
-                      required
-                      autoFocus
-                    />
+                    <div>
+                      <label className="text-sm text-[var(--text-secondary)] mb-1 block">Novo Nome</label>
+                      <input
+                        type="text"
+                        placeholder="Novo nome da matéria..."
+                        value={editedMateriaValue}
+                        onChange={(e) => setEditedMateriaValue(e.target.value)}
+                        className="w-full p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-blue-500 outline-none transition-colors"
+                        required
+                        autoFocus
+                      />
+                    </div>
                     <div className="flex gap-2">
                       <button
                         type="submit"
                         disabled={updatingMateria || !editedMateriaValue.trim()}
-                        className="flex-1 py-2.5 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                        className="flex-1 py-3 rounded-lg font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
                       >
-                        {updatingMateria ? "Salvando..." : (
+                        {updatingMateria ? (
+                          <>
+                            <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+                            Salvando...
+                          </>
+                        ) : (
                           <>
                             <Check className="w-4 h-4" /> Salvar
                           </>
@@ -692,7 +616,7 @@ export default function PainelAdmin() {
                           setEditingMateriaName(null);
                           setEditedMateriaValue("");
                         }}
-                        className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-gray-500/10 hover:bg-gray-500/20 text-[var(--text-secondary)] transition-all flex items-center justify-center gap-2"
+                        className="px-4 py-3 rounded-lg font-bold bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)] transition-all flex items-center justify-center gap-2"
                       >
                         <X className="w-4 h-4" /> Cancelar
                       </button>
@@ -702,26 +626,34 @@ export default function PainelAdmin() {
               ) : (
                 <div>
                   <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <Plus className="text-purple-500 w-5 h-5" /> Adicionar Matéria
+                    <Plus className="text-purple-500 w-5 h-5" /> Nova Matéria
                   </h2>
                   <p className="text-xs text-[var(--text-secondary)] mb-4">
                     Cadastre uma nova disciplina no sistema para associar a futuras trilhas de aprendizado.
                   </p>
                   <form onSubmit={handleAddMateria} className="flex flex-col gap-4">
-                    <input
-                      type="text"
-                      placeholder="Nome da matéria (ex: Biologia, Matemática...)"
-                      value={newMateriaName}
-                      onChange={(e) => setNewMateriaName(e.target.value)}
-                      className="w-full p-3 rounded-lg text-sm bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
-                      required
-                    />
+                    <div>
+                      <label className="text-sm text-[var(--text-secondary)] mb-1 block">Nome da Matéria</label>
+                      <input
+                        type="text"
+                        placeholder="Ex: Banco de Dados, Redes..."
+                        value={newMateriaName}
+                        onChange={(e) => setNewMateriaName(e.target.value)}
+                        className="w-full p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
+                        required
+                      />
+                    </div>
                     <button
                       type="submit"
                       disabled={addingMateria || !newMateriaName.trim()}
-                      className="w-full py-2.5 rounded-lg text-sm font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/20 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                      className="w-full py-3 rounded-lg font-bold bg-purple-600 hover:bg-purple-500 text-white transition-all shadow-lg shadow-purple-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      {addingMateria ? "Adicionando..." : (
+                      {addingMateria ? (
+                        <>
+                          <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+                          Adicionando...
+                        </>
+                      ) : (
                         <>
                           <Plus className="w-4 h-4" /> Adicionar Matéria
                         </>
@@ -733,10 +665,9 @@ export default function PainelAdmin() {
             </div>
 
             {/* Direita: Matérias Cadastradas */}
-            <div className="lg:col-span-7 bg-[var(--bg-card)] rounded-2xl shadow-xl border border-[var(--border-color)] overflow-hidden">
-              {/* Cabeçalho compacto */}
-              <div className="p-4 border-b border-[var(--border-color)] bg-[var(--bg-card-hover)] flex flex-col sm:flex-row justify-between items-center gap-4">
-                <h2 className="text-lg font-bold flex items-center gap-2">
+            <div className="lg:col-span-7 bg-[var(--bg-card)] border border-[var(--border-color)] p-6 rounded-2xl shadow-xl">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                <h2 className="text-xl font-bold flex items-center gap-2">
                   <BookOpen className="text-purple-500 w-5 h-5" /> Matérias Cadastradas ({materias.length})
                 </h2>
                 <div className="relative w-full sm:w-48">
@@ -751,35 +682,39 @@ export default function PainelAdmin() {
                 </div>
               </div>
 
-              {/* Lista com scroll se necessário */}
-              <div className="max-h-[400px] overflow-y-auto divide-y divide-[var(--border-color)]">
-                {loadingMaterias ? (
-                  <div className="p-6 text-center text-sm text-[var(--text-secondary)]">Carregando matérias...</div>
-                ) : filteredMaterias.length === 0 ? (
-                  <div className="p-6 text-center text-sm text-[var(--text-secondary)]">
-                    Nenhuma matéria encontrada.
-                  </div>
-                ) : (
-                  filteredMaterias.map((materiaNome) => {
-                    const isSelectedForEdit = editingMateriaName === materiaNome;
+              {loadingMaterias && materias.length === 0 ? (
+                <div className="p-8 text-center text-[var(--text-secondary)] flex items-center justify-center gap-2">
+                  <span className="animate-spin inline-block w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full" />
+                  Carregando matérias...
+                </div>
+              ) : filteredMaterias.length === 0 ? (
+                <div className="p-8 text-center text-[var(--text-secondary)]">
+                  {materias.length === 0 ? "Nenhuma matéria cadastrada." : "Nenhuma matéria encontrada."}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2">
+                  {filteredMaterias.map((mat) => {
+                    const isSelectedForEdit = editingMateriaName === mat;
                     return (
                       <div
-                        key={materiaNome}
-                        className={`p-3 flex justify-between items-center hover:bg-[var(--bg-card-hover)] transition-colors gap-2 ${
-                          isSelectedForEdit ? "bg-purple-500/5 border-l-4 border-purple-500 pl-2" : ""
+                        key={mat}
+                        className={`flex items-center justify-between p-4 rounded-xl bg-[var(--bg-page)] border transition-all group shadow-sm ${
+                          isSelectedForEdit 
+                            ? "border-purple-500 bg-purple-500/5 shadow-purple-500/5" 
+                            : "border-[var(--border-color)] hover:border-purple-500/50 hover:shadow-purple-500/5"
                         }`}
                       >
-                        <span className={`text-sm font-medium truncate ${isSelectedForEdit ? "text-purple-500 font-bold" : "text-[var(--text-primary)]"}`}>
-                          {materiaNome}
+                        <span className={`font-semibold ${isSelectedForEdit ? "text-purple-500 font-bold" : "text-[var(--text-primary)]"}`}>
+                          {mat}
                         </span>
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
                           <button
                             onClick={() => {
-                              setEditingMateriaName(materiaNome);
-                              setEditedMateriaValue(materiaNome);
+                              setEditingMateriaName(mat);
+                              setEditedMateriaValue(mat);
                             }}
                             title="Editar Matéria"
-                            className={`p-1.5 rounded-lg transition-all inline-flex items-center ${
+                            className={`p-2 rounded-lg transition-all inline-flex items-center ${
                               isSelectedForEdit
                                 ? "bg-purple-500 text-white"
                                 : "bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white"
@@ -788,94 +723,24 @@ export default function PainelAdmin() {
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => handleDeleteMateria(materiaNome)}
+                            onClick={() => handleDeleteMateria(mat)}
+                            disabled={deletingMateriaName === mat}
+                            className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all disabled:opacity-50"
                             title="Excluir Matéria"
-                            className="p-1.5 rounded-lg bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white transition-all inline-flex items-center"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            {deletingMateriaName === mat ? (
+                              <span className="animate-spin inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full" />
+                            ) : (
+                              <Trash2 className="w-3.5 h-3.5" />
+                            )}
                           </button>
                         </div>
                       </div>
                     );
-                  })
-                )}
-              </div>
-            </div>
-=======
-          /* ABA DE MATÉRIAS: CRUD Dinâmico */
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fadeIn">
-            {/* Card para Adicionar Matéria */}
-            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-6 rounded-2xl shadow-xl h-fit">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Plus className="text-purple-500 w-5 h-5" /> Nova Matéria
-              </h2>
-              <form onSubmit={handleCreateMateria} className="flex flex-col gap-4">
-                <div>
-                  <label className="text-sm text-[var(--text-secondary)] mb-1 block">Nome da Matéria</label>
-                  <input
-                    type="text"
-                    value={newMateriaName}
-                    onChange={(e) => setNewMateriaName(e.target.value)}
-                    placeholder="Ex: Banco de Dados, Redes..."
-                    required
-                    className="w-full p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={addingMateria || !newMateriaName.trim()}
-                  className="w-full py-3 rounded-lg font-bold bg-purple-600 hover:bg-purple-500 text-white transition-all shadow-lg shadow-purple-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {addingMateria ? (
-                    <>
-                      <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
-                      Adicionando...
-                    </>
-                  ) : (
-                    "Adicionar Matéria"
-                  )}
-                </button>
-              </form>
-            </div>
-
-            {/* Listagem de Matérias */}
-            <div className="lg:col-span-2 bg-[var(--bg-card)] border border-[var(--border-color)] p-6 rounded-2xl shadow-xl">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <BookOpen className="text-purple-500 w-5 h-5" /> Matérias Cadastradas ({materias.length})
-              </h2>
-              {materiaLoading && materias.length === 0 ? (
-                <div className="p-8 text-center text-[var(--text-secondary)] flex items-center justify-center gap-2">
-                  <span className="animate-spin inline-block w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full" />
-                  Carregando matérias...
-                </div>
-              ) : materias.length === 0 ? (
-                <div className="p-8 text-center text-[var(--text-secondary)]">Nenhuma matéria cadastrada.</div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[550px] overflow-y-auto pr-2">
-                  {materias.map((mat) => (
-                    <div
-                      key={mat}
-                      className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] hover:border-purple-500/50 transition-all group shadow-sm hover:shadow-purple-500/5"
-                    >
-                      <span className="font-semibold text-[var(--text-primary)]">{mat}</span>
-                      <button
-                        onClick={() => handleDeleteMateria(mat)}
-                        disabled={deletingMateriaName === mat}
-                        className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-50"
-                        title="Excluir Matéria"
-                      >
-                        {deletingMateriaName === mat ? (
-                          <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
-                        ) : (
-                          <Trash2 className="w-4 h-4" />
-                        )}
-                      </button>
-                    </div>
-                  ))}
+                  })}
                 </div>
               )}
             </div>
->>>>>>> Stashed changes
           </div>
         )}
       </div>
