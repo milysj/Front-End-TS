@@ -1,3 +1,5 @@
+import packageJson from '../../../package.json';
+
 const Footer = () => {
     return (
         <footer 
@@ -8,9 +10,13 @@ const Footer = () => {
         >
             <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
                 {/* Copyright */}
-                <div className="text-lg font-semibold text-[var(--text-primary)]">
+                <div className="text-lg font-semibold text-[var(--text-primary)] flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span aria-label={`ConsultAi, todos os direitos reservados ${new Date().getFullYear()}`}>
                         ConsultAi © {new Date().getFullYear()}
+                    </span>
+                    <span className="hidden sm:inline text-xs text-[var(--text-secondary)] opacity-60">•</span>
+                    <span className="text-xs text-[var(--text-secondary)] opacity-80" aria-label={`Versão do aplicativo: ${packageJson.version}`}>
+                        v{packageJson.version}
                     </span>
                 </div>
 
