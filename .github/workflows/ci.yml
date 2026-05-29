@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -13,7 +14,8 @@ permissions:
 jobs:
   version:
     runs-on: ubuntu-latest
-
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
@@ -144,8 +146,11 @@ jobs:
           fi
           git push origin main
 
-      - name: Build imagem Docker (validação)
-        run: docker build -t estudemy-frontend:ci -f ./dockerfile .
+      - name: Obter versão do package.json
+        id: get_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Enviar email em caso de falha
         if: failure()
@@ -155,7 +160,102 @@ jobs:
           server_port: 587
           username: ${{ secrets.EMAIL_ORIGIN }}
           password: ${{ secrets.EMAIL_APP_PASSWORD }}  # Use app password, not regular password
-          subject: "Falha no CI - Front-End-TS"
-          body: "O processo de CI falhou. Por favor, verifique os logs para mais detalhes."
+          subject: "Falha no CI (version) - Front-End-TS"
+          body: "O processo de CI/versão falhou. Por favor, verifique os logs para mais detalhes."
+          to: ${{ secrets.EMAIL_DESTINO }}
+          from: ${{ secrets.EMAIL_ORIGIN }}
+
+  build-hml:
+    name: build-hml
+    runs-on: ubuntu-latest
+    needs: version
+    environment: HML
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '22'
+
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build e Push Docker (HML)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfile
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL_HML || 'http://localhost:5003' }}
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/estudemy-frontend:hml
+            ${{ secrets.DOCKER_USERNAME }}/estudemy-frontend:hml-${{ needs.version.outputs.version }}
+
+      - name: Enviar email em caso de falha
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_ORIGIN }}
+          password: ${{ secrets.EMAIL_APP_PASSWORD }}  
+          subject: "Falha no CI (build-hml) - Front-End-TS"
+          body: "A build de HML falhou. Por favor, verifique os logs para mais detalhes."
+          to: ${{ secrets.EMAIL_DESTINO }}
+          from: ${{ secrets.EMAIL_ORIGIN }}
+
+  build-prod:
+    name: build-prod
+    runs-on: ubuntu-latest
+    needs: build-hml
+    environment: PROD
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '22'
+
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build e Push Docker (PROD)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfile
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL_PROD || 'http://localhost:5004' }}
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/estudemy-frontend:prod
+            ${{ secrets.DOCKER_USERNAME }}/estudemy-frontend:${{ needs.version.outputs.version }}
+
+      - name: Enviar email em caso de falha
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_ORIGIN }}
+          password: ${{ secrets.EMAIL_APP_PASSWORD }}  
+          subject: "Falha no CI (build-prod) - Front-End-TS"
+          body: "A build de PROD falhou. Por favor, verifique os logs para mais detalhes."
           to: ${{ secrets.EMAIL_DESTINO }}
           from: ${{ secrets.EMAIL_ORIGIN }}
