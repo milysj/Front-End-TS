@@ -151,10 +151,10 @@ jobs:
           API_URL_HML: ${{ secrets.NEXT_PUBLIC_API_URL_HML }}
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            echo "tags=${{ secrets.DOCKER_USERNAME }}/estudemy-frontend:latest,${{ secrets.DOCKER_USERNAME }}/estudemy-frontend:${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
+            echo "tags=${{ secrets.DOCKER_USERNAME }}/estudemy-frontend:prod,${{ secrets.DOCKER_USERNAME }}/estudemy-frontend:${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
             echo "api_url=${API_URL_PROD:-http://localhost:5004}" >> $GITHUB_OUTPUT
           else
-            echo "tags=${{ secrets.DOCKER_USERNAME }}/estudemy-frontend:develop" >> $GITHUB_OUTPUT
+            echo "tags=${{ secrets.DOCKER_USERNAME }}/estudemy-frontend:hml" >> $GITHUB_OUTPUT
             echo "api_url=${API_URL_HML:-http://localhost:5003}" >> $GITHUB_OUTPUT
           fi
 
