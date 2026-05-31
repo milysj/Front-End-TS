@@ -1,7 +1,7 @@
 const Footer = () => {
     return (
-        <footer 
-            className="bg-[var(--bg-card)] text-[var(--text-primary)] py-6 mt-8 align-bottom border-t border-[var(--border-color)] transition-colors duration-300" 
+        <footer
+            className="bg-[var(--bg-card)] text-[var(--text-primary)] py-6 mt-8 align-bottom border-t border-[var(--border-color)] transition-colors duration-300"
             style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
             role="contentinfo"
             aria-label="Rodapé do site"
@@ -18,7 +18,7 @@ const Footer = () => {
                 <nav aria-label="Links de redes sociais">
                     <div className="flex flex-row-reverse gap-3">
                         <a
-                            href="https://github.com/milysj/Full-Stack-Estude.my"
+                            href="https://github.com/milysj/Front-End-TS"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hover:text-blue-400 transition-colors text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"

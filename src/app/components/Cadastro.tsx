@@ -358,12 +358,12 @@ const Cadastrar = () => {
           value={titulacao}
           onChange={(e) => setTitulacao(e.target.value)}
         >
-          <option value="">Selecione a titulação</option>
-          <option value="Graduacao">Graduação</option>
-          <option value="Especializacao">Especialização</option>
-          <option value="Mestrado">Mestrado</option>
-          <option value="Doutorado">Doutorado</option>
-          <option value="PosDoutorado">Pós-Doutorado</option>
+          <option value="" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Selecione a titulação</option>
+          <option value="Graduacao" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Graduação</option>
+          <option value="Especializacao" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Especialização</option>
+          <option value="Mestrado" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Mestrado</option>
+          <option value="Doutorado" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Doutorado</option>
+          <option value="PosDoutorado" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Pós-Doutorado</option>
         </select>
       </div>
     </>
