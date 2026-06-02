@@ -1,5 +1,7 @@
-<img width="310" height="60" alt="EstudeMyLogo" src="https://github.com/user-attachments/assets/d1f0bb6b-9139-47ab-86f2-9900c73ed59a" /># EstudeMy — Front-End 🎮📚
-![Uplo<?xml version="1.0" encoding="UTF-8"?>
+# EstudeMy — Front-End 🎮📚
+
+<img width="310" height="60" alt="EstudeMyLogo" src="https://github.com/user-attachments/assets/4c3a1a77-57da-42e0-9eec-6c009ba4f900" />
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="310px" height="60px" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g><path style="opacity:0.484" fill="#e3e5e8" d="M 6.5,3.5 C 7.9143,5.59829 7.24764,6.59829 4.5,6.5C 4.42702,4.97306 5.09368,3.97306 6.5,3.5 Z"/></g>
@@ -62,7 +64,7 @@
 <g><path style="opacity:1" fill="#001740" d="M 21.5,17.5 C 25.5,17.5 29.5,17.5 33.5,17.5C 30.0381,18.4816 26.3714,18.815 22.5,18.5C 22.5,20.8333 22.5,23.1667 22.5,25.5C 26.3714,25.185 30.0381,25.5184 33.5,26.5C 29.5,26.5 25.5,26.5 21.5,26.5C 21.5,23.5 21.5,20.5 21.5,17.5 Z"/></g>
 <g><path style="opacity:1" fill="#400304" d="M 192.5,50.5 C 192.833,50.5 193.167,50.5 193.5,50.5C 189.893,51.824 185.893,52.4907 181.5,52.5C 177.319,52.4989 173.319,52.1656 169.5,51.5C 177.352,51.8254 185.018,51.492 192.5,50.5 Z"/></g>
 </svg>
-ading EstudeMyLogo.svg…]()
+
 
 
 Aplicação web do **EstudeMy**, uma plataforma de estudos **gamificada** e interativa projetada para tornar o aprendizado envolvente e dinâmico. Professores e administradores gerenciam cursos, trilhas e conteúdos de aprendizagem; os alunos percorrem trilhas de conhecimento, resolvem desafios, acompanham seu progresso e competem em rankings saudáveis com base em conquistas.
