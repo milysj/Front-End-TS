@@ -310,15 +310,16 @@ export default function GerarTrilhaIaDialog({
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="col-span-2">
-                <label className="text-sm font-medium">Dificuldade</label>
+                <label className="text-sm font-medium text-[var(--text-primary)]">Dificuldade</label>
                 <select
                   value={dificuldade}
                   onChange={(e) => setDificuldade(e.target.value as DificuldadeIa)}
-                  className="mt-1 w-full rounded border border-[var(--border-color)] bg-[var(--bg-input)] px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] px-3 py-2 text-sm transition-colors duration-300"
+                  style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                 >
-                  <option value="Facil">Fácil</option>
-                  <option value="Medio">Médio</option>
-                  <option value="Dificil">Difícil</option>
+                  <option value="Facil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Fácil</option>
+                  <option value="Medio" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Médio</option>
+                  <option value="Dificil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Difícil</option>
                 </select>
               </div>
               <div>

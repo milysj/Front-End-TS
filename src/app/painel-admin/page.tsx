@@ -409,22 +409,24 @@ export default function PainelAdmin() {
                   value={filterTipo}
                   onChange={(e) => setFilterTipo(e.target.value)}
                   className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
+                  style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                 >
-                  <option value="TODOS">Todos os Tipos</option>
-                  <option value="ALUNO">Aluno</option>
-                  <option value="PROFESSOR">Professor</option>
-                  <option value="ADMINISTRADOR">Administrador</option>
-                  <option value="OWNER">Owner</option>
+                  <option value="TODOS" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Todos os Tipos</option>
+                  <option value="ALUNO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Aluno</option>
+                  <option value="PROFESSOR" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Professor</option>
+                  <option value="ADMINISTRADOR" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Administrador</option>
+                  <option value="OWNER" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Owner</option>
                 </select>
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
                   className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
+                  style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                 >
-                  <option value="TODOS">Todos os Status</option>
-                  <option value="ATIVO">Ativo</option>
-                  <option value="BLOQUEADO">Bloqueado</option>
-                  <option value="BANIDO">Banido</option>
+                  <option value="TODOS" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Todos os Status</option>
+                  <option value="ATIVO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Ativo</option>
+                  <option value="BLOQUEADO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Bloqueado</option>
+                  <option value="BANIDO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Banido</option>
                 </select>
               </div>
             </div>
@@ -456,14 +458,15 @@ export default function PainelAdmin() {
                             value={u.tipoUsuario}
                             disabled={disableActions}
                             onChange={(e) => handleChangeTipo(u._id, e.target.value)}
-                            className={`p-2 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-sm outline-none focus:border-purple-500 transition-colors ${disableActions ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                            className={`p-2 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm outline-none focus:border-purple-500 transition-colors ${disableActions ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                            style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                           >
-                            <option value="ALUNO">Aluno</option>
-                            <option value="PROFESSOR">Professor</option>
+                            <option value="ALUNO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Aluno</option>
+                            <option value="PROFESSOR" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Professor</option>
                             {(user?.tipoUsuario === "OWNER" || user?.canPromoteToAdmin || u.tipoUsuario === "ADMINISTRADOR") && (
-                              <option value="ADMINISTRADOR">Administrador</option>
+                              <option value="ADMINISTRADOR" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Administrador</option>
                             )}
-                            {user?.tipoUsuario === "OWNER" && <option value="OWNER">Owner</option>}
+                            {user?.tipoUsuario === "OWNER" && <option value="OWNER" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Owner</option>}
                           </select>
                           
                           {user?.tipoUsuario === "OWNER" && u.tipoUsuario === "ADMINISTRADOR" && (

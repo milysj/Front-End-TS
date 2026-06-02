@@ -17,8 +17,8 @@ const fases = [
   { id: 4, nome: "Castelo", img: "/img/fases/castelo.jpg", paga: false },
 ];
 
-// Lista de matérias
-const materias = [
+// Lista de matérias fallback (caso a API falhe)
+const MATERIAS_FALLBACK = [
   "Matemática",
   "Português",
   "Ciências",
@@ -34,7 +34,7 @@ const materias = [
 const idiomas = [
   "Português",
   "Inglês",
-  "espanhol"
+  "Espanhol"
 ];
 
 // Imagens disponíveis
@@ -75,6 +75,7 @@ interface UsuarioComTrilhas {
 
 export default function GerenciarTrilha() {
   // Estados principais
+  const [materias, setMaterias] = useState<string[]>(MATERIAS_FALLBACK);
   const [erros, setErros] = useState<{ [key: string]: string }>({});
   const [trilhas, setTrilhas] = useState<Trilha[]>([]);
   const [trilha, setTrilha] = useState<Trilha>({
@@ -120,7 +121,7 @@ export default function GerenciarTrilha() {
     }));
     setSugestaoPendente(s);
     setMostrarFormulario(true);
-  }, []);
+  }, [materias]);
 
   // ================== Funções CRUD ==================
   // ================== Funções CRUD ==================
@@ -222,6 +223,31 @@ export default function GerenciarTrilha() {
     };
 
     buscarTipoUsuario();
+  }, []);
+
+  // Buscar matérias do backend ao montar o componente
+  useEffect(() => {
+    const fetchMateriasDoBackend = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const response = await fetch(`${API_URL}/api/materias`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data)) {
+            setMaterias(data);
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao buscar matérias do backend:", error);
+      }
+    };
+
+    fetchMateriasDoBackend();
   }, []);
 
   // Buscar trilhas
@@ -562,31 +588,33 @@ export default function GerenciarTrilha() {
             {usuarioSelecionado && (
               <>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Matéria</label>
+                  <label className="block text-sm font-semibold mb-1 text-[var(--text-primary)]">Matéria</label>
                   <select
                     value={filtroMateria}
                     onChange={(e) => setFiltroMateria(e.target.value)}
-                    className="w-full border rounded px-3 py-2 text-sm"
+                    className="w-full border border-[var(--border-color)] rounded px-3 py-2 text-sm bg-[var(--bg-input)] text-[var(--text-primary)] transition-colors duration-300"
+                    style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                   >
-                    <option value="">Todas</option>
+                    <option value="" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Todas</option>
                     {materias.map((m) => (
-                      <option key={m} value={m}>
+                      <option key={m} value={m} style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
                         {m}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Dificuldade</label>
+                  <label className="block text-sm font-semibold mb-1 text-[var(--text-primary)]">Dificuldade</label>
                   <select
                     value={filtroDificuldade}
                     onChange={(e) => setFiltroDificuldade(e.target.value)}
-                    className="w-full border rounded px-3 py-2 text-sm"
+                    className="w-full border border-[var(--border-color)] rounded px-3 py-2 text-sm bg-[var(--bg-input)] text-[var(--text-primary)] transition-colors duration-300"
+                    style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                   >
-                    <option value="">Todas</option>
-                    <option value="Facil">Fácil</option>
-                    <option value="Medio">Médio</option>
-                    <option value="Dificil">Difícil</option>
+                    <option value="" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Todas</option>
+                    <option value="Facil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Fácil</option>
+                    <option value="Medio" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Médio</option>
+                    <option value="Dificil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Difícil</option>
                   </select>
                 </div>
               </>
@@ -803,13 +831,14 @@ export default function GerenciarTrilha() {
                       name="materia"
                       value={trilha.materia}
                       onChange={handleChange}
-                      className="w-full border rounded px-3 py-2 text-sm sm:text-base"
+                      className="w-full border border-[var(--border-color)] rounded px-3 py-2 text-sm sm:text-base bg-[var(--bg-input)] text-[var(--text-primary)] transition-colors duration-300"
+                      style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                     >
-                      <option value="" disabled>
+                      <option value="" disabled hidden style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
                         Selecione uma matéria
                       </option>
                       {materias.map((m, i) => (
-                        <option key={i} value={m}>
+                        <option key={i} value={m} style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
                           {m}
                         </option>
                       ))}
@@ -826,11 +855,12 @@ export default function GerenciarTrilha() {
                       name="dificuldade"
                       value={trilha.dificuldade}
                       onChange={handleChange}
-                      className="w-full border rounded px-3 py-2 text-sm sm:text-base"
+                      className="w-full border border-[var(--border-color)] rounded px-3 py-2 text-sm sm:text-base bg-[var(--bg-input)] text-[var(--text-primary)] transition-colors duration-300"
+                      style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                     >
-                      <option value="Facil">Fácil</option>
-                      <option value="Medio">Médio</option>
-                      <option value="Dificil">Difícil</option>
+                      <option value="Facil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Fácil</option>
+                      <option value="Medio" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Médio</option>
+                      <option value="Dificil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Difícil</option>
                     </select>
                   </div>
                 </div>
@@ -844,14 +874,14 @@ export default function GerenciarTrilha() {
                       name="idioma"
                       value={trilha.idioma}
                       onChange={handleChange}
-                      className="w-full border rounded px-3 py-2 text-sm sm:text-base"
+                      className="w-full border border-[var(--border-color)] rounded px-3 py-2 text-sm sm:text-base bg-[var(--bg-input)] text-[var(--text-primary)] transition-colors duration-300"
+                      style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                     >
-                      <option value="" disabled>
+                      <option value="" disabled hidden style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
                         Selecione um idioma
                       </option>
                       {idiomas.map((i, index) => (  
-
-                        <option key={index} value={i}>
+                        <option key={index} value={i} style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
                           {i}
                         </option>
                       ))}
@@ -1196,13 +1226,14 @@ export default function GerenciarTrilha() {
                     name="materia"
                     value={trilha.materia}
                     onChange={handleChange}
-                    className="w-full border rounded px-3 py-2 text-sm sm:text-base"
+                    className="w-full border border-[var(--border-color)] rounded px-3 py-2 text-sm sm:text-base bg-[var(--bg-input)] text-[var(--text-primary)] transition-colors duration-300"
+                    style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                   >
-                    <option value="" disabled>
+                    <option value="" disabled hidden style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
                       Selecione uma matéria
                     </option>
                     {materias.map((m, i) => (
-                      <option key={i} value={m}>
+                      <option key={i} value={m} style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
                         {m}
                       </option>
                     ))}
@@ -1219,11 +1250,36 @@ export default function GerenciarTrilha() {
                     name="dificuldade"
                     value={trilha.dificuldade}
                     onChange={handleChange}
-                    className="w-full border rounded px-3 py-2 text-sm sm:text-base"
+                    className="w-full border border-[var(--border-color)] rounded px-3 py-2 text-sm sm:text-base bg-[var(--bg-input)] text-[var(--text-primary)] transition-colors duration-300"
+                    style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                   >
-                    <option value="Facil">Fácil</option>
-                    <option value="Medio">Médio</option>
-                    <option value="Dificil">Difícil</option>
+                    <option value="Facil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Fácil</option>
+                    <option value="Medio" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Médio</option>
+                    <option value="Dificil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Difícil</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block font-semibold mb-1 text-sm sm:text-base">
+                    Idioma
+                  </label>
+                  <select
+                    name="idioma"
+                    value={trilha.idioma}
+                    onChange={handleChange}
+                    className="w-full border border-[var(--border-color)] rounded px-3 py-2 text-sm sm:text-base bg-[var(--bg-input)] text-[var(--text-primary)] transition-colors duration-300"
+                    style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
+                  >
+                    <option value="" disabled hidden style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
+                      Selecione um idioma
+                    </option>
+                    {idiomas.map((i, index) => (  
+                      <option key={index} value={i} style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
+                        {i}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
