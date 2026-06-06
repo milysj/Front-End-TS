@@ -8,6 +8,7 @@ import Carrousel from "@/app/components/Carrousel";
 import { useBackgroundImage } from "@/app/hooks/useBackgroundImage";
 import { PageWrapper } from "@/app/components/accessibility/PageWrapper";
 import { useAccessibleLoading } from "@/app/hooks/useAccessibility";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -22,6 +23,7 @@ interface Trilha {
 
 export default function Home() {
   const backgroundImage = useBackgroundImage("pages");
+  const { language } = useLanguage();
   const [isMobile, setIsMobile] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
@@ -61,12 +63,20 @@ export default function Home() {
       signal: abortController.signal,
     };
 
+    // Mapear código de idioma do frontend para o valor no banco de dados
+    const getMappedIdioma = (lang: string) => {
+      if (lang === "en-US") return "Inglês";
+      if (lang === "es-ES") return "Espanhol";
+      return "Português";
+    };
+    const mappedIdioma = getMappedIdioma(language);
+
     // Função para buscar novidades
     const fetchNovidades = async () => {
       if (isMounted) setLoadingNovidades(true);
       try {
         const res = await fetch(
-          `${API_URL}/api/trilhas/novidades`,
+          `${API_URL}/api/trilhas/novidades?idioma=${encodeURIComponent(mappedIdioma)}`,
           requestInit
         );
         if (!res.ok || !isMounted) {
@@ -95,7 +105,7 @@ export default function Home() {
       if (isMounted) setLoadingPopulares(true);
       try {
         const res = await fetch(
-          `${API_URL}/api/trilhas/populares`,
+          `${API_URL}/api/trilhas/populares?idioma=${encodeURIComponent(mappedIdioma)}`,
           requestInit
         );
         if (!res.ok || !isMounted) {
@@ -127,10 +137,13 @@ export default function Home() {
       }
       if (isMounted) setLoadingContinue(true);
       try {
-        const res = await fetch(`${API_URL}/api/trilhas/continue`, {
-          headers: { Authorization: `Bearer ${savedToken}` },
-          signal: abortController.signal,
-        });
+        const res = await fetch(
+          `${API_URL}/api/trilhas/continue?idioma=${encodeURIComponent(mappedIdioma)}`,
+          {
+            headers: { Authorization: `Bearer ${savedToken}` },
+            signal: abortController.signal,
+          }
+        );
         if (!res.ok || !isMounted) {
           if (!isMounted) return;
           console.error("Erro ao buscar trilhas iniciadas:", await res.text());
@@ -164,7 +177,7 @@ export default function Home() {
       isMounted = false;
       abortController.abort();
     };
-  }, []);
+  }, [language]);
   // Navegação e registro de visualização
   const handleTrilhaClick = (id: string) => {
     // Registrar visualização no backend se houver token
