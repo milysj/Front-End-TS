@@ -56,6 +56,7 @@ export const API_ENDPOINTS = {
     ATUALIZAR_PERSONAGEM: "/api/users/atualizar-personagem",
     IDIOMA: "/api/users/idioma",
     TEMA: "/api/users/tema",
+    PREFERENCIAS: "/api/users/preferencias",
     LISTAR: "/api/usuarios",
   },
   // Trilhas
@@ -105,6 +106,8 @@ export const API_ENDPOINTS = {
   },
   // Feedback
   FEEDBACK: "/api/feedback",
+  // Contato
+  CONTATO: "/api/contato",
   // Perguntas e Resultados
   PERGUNTAS: "/api/perguntas",
   RESULTADOS: "/api/resultados",

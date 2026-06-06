@@ -43,7 +43,20 @@
     "feedback": "Enviar Feedback",
     "saveChanges": "Salvar Alterações",
     "saving": "Salvando...",
-    "savedSuccess": "Configurações salvas com sucesso!"
+    "savedSuccess": "Configurações salvas com sucesso!",
+    "twoFactorTitle": "Configurar Autenticação de Dois Fatores (2FA)",
+    "twoFactorSetupInstructions": "Escaneie o código QR abaixo com seu aplicativo de autenticação (como Google Authenticator ou Authy) ou insira a chave manual.",
+    "twoFactorKey": "Chave Manual",
+    "twoFactorEnterCode": "Código de Autenticação",
+    "twoFactorConfirm": "Confirmar e Ativar",
+    "twoFactorBackupTitle": "Códigos de Recuperação",
+    "twoFactorBackupIntro": "Salve estes códigos de recuperação em um local seguro. Cada código só pode ser usado uma vez se você perder o acesso ao seu dispositivo de autenticação.",
+    "twoFactorClose": "Concluído & Fechar",
+    "twoFactorDisableTitle": "Desativar Autenticação de Dois Fatores (2FA)",
+    "twoFactorDisableConfirmText": "Para confirmar a desativação da autenticação de dois fatores, digite sua senha e o código atual do aplicativo de autenticação ou um código de recuperação.",
+    "twoFactorPassword": "Sua Senha Atual",
+    "twoFactorCodeOrBackup": "Código de Autenticação / Recuperação",
+    "twoFactorDisableConfirm": "Desativar"
   },
   "navigation": {
     "myCourses": "Meus Cursos",
@@ -152,7 +165,11 @@
     "message": "Mensagem:",
     "messagePlaceholder": "Escreva sua mensagem...",
     "send": "Enviar Mensagem",
-    "orContact": "Ou entre em contato diretamente pelo e-mail:"
+    "orContact": "Ou entre em contato diretamente pelo e-mail:",
+    "success": "Mensagem enviada com sucesso! Entraremos em contato em breve.",
+    "error": "Erro ao enviar mensagem. Tente novamente.",
+    "sending": "Enviando...",
+    "connectionError": "Erro de conexão. Verifique sua internet e tente novamente."
   },
   "faq": {
     "whatIs": "O que é a plataforma gamificada?",

@@ -43,7 +43,20 @@
     "feedback": "Send Feedback",
     "saveChanges": "Save Changes",
     "saving": "Saving...",
-    "savedSuccess": "Settings saved successfully!"
+    "savedSuccess": "Settings saved successfully!",
+    "twoFactorTitle": "Set Up Two-Factor Authentication (2FA)",
+    "twoFactorSetupInstructions": "Scan the QR code below using your authenticator app (such as Google Authenticator or Authy) or enter the manual key.",
+    "twoFactorKey": "Manual Key",
+    "twoFactorEnterCode": "Authentication Code",
+    "twoFactorConfirm": "Confirm and Enable",
+    "twoFactorBackupTitle": "Backup Codes",
+    "twoFactorBackupIntro": "Save these backup codes in a safe place. Each code can only be used once if you lose access to your authenticator device.",
+    "twoFactorClose": "Done & Close",
+    "twoFactorDisableTitle": "Disable Two-Factor Authentication (2FA)",
+    "twoFactorDisableConfirmText": "To confirm disabling two-factor authentication, enter your password and the current code from the authenticator app or a backup code.",
+    "twoFactorPassword": "Your Current Password",
+    "twoFactorCodeOrBackup": "Authentication / Backup Code",
+    "twoFactorDisableConfirm": "Disable"
   },
   "navigation": {
     "myCourses": "My Courses",
@@ -152,7 +165,11 @@
     "message": "Message:",
     "messagePlaceholder": "Write your message...",
     "send": "Send Message",
-    "orContact": "Or contact us directly by email:"
+    "orContact": "Or contact us directly by email:",
+    "success": "Message sent successfully! We will get in touch soon.",
+    "error": "Error sending message. Please try again.",
+    "sending": "Sending...",
+    "connectionError": "Connection error. Check your internet connection and try again."
   },
   "faq": {
     "whatIs": "What is the gamified platform?",
