@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
-import { BookText, ArrowUp, Bookmark, BookmarkCheck, BookOpen, HelpCircle } from "lucide-react";
+import { BookText, ArrowUp, Bookmark, BookmarkCheck, BookOpen, HelpCircle, X, Sparkles, Heart, Coins, Lock, Trophy, Star, Check } from "lucide-react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import SplashScreen from "@/app/components/game/SplashScreen";
 import NPSForm from "@/app/components/NPSForm";
@@ -118,6 +118,8 @@ export default function Trilhas({ trilhaId }: TrilhasProps) {
   const [mostrarSplash, setMostrarSplash] = useState(false);
   const [urlParaRedirecionar, setUrlParaRedirecionar] = useState<string | null>(null);
   const [mostrarNPS, setMostrarNPS] = useState(false);
+  const [mostrarGuia, setMostrarGuia] = useState(false);
+  const [activeTab, setActiveTab] = useState<"trilha" | "jogo" | "dicas">("trilha");
 
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const tracksRef = useRef<HTMLDivElement | null>(null);
@@ -731,7 +733,11 @@ export default function Trilhas({ trilhaId }: TrilhasProps) {
                {salvando ? "..." : trilhaSalva ? t("trail.saved") : t("trail.save")}
              </button>
            )}
-          <button className="flex items-center gap-2 border-2 border-[var(--border-color)] rounded-xl px-3 py-1 text-[var(--text-primary)] font-bold transform active:translate-y-1 shadow-[0_6px_0px_rgba(0,0,0,0.2)] active:shadow-[0_2px_0px_rgba(0,0,0,0.3)] transition-all duration-150 hover:bg-[var(--bg-input)]" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}>
+          <button
+            onClick={() => setMostrarGuia(true)}
+            className="flex items-center gap-2 border-2 border-[var(--border-color)] rounded-xl px-3 py-1 text-[var(--text-primary)] font-bold transform active:translate-y-1 shadow-[0_6px_0px_rgba(0,0,0,0.2)] active:shadow-[0_2px_0px_rgba(0,0,0,0.3)] transition-all duration-150 hover:bg-[var(--bg-input)]"
+            style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+          >
             <BookText className="w-4 h-4 " />
             {t("trail.guide")}
           </button>
@@ -886,6 +892,330 @@ export default function Trilhas({ trilhaId }: TrilhasProps) {
           onComplete={() => setMostrarNPS(false)}
         />
       )}
+
+      {/* Guia da Trilha e do Jogo Pop-up Modal */}
+      <AnimatePresence>
+        {mostrarGuia && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop com blur */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMostrarGuia(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+
+            {/* Conteúdo do Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="relative w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl p-6 md:p-8 overflow-hidden max-h-[85vh] z-10 transition-colors duration-300 flex flex-col"
+              style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
+            >
+              {/* Botão de Fechar */}
+              <button
+                onClick={() => setMostrarGuia(false)}
+                className="absolute top-4 right-4 p-2 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)] transition-all cursor-pointer border-0 bg-transparent z-20"
+                aria-label="Fechar guia"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Título & Subtítulo */}
+              <div className="text-center mb-6 shrink-0">
+                <h3 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)] flex items-center justify-center gap-2">
+                  🎮 {t("trail.guideTitle")}
+                </h3>
+                <p className="text-sm text-[var(--text-secondary)] mt-2">
+                  {t("trail.guideSubtitle")}
+                </p>
+              </div>
+
+              {/* Seletor de Abas (Tabs) */}
+              <div className="flex border-b border-[var(--border-color)] mb-6 gap-2 p-1 bg-[var(--bg-input)] rounded-xl relative transition-all duration-300 shrink-0">
+                <button
+                  onClick={() => setActiveTab("trilha")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg font-bold text-xs md:text-sm transition-all border-0 cursor-pointer ${
+                    activeTab === "trilha"
+                      ? "bg-[var(--bg-card)] text-blue-500 shadow-md scale-[1.02]"
+                      : "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  }`}
+                  style={{ backgroundColor: activeTab === 'trilha' ? 'var(--bg-card)' : 'transparent' }}
+                >
+                  🗺️ {t("trail.guideTabTrail")}
+                </button>
+                <button
+                  onClick={() => setActiveTab("jogo")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg font-bold text-xs md:text-sm transition-all border-0 cursor-pointer ${
+                    activeTab === "jogo"
+                      ? "bg-[var(--bg-card)] text-purple-500 shadow-md scale-[1.02]"
+                      : "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  }`}
+                  style={{ backgroundColor: activeTab === 'jogo' ? 'var(--bg-card)' : 'transparent' }}
+                >
+                  ⚔️ {t("trail.guideTabGame")}
+                </button>
+                <button
+                  onClick={() => setActiveTab("dicas")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg font-bold text-xs md:text-sm transition-all border-0 cursor-pointer ${
+                    activeTab === "dicas"
+                      ? "bg-[var(--bg-card)] text-amber-500 shadow-md scale-[1.02]"
+                      : "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  }`}
+                  style={{ backgroundColor: activeTab === 'dicas' ? 'var(--bg-card)' : 'transparent' }}
+                >
+                  🏆 {t("trail.guideTabTips")}
+                </button>
+              </div>
+
+              {/* Conteúdo das Abas com Animação */}
+              <div className="flex-1 overflow-y-auto pr-1">
+                <AnimatePresence mode="wait">
+                  {activeTab === "trilha" && (
+                    <motion.div
+                      key="tab-trilha"
+                      initial={{ opacity: 0, x: -15 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 15 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-6 text-left"
+                    >
+                      <p className="text-sm text-[var(--text-primary)] leading-relaxed">
+                        {t("trail.guideTrailIntro")}
+                      </p>
+
+                      {/* Estados das Fases */}
+                      <div className="space-y-4">
+                        <h4 className="text-md font-bold text-[var(--text-primary)] border-b border-[var(--border-color)] pb-2 flex items-center gap-2">
+                          🌟 Status das Fases
+                        </h4>
+
+                        <div className="grid grid-cols-1 gap-3">
+                          {/* Bloqueada */}
+                          <div className="flex items-center gap-4 p-3 rounded-xl bg-gray-500/5 border border-[var(--border-color)] hover:bg-gray-500/10 transition-colors">
+                            <div className="w-12 h-12 shrink-0 bg-[var(--bg-input)] text-[var(--text-muted)] opacity-50 flex items-center justify-center rounded-full border border-[var(--border-color)] shadow-sm">
+                              <Lock className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <h5 className="font-bold text-sm text-[var(--text-primary)] flex items-center gap-1.5">
+                                {t("trail.guideStatusLockedTitle")}
+                                <span className="text-xs px-2 py-0.5 rounded bg-gray-500/20 text-gray-500">Bloqueada</span>
+                              </h5>
+                              <p className="text-xs text-[var(--text-secondary)] mt-1">
+                                {t("trail.guideStatusLockedDesc")}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Disponível */}
+                          <div className="flex items-center gap-4 p-3 rounded-xl bg-blue-500/5 border border-blue-500/20 hover:bg-blue-500/10 transition-colors">
+                            <div className="w-12 h-12 shrink-0 bg-blue-500 text-yellow-300 flex items-center justify-center rounded-full border border-blue-400 shadow-[0_4px_0px_rgba(0,0,0,0.15)] ring-2 ring-blue-300">
+                              <Star className="w-5 h-5 fill-yellow-300" />
+                            </div>
+                            <div>
+                              <h5 className="font-bold text-sm text-[var(--text-primary)] flex items-center gap-1.5">
+                                {t("trail.guideStatusAvailableTitle")}
+                                <span className="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-500 font-semibold">Atual</span>
+                              </h5>
+                              <p className="text-xs text-[var(--text-secondary)] mt-1">
+                                {t("trail.guideStatusAvailableDesc")}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Concluída */}
+                          <div className="flex items-center gap-4 p-3 rounded-xl bg-green-500/5 border border-green-500/20 hover:bg-green-500/10 transition-colors">
+                            <div className="w-12 h-12 shrink-0 bg-green-500 text-yellow-300 flex items-center justify-center rounded-full shadow-[0_4px_0px_rgba(0,0,0,0.15)] ring-2 ring-green-300">
+                              <Check className="w-5 h-5 stroke-[3]" />
+                            </div>
+                            <div>
+                              <h5 className="font-bold text-sm text-[var(--text-primary)] flex items-center gap-1.5">
+                                {t("trail.guideStatusCompletedTitle")}
+                                <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-500 font-semibold">✓ Concluída</span>
+                              </h5>
+                              <p className="text-xs text-[var(--text-secondary)] mt-1">
+                                {t("trail.guideStatusCompletedDesc")}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tipos de Fases */}
+                      <div className="space-y-4 pt-2">
+                        <h4 className="text-md font-bold text-[var(--text-primary)] border-b border-[var(--border-color)] pb-2 flex items-center gap-2">
+                          📚 Tipos de Fases
+                        </h4>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {/* Conteúdo */}
+                          <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/15 hover:bg-blue-500/10 transition-all">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="flex items-center gap-1 px-2.5 py-1 bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold">
+                                <BookOpen size={14} />
+                                {t("trail.guideTypeBookTitle")}
+                              </span>
+                            </div>
+                            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                              {t("trail.guideTypeBookDesc")}
+                            </p>
+                          </div>
+
+                          {/* Quiz */}
+                          <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/15 hover:bg-purple-500/10 transition-all">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="flex items-center gap-1 px-2.5 py-1 bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded-lg text-xs font-bold">
+                                <HelpCircle size={14} />
+                                {t("trail.guideTypeQuizTitle")}
+                              </span>
+                            </div>
+                            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                              {t("trail.guideTypeQuizDesc")}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {activeTab === "jogo" && (
+                    <motion.div
+                      key="tab-jogo"
+                      initial={{ opacity: 0, x: -15 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 15 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-6 text-left"
+                    >
+                      <p className="text-sm text-[var(--text-primary)] leading-relaxed">
+                        {t("trail.guideGameIntro")}
+                      </p>
+
+                      {/* Grid de Recursos */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {/* Vidas */}
+                        <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/15 flex flex-col items-center text-center hover:bg-red-500/10 transition-all">
+                          <Heart className="w-8 h-8 text-red-500 fill-red-500 mb-2 animate-pulse" />
+                          <h5 className="font-bold text-sm text-red-600 dark:text-red-400">{t("trail.guideGameLivesTitle")}</h5>
+                          <p className="text-[11px] text-[var(--text-secondary)] mt-1">
+                            {t("trail.guideGameLivesDesc")}
+                          </p>
+                        </div>
+
+                        {/* Moedas */}
+                        <div className="p-4 rounded-xl bg-yellow-500/5 border border-yellow-500/15 flex flex-col items-center text-center hover:bg-yellow-500/10 transition-all">
+                          <Coins className="w-8 h-8 text-yellow-500 fill-yellow-500 mb-2" />
+                          <h5 className="font-bold text-sm text-yellow-600 dark:text-yellow-400">{t("trail.guideGameCoinsTitle")}</h5>
+                          <p className="text-[11px] text-[var(--text-secondary)] mt-1">
+                            {t("trail.guideGameCoinsDesc")}
+                          </p>
+                        </div>
+
+                        {/* XP */}
+                        <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/15 flex flex-col items-center text-center hover:bg-purple-500/10 transition-all">
+                          <Sparkles className="w-8 h-8 text-purple-500 fill-purple-500/30 mb-2" />
+                          <h5 className="font-bold text-sm text-purple-600 dark:text-purple-400">{t("trail.guideGameXpTitle")}</h5>
+                          <p className="text-[11px] text-[var(--text-secondary)] mt-1">
+                            {t("trail.guideGameXpDesc")}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Personagem do Usuário */}
+                      <div className="p-4 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex flex-col sm:flex-row items-center gap-4 hover:border-purple-500/30 transition-all">
+                        <div className="relative w-16 h-16 bg-[var(--bg-card)] rounded-full border border-[var(--border-color)] flex items-center justify-center p-2 shadow-inner shrink-0">
+                          <img
+                            src={getPersonagemImage(personagemUsuario)}
+                            alt={personagemUsuario || "Hero"}
+                            className="w-12 h-12 object-contain"
+                          />
+                        </div>
+                        <div className="text-center sm:text-left">
+                          <h5 className="font-bold text-sm text-[var(--text-primary)]">
+                            👤 {t("trail.guideGameCharTitle")}: <span className="text-purple-500 capitalize">{personagemUsuario || "Hero"}</span>
+                          </h5>
+                          <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
+                            {t("trail.guideGameCharDesc")}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {activeTab === "dicas" && (
+                    <motion.div
+                      key="tab-dicas"
+                      initial={{ opacity: 0, x: -15 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 15 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-6 text-left"
+                    >
+                      <p className="text-sm text-[var(--text-primary)] leading-relaxed">
+                        {t("trail.guideTipsIntro")}
+                      </p>
+
+                      <div className="space-y-4">
+                        {/* Dica 1: Ranking */}
+                        <div className="flex gap-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/15 hover:bg-amber-500/10 transition-colors">
+                          <Trophy className="w-6 h-6 text-amber-500 shrink-0 mt-0.5" />
+                          <div>
+                            <h5 className="font-bold text-sm text-amber-600 dark:text-amber-400">
+                              {t("trail.guideTipsRankingTitle")}
+                            </h5>
+                            <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
+                              {t("trail.guideTipsRankingDesc")}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Dica 2: Revisão */}
+                        <div className="flex gap-3 p-4 rounded-xl bg-green-500/5 border border-green-500/15 hover:bg-green-500/10 transition-colors">
+                          <BookmarkCheck className="w-6 h-6 text-green-500 shrink-0 mt-0.5" />
+                          <div>
+                            <h5 className="font-bold text-sm text-green-600 dark:text-green-400">
+                              {t("trail.guideTipsReviewTitle")}
+                            </h5>
+                            <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
+                              {t("trail.guideTipsReviewDesc")}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Dica 3: Conteúdo Primeiro */}
+                        <div className="flex gap-3 p-4 rounded-xl bg-blue-500/5 border border-blue-500/15 hover:bg-blue-500/10 transition-colors">
+                          <BookOpen className="w-6 h-6 text-blue-500 shrink-0 mt-0.5" />
+                          <div>
+                            <h5 className="font-bold text-sm text-blue-600 dark:text-blue-400">
+                              {t("trail.guideTipsReadTitle")}
+                            </h5>
+                            <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
+                              {t("trail.guideTipsReadDesc")}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Botão de Fechar / Ação */}
+              <div className="mt-8 flex justify-center border-t border-[var(--border-color)] pt-4 shrink-0">
+                <button
+                  onClick={() => setMostrarGuia(false)}
+                  className="px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all shadow-lg shadow-blue-600/20 active:scale-95 cursor-pointer border-0"
+                >
+                  {t("trail.guideClose")}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
     </>
   );
