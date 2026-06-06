@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "react-bootstrap";
+import BackButton from "@/app/components/BackButton";
 
 export default function ReenviarVerificacao() {
   const router = useRouter();
@@ -49,7 +50,8 @@ export default function ReenviarVerificacao() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative">
+      <BackButton href="/login" className="fixed top-4 left-4 z-50" />
       <div className="w-full max-w-md p-8 bg-[var(--bg-card)] rounded-lg shadow-md border border-[var(--border-color)]">
         <div className="mb-6 flex justify-center">
           <Image width={300} height={100} src="/svg/EstudeMyLogo.svg" alt="Logo" />

@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
+import BackButton from "./BackButton";
 import { useAuth } from "../contexts/AuthContext";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
@@ -223,12 +224,18 @@ const Topo = () => {
             {/* Logo do sistema - ALTERADO: Esconde se a pesquisa mobile estiver aberta */}
             {(!isMobile || (isMobile && !mobileSearchOpen)) && (
               <div
+                className="d-flex align-items-center"
                 style={{
                   zIndex: 10,
                   position: "relative",
                   flexShrink: 0,
+                  gap: isMobile ? "8px" : "16px",
+                  marginLeft: isMobile ? "8px" : "20px",
                 }}
               >
+                {pathname !== "/home" && pathname !== "/" && (
+                  <BackButton className="scale-90 md:scale-100" />
+                )}
                 <Link
                   href="/home"
                   className="d-flex align-items-center"
@@ -240,8 +247,6 @@ const Topo = () => {
                 >
                   <div
                     style={{
-                      marginLeft: isMobile ? "8px" : "20px",
-                      transition: "margin-left 0.3s",
                       display: "flex",
                       alignItems: "center",
                       height: "100%",

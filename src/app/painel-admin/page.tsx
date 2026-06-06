@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import BackButton from "@/app/components/BackButton";
 import { Lock, Unlock, Ban, Trash2, CheckCircle, BookOpen, Plus, Search, Users, Pencil, Check, X, ArrowLeft } from "lucide-react";
 
 interface UserData {
@@ -347,12 +348,7 @@ export default function PainelAdmin() {
           <h1 className="text-4xl font-bold flex items-center gap-3">
             <Lock className="text-purple-500 w-8 h-8" /> Painel de Administração
           </h1>
-          <button
-            onClick={() => router.push("/home")}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-all font-bold shadow-sm w-fit cursor-pointer text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" /> Voltar
-          </button>
+          <BackButton href="/home" />
         </div>
 
         {error && (
