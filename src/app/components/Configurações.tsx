@@ -234,6 +234,11 @@ export default function Configuracoes() {
         idioma: merged.language,
       });
 
+      // Refresh user cache in AuthContext (updates Cookies as well)
+      if (auth && auth.refreshUser) {
+        await auth.refreshUser();
+      }
+
       // Se o idioma ou tema mudaram, a alteração no backend é salva.
       // A gente também atualiza o estado local global de idioma/tema se necessário:
       if (updatedFields.language && updatedFields.language !== language) {
