@@ -14,6 +14,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import BackButton from "./BackButton";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../contexts/LanguageContext";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   List,
@@ -36,6 +37,7 @@ import { styleEffect } from "framer-motion";
 
 // Componente principal do topo/navegação
 const Topo = () => {
+  const { t } = useLanguage();
   // Estados para controlar o comportamento do menu lateral e navbar
   const [collapsed, setCollapsed] = useState(true); // Sidebar recolhida ou não
   const [sidebarToggled, setSidebarToggled] = useState(false); // Sidebar aberta no mobile
@@ -94,12 +96,12 @@ const Topo = () => {
     {
       href: "/home",
       icon: <HouseDoor size={20} />,
-      label: "Home",
+      label: t("common.home") || "Home",
     },
     {
       href: "/ranking",
       icon: <BarChart size={20} />,
-      label: "Ranking",
+      label: t("common.ranking") || "Ranking",
     },
   ];
 
@@ -112,21 +114,21 @@ const Topo = () => {
     onClick?: (e?: React.MouseEvent) => void;
     separator?: boolean; // Indica se deve ter separador antes deste item
   }> = [
-    { href: "/perfil", icon: <Person size={18} />, label: "Perfil" },
+    { href: "/perfil", icon: <Person size={18} />, label: t("common.profile") || "Perfil" },
     {
       href: "/configuracoes",
       icon: <Gear size={18} />,
-      label: "Configurações",
+      label: t("common.settings") || "Configurações",
     },
     {
       href: "/meusCursos",
       icon: <Book size={18} />,
-      label: "Meus Cursos",
+      label: t("navigation.myCourses") || "Meus Cursos",
     },
     {
       href: "/salvas",
       icon: <BookmarkFill size={18} />,
-      label: "Lições Salvas",
+      label: t("navigation.savedLessons") || "Lições Salvas",
     },
     // Apenas mostrar "Gerenciar Trilhas" se for PROFESSOR, ADMINISTRADOR ou OWNER
     ...(tipoUsuario === "PROFESSOR" || tipoUsuario === "ADMINISTRADOR" || tipoUsuario === "OWNER"
@@ -134,7 +136,7 @@ const Topo = () => {
           {
             href: "/gerenciarTrilha",
             icon: <BackpackFill size={18} />,
-            label: "Gerenciar Trilhas",
+            label: t("navigation.manageTrails") || "Gerenciar Trilhas",
           },
         ]
       : []),
@@ -144,7 +146,7 @@ const Topo = () => {
           {
             href: "/painel-admin",
             icon: <Shield size={18} />,
-            label: "Painel Admin",
+            label: t("navigation.adminPanel") || "Painel Admin",
           },
         ]
       : []),
@@ -169,11 +171,11 @@ const Topo = () => {
           />
         </div>
       ),
-      label: "ConsultAI",
+      label: t("navigation.consultAI") || "ConsultAI",
     },
     {
       href: "#",
-      label: "Sair",
+      label: t("common.logout") || "Sair",
       variant: "danger",
       onClick: handleLogout,
       separator: true,
@@ -298,7 +300,7 @@ const Topo = () => {
                 >
                   <FormControl
                     type="search"
-                    placeholder="Pesquisar lições, trilhas..."
+                    placeholder={t("search.placeholder") || "Pesquisar..."}
                     className="me-3 mt-1"
                     aria-label="Search"
                     value={searchTerm}
@@ -353,7 +355,7 @@ const Topo = () => {
                 </Button>
                 <FormControl
                   type="search"
-                  placeholder="Pesquisar..."
+                  placeholder={t("search.placeholder") || "Pesquisar..."}
                   className="me-2"
                   aria-label="Search"
                   value={searchTerm}

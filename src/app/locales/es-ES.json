@@ -9,7 +9,14 @@
     "cancel": "Cancelar",
     "loading": "Cargando...",
     "search": "Buscar",
-    "back": "Volver"
+    "back": "Volver",
+    "subject": "Materia",
+    "difficulty": "Dificultad",
+    "easy": "Fácil",
+    "medium": "Medio",
+    "hard": "Difícil",
+    "paid": "De pago",
+    "by": "Por"
   },
   "settings": {
     "title": "Configuración",
@@ -62,7 +69,8 @@
     "myCourses": "Mis Cursos",
     "savedLessons": "Lecciones Guardadas",
     "manageTrails": "Gestionar Senderos",
-    "consultAI": "ConsultAI"
+    "consultAI": "ConsultAI",
+    "adminPanel": "Panel Admin"
   },
   "home": {
     "continue": "Continuar",
@@ -195,6 +203,51 @@
     "success": "¡Perfil creado con éxito!",
     "error": "Error al crear perfil.",
     "connectionError": "Error de conexión. Verifica la consola para más detalles."
+  },
+  "subjects": {
+    "all": "Todas",
+    "math": "Matemáticas",
+    "portuguese": "Portugués",
+    "history": "Historia",
+    "geography": "Geografía",
+    "science": "Ciencias",
+    "biology": "Biología",
+    "physics": "Física",
+    "chemistry": "Química",
+    "english": "Inglés",
+    "spanish": "Español",
+    "arts": "Artes",
+    "physicalEducation": "Educación Física",
+    "philosophy": "Filosofía",
+    "sociology": "Sociología",
+    "literature": "Literatura"
+  },
+  "ranking": {
+    "loading": "Cargando clasificación...",
+    "titleHits": "Clasificación de Aciertos",
+    "titleLevel": "Clasificación de Nivel",
+    "yourPosition": "Estás en el puesto {position}",
+    "general": "Clasificación General",
+    "averageHits": "Promedio de aciertos",
+    "totalHits": "Total de aciertos",
+    "hitsLabel": "Aciertos",
+    "levelLabel": "Nivel",
+    "xpLabel": "XP",
+    "guerreiro": "Guerrero",
+    "mago": "Mago",
+    "samurai": "Samurái"
+  },
+  "myCourses": {
+    "title": "Mis Cursos",
+    "description": "Visualiza los cursos que iniciaste y continúa donde lo dejaste",
+    "loading": "Cargando tus cursos...",
+    "empty": "Aún no has iniciado ningún curso.",
+    "explore": "¡Explora las rutas disponibles en la página de inicio para comenzar!"
+  },
+  "savedLessons": {
+    "title": "Lecciones Guardadas",
+    "description": "Visualiza las rutas que guardaste para estudiar después",
+    "loading": "Cargando...",
+    "empty": "Aún no has guardado ninguna ruta."
   }
 }
-

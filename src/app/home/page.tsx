@@ -23,7 +23,7 @@ interface Trilha {
 
 export default function Home() {
   const backgroundImage = useBackgroundImage("pages");
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [isMobile, setIsMobile] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
@@ -220,13 +220,13 @@ export default function Home() {
             <Topo />
 
             {/* Seção "Continue" - só aparece se houver trilhas iniciadas */}
-            {!loadingContinue && continueTrilhas.length > 0 && (
-              <Section title="Continue" isMobile={isMobile}>
+             {!loadingContinue && continueTrilhas.length > 0 && (
+              <Section title={t("home.continue") || "Continue"} isMobile={isMobile}>
                 <Carrousel items={continueTrilhas} onClick={handleTrilhaClick} />
               </Section>
             )}
 
-            <Section title="Novidades" isMobile={isMobile}>
+            <Section title={t("home.news") || "Novidades"} isMobile={isMobile}>
               {loadingNovidades ? (
                 <p 
                   className="text-[var(--text-secondary)] p-4 text-center"
@@ -234,14 +234,14 @@ export default function Home() {
                   aria-live="polite"
                   aria-label="Carregando novidades"
                 >
-                  Carregando...
+                  {t("common.loading") || "Carregando..."}
                 </p>
               ) : (
                 <Carrousel items={novidades} onClick={handleTrilhaClick} />
               )}
             </Section>
 
-            <Section title="Melhores para você" isMobile={isMobile}>
+            <Section title={t("home.bestForYou") || "Melhores para você"} isMobile={isMobile}>
               {loadingPopulares ? (
                 <p 
                   className="text-[var(--text-secondary)] p-4 text-center"
@@ -249,7 +249,7 @@ export default function Home() {
                   aria-live="polite"
                   aria-label="Carregando trilhas populares"
                 >
-                  Carregando...
+                  {t("common.loading") || "Carregando..."}
                 </p>
               ) : (
                 <Carrousel items={populares} onClick={handleTrilhaClick} />

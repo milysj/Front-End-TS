@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 
 // Função helper para obter o ícone do personagem
 const getPersonagemIcon = (personagem?: string): string => {
@@ -45,6 +46,14 @@ interface UsuarioNivel {
 }
 
 export default function Ranking() {
+  const { t } = useLanguage();
+  
+  const getPersonagemTranslated = (personagem?: string): string => {
+    if (!personagem) return "";
+    const key = `ranking.${personagem.toLowerCase()}`;
+    const translated = t(key);
+    return translated !== key ? translated : personagem;
+  };
   const [rankingData, setRankingData] = useState<Usuario[]>([]);
   const [rankingNivel, setRankingNivel] = useState<UsuarioNivel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -225,7 +234,7 @@ export default function Ranking() {
   if (loading) {
     return (
       <div className="flex items-center justify-center bg-[var(--bg-card)] text-[var(--text-primary)] p-6 flex-col rounded-xl shadow-md max-w-lg border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}>
-        <p>Carregando ranking...</p>
+        <p>{t("ranking.loading") || "Carregando ranking..."}</p>
       </div>
     );
   }
@@ -233,7 +242,7 @@ export default function Ranking() {
   return (
     <div className="flex items-center justify-center p-2 sm:p-4 gap-4 sm:gap-8 flex-row flex-wrap">
       <div className="bg-[var(--bg-card)] text-[var(--text-primary)] p-4 sm:p-6 flex flex-col items-center rounded-xl shadow-md flex-1 min-w-[300px] max-w-md shrink-0 border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}>
-        <h1 className="text-lg sm:text-xl font-bold mb-4 text-center text-[var(--text-primary)]">Ranking de Acertos</h1>
+        <h1 className="text-lg sm:text-xl font-bold mb-4 text-center text-[var(--text-primary)]">{t("ranking.titleHits") || "Ranking de Acertos"}</h1>
         {/* Podium dos 3 primeiros */}
         <div className="flex items-end justify-center gap-2 sm:gap-4 mb-4 sm:mb-6 w-full overflow-x-auto pb-2">
           {/* 2º lugar - Prata */}
@@ -294,15 +303,15 @@ export default function Ranking() {
         {/* Informação da posição do usuário */}
         <h2 className="text-base sm:text-xl font-bold mb-2 sm:mb-4 text-center px-2 text-[var(--text-primary)]">
           {usuarioPosicao
-            ? `Você está em ${usuarioPosicao}º lugar`
-            : "Ranking Geral"}
+            ? (t("ranking.yourPosition") || "Você está em {position}º lugar").replace("{position}", String(usuarioPosicao))
+            : (t("ranking.general") || "Ranking Geral")}
         </h2>
 
         {usuarioPosicao && (
           <p className="text-xs sm:text-sm text-[var(--text-secondary)] mb-2 sm:mb-4 text-center px-2 break-words">
-            Média de acertos:{" "}
+            {(t("ranking.averageHits") || "Média de acertos")}:{" "}
             {rankingData[usuarioPosicao - 1]?.mediaAcertos?.toFixed(1) || 0}% |
-            Total de acertos:{" "}
+            {(t("ranking.totalHits") || "Total de acertos")}:{" "}
             {rankingData[usuarioPosicao - 1]?.totalAcertos || 0}
           </p>
         )}
@@ -325,7 +334,7 @@ export default function Ranking() {
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-sm sm:text-base truncate text-[var(--text-primary)]">{user.name}</p>
                   <p className="text-xs sm:text-sm text-gray-400 break-words">
-                    Média: {user.mediaAcertos?.toFixed(1) || 0}% | Acertos:{" "}
+                    {t("ranking.averageHits") || "Média"}: {user.mediaAcertos?.toFixed(1) || 0}% | {t("ranking.hitsLabel") || "Acertos"}:{" "}
                     {user.totalAcertos || 0}
                   </p>
                 </div>
@@ -343,7 +352,7 @@ export default function Ranking() {
       {/* Ranking de Nível */}
       <div className="bg-[var(--bg-card)] text-[var(--text-primary)] p-4 sm:p-6 flex flex-col items-center rounded-xl shadow-md flex-1 min-w-[300px] max-w-md shrink-0 border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}>
         {/* Título */}
-        <h1 className="text-lg sm:text-xl font-bold mb-4 text-center text-[var(--text-primary)]">Ranking de Nível</h1>
+        <h1 className="text-lg sm:text-xl font-bold mb-4 text-center text-[var(--text-primary)]">{t("ranking.titleLevel") || "Ranking de Nível"}</h1>
 
         {/* Podium dos 3 primeiros */}
         <div className="flex items-end justify-center gap-2 sm:gap-4 mb-4 sm:mb-6 w-full overflow-x-auto pb-2">
@@ -404,14 +413,13 @@ export default function Ranking() {
 
         <h2 className="text-base sm:text-xl font-bold mb-2 sm:mb-4 text-center px-2">
           {usuarioPosicaoNivel
-            ? `Você está em ${usuarioPosicaoNivel}º lugar`
-            : "Ranking de Nível"}
+            ? (t("ranking.yourPosition") || "Você está em {position}º lugar").replace("{position}", String(usuarioPosicaoNivel))
+            : (t("ranking.titleLevel") || "Ranking de Nível")}
         </h2>
 
         {usuarioPosicaoNivel && (
           <p className="text-xs sm:text-sm text-[var(--text-secondary)] mb-2 sm:mb-4 text-center px-2 break-words">
-            Nível: {rankingNivel[usuarioPosicaoNivel - 1]?.nivel || 1} | XP
-            Total: {rankingNivel[usuarioPosicaoNivel - 1]?.xpTotal || 0}
+            {t("ranking.levelLabel") || "Nível"}: {rankingNivel[usuarioPosicaoNivel - 1]?.nivel || 1} | {t("ranking.xpLabel") || "XP"} Total: {rankingNivel[usuarioPosicaoNivel - 1]?.xpTotal || 0}
           </p>
         )}
 
@@ -438,15 +446,15 @@ export default function Ranking() {
                     {user.personagem && (
                       <span className="inline-flex items-center gap-1">
                         <span>{getPersonagemIcon(user.personagem)}</span>
-                        <span>{user.personagem}</span>
+                        <span>{getPersonagemTranslated(user.personagem)}</span>
                         <span>|</span>
                       </span>
                     )}
                     {user.personagem && " "}
-                    Nível: {user.nivel || 1}
+                    {t("ranking.levelLabel") || "Nível"}: {user.nivel || 1}
                   </p>
                   <p className="text-xs sm:text-sm text-[var(--text-muted)] truncate leading-tight mt-0">
-                    XP: {user.xpTotal || 0}
+                    {t("ranking.xpLabel") || "XP"}: {user.xpTotal || 0}
                   </p>
                 </div>
               </div>

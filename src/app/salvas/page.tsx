@@ -8,6 +8,7 @@ import { useState, useEffect, useLayoutEffect } from "react";
 import { useBackgroundImage } from "@/app/hooks/useBackgroundImage";
 import { PageWrapper } from "@/app/components/accessibility/PageWrapper";
 import { useKeyboardNavigation, useAccessibleLoading } from "@/app/hooks/useAccessibility";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 
 interface Trilha {
   _id: string;
@@ -17,9 +18,11 @@ interface Trilha {
   dificuldade: string;
   image?: string;
   imagem?: string; // Campo do backend
+  idioma?: string;
 }
 
 export default function MenuTrilhas() {
+  const { language, t } = useLanguage();
   const backgroundImage = useBackgroundImage("pages");
   const [isMobile, setIsMobile] = useState(false);
   const [trilhasSalvas, setTrilhasSalvas] = useState<Trilha[]>([]);
@@ -29,8 +32,8 @@ export default function MenuTrilhas() {
   useAccessibleLoading(loading, false, trilhasSalvas.length === 0 && !loading, "lições salvas");
 
   useLayoutEffect(() => {
-    document.title = "Lições Salvas - Estude.My";
-  }, []);
+    document.title = `${t("savedLessons.title") || "Lições Salvas"} - Estude.My`;
+  }, [t]);
 
   // Hook para detectar se está em tela mobile
   useEffect(() => {
@@ -103,8 +106,8 @@ export default function MenuTrilhas() {
 
   return (
     <PageWrapper 
-      title="Lições Salvas" 
-      description="Visualize as trilhas que você salvou para estudar depois"
+      title={t("savedLessons.title") || "Lições Salvas"} 
+      description={t("savedLessons.description") || "Visualize as trilhas que você salvou para estudar depois"}
     >
       <Script id="microsoft-clarity" strategy="afterInteractive">
         {`
@@ -141,19 +144,29 @@ export default function MenuTrilhas() {
                 } p-4 rounded-xl text-[var(--text-primary)] font-bold bg-[var(--bg-card)] bg-opacity-80 backdrop-blur-sm border border-[var(--border-color)] transition-colors duration-300`}
                 style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
               >
-                Lições Salvas
+                {t("savedLessons.title") || "Lições Salvas"}
               </h1>
-              {loading ? (
-                <p className="text-[var(--text-secondary)] p-4" role="status" aria-live="polite">
-                  Carregando...
-                </p>
-              ) : trilhasSalvas.length === 0 ? (
-                <p className="text-[var(--text-secondary)] p-4" role="status" aria-live="polite">
-                  Você ainda não salvou nenhuma trilha.
-                </p>
-              ) : (
-                <Carrousel items={trilhasSalvas} onClick={handleTrilhaClick} />
-              )}
+              {(() => {
+                const getMappedIdioma = (lang: string) => {
+                  if (lang === "en-US") return "Inglês";
+                  if (lang === "es-ES") return "Espanhol";
+                  return "Português";
+                };
+                const mappedIdioma = getMappedIdioma(language);
+                const filteredTrilhas = trilhasSalvas.filter(t => (t.idioma || "Português") === mappedIdioma);
+                
+                return loading ? (
+                  <p className="text-[var(--text-secondary)] p-4" role="status" aria-live="polite">
+                    {t("savedLessons.loading") || "Carregando..."}
+                  </p>
+                ) : filteredTrilhas.length === 0 ? (
+                  <p className="text-[var(--text-secondary)] p-4" role="status" aria-live="polite">
+                    {t("savedLessons.empty") || "Você ainda não salvou nenhuma trilha."}
+                  </p>
+                ) : (
+                  <Carrousel items={filteredTrilhas} onClick={handleTrilhaClick} />
+                );
+              })()}
             </section>
           </div>
 

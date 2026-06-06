@@ -549,7 +549,6 @@ export default function Configuracoes() {
                 value={formData.language}
                 onChange={async (e) => {
                   const newLanguage = e.target.value as "pt-BR" | "en-US" | "es-ES";
-                  setLanguage(newLanguage, false);
                   setFormData((prev) => ({ ...prev, language: newLanguage }));
                   await salvarConfiguracao({ language: newLanguage });
                 }}

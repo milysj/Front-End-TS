@@ -2,6 +2,38 @@
 
 import { ChevronRightIcon, ChevronLeftIcon } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
+import { useLanguage } from "@/app/contexts/LanguageContext";
+
+const getMateriaKey = (materia: string): string => {
+  switch (materia) {
+    case "Todas": return "subjects.all";
+    case "Matemática": return "subjects.math";
+    case "Português": return "subjects.portuguese";
+    case "História": return "subjects.history";
+    case "Geografia": return "subjects.geography";
+    case "Ciências": return "subjects.science";
+    case "Biologia": return "subjects.biology";
+    case "Física": return "subjects.physics";
+    case "Química": return "subjects.chemistry";
+    case "Inglês": return "subjects.english";
+    case "Espanhol": return "subjects.spanish";
+    case "Artes": return "subjects.arts";
+    case "Educação Física": return "subjects.physicalEducation";
+    case "Filosofia": return "subjects.philosophy";
+    case "Sociologia": return "subjects.sociology";
+    case "Literatura": return "subjects.literature";
+    default: return "";
+  }
+};
+
+const getDifficultyKey = (difficulty: string): string => {
+  switch (difficulty) {
+    case "Facil": return "common.easy";
+    case "Medio": return "common.medium";
+    case "Dificil": return "common.hard";
+    default: return "";
+  }
+};
 
 interface Trilha {
   _id: string;
@@ -19,6 +51,7 @@ interface Props {
 }
 
 export default function Carrousel({ items = [], onClick }: Props) {
+  const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [screenSize, setScreenSize] = useState<"small" | "medium" | "large">(
     "large"
@@ -109,7 +142,7 @@ export default function Carrousel({ items = [], onClick }: Props) {
         role="status"
         aria-live="polite"
       >
-        Nenhuma trilha encontrada.
+        {t("search.noResults") || "Nenhuma trilha encontrada."}
       </p>
     );
   }
@@ -146,7 +179,7 @@ export default function Carrousel({ items = [], onClick }: Props) {
           role="list"
           aria-label={`${items.length} trilhas disponíveis`}
         >
-          {items.map((item, index) => (
+          {items.map((item) => (
             <div
               key={item._id}
               data-carousel-card
@@ -161,7 +194,7 @@ export default function Carrousel({ items = [], onClick }: Props) {
               style={{ minWidth: cardWidth, maxWidth: cardWidth, backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
               role="listitem"
               tabIndex={0}
-              aria-label={`Trilha: ${item.titulo}. ${item.descricao}. Matéria: ${item.materia}. Dificuldade: ${item.dificuldade}`}
+              aria-label={`${t("trail.title") || "Trilha"}: ${item.titulo}. ${item.descricao}. ${t("common.subject") || "Matéria"}: ${t(getMateriaKey(item.materia)) || item.materia}. ${t("common.difficulty") || "Dificuldade"}: ${t(getDifficultyKey(item.dificuldade)) || item.dificuldade}`}
             >
               {(item.image || item.imagem) && (
                 <img
@@ -174,8 +207,8 @@ export default function Carrousel({ items = [], onClick }: Props) {
                 <h3 className="text-base font-bold text-[var(--text-primary)]">{item.titulo}</h3>
                 <p className="text-sm text-[var(--text-secondary)]">{item.descricao}</p>
                 <p className="text-xs mt-1 text-[var(--text-muted)]">
-                  Matéria: <b>{item.materia}</b> | Dificuldade:{" "}
-                  <b>{item.dificuldade}</b>
+                  {t("common.subject") || "Matéria"}: <b>{t(getMateriaKey(item.materia)) || item.materia}</b> | {t("common.difficulty") || "Dificuldade"}:{" "}
+                  <b>{t(getDifficultyKey(item.dificuldade)) || item.dificuldade}</b>
                 </p>
               </div>
             </div>

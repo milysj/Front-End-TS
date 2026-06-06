@@ -9,7 +9,14 @@
     "cancel": "Cancelar",
     "loading": "Carregando...",
     "search": "Pesquisar",
-    "back": "Voltar"
+    "back": "Voltar",
+    "subject": "Matéria",
+    "difficulty": "Dificuldade",
+    "easy": "Fácil",
+    "medium": "Médio",
+    "hard": "Difícil",
+    "paid": "Paga",
+    "by": "Por"
   },
   "settings": {
     "title": "Configurações",
@@ -62,7 +69,8 @@
     "myCourses": "Meus Cursos",
     "savedLessons": "Lições Salvas",
     "manageTrails": "Gerenciar Trilhas",
-    "consultAI": "ConsultAI"
+    "consultAI": "ConsultAI",
+    "adminPanel": "Painel Admin"
   },
   "home": {
     "continue": "Continue",
@@ -195,6 +203,52 @@
     "success": "Perfil criado com sucesso!",
     "error": "Erro ao criar perfil.",
     "connectionError": "Erro de conexão. Verifique o console para mais detalhes."
+  },
+  "subjects": {
+    "all": "Todas",
+    "math": "Matemática",
+    "portuguese": "Português",
+    "history": "História",
+    "geography": "Geografia",
+    "science": "Ciências",
+    "biology": "Biologia",
+    "physics": "Física",
+    "chemistry": "Química",
+    "english": "Inglês",
+    "spanish": "Espanhol",
+    "arts": "Artes",
+    "physicalEducation": "Educação Física",
+    "philosophy": "Filosofia",
+    "sociology": "Sociologia",
+    "literature": "Literatura"
+  },
+  "ranking": {
+    "loading": "Carregando ranking...",
+    "titleHits": "Ranking de Acertos",
+    "titleLevel": "Ranking de Nível",
+    "yourPosition": "Você está em {position}º lugar",
+    "general": "Ranking Geral",
+    "averageHits": "Média de acertos",
+    "totalHits": "Total de acertos",
+    "hitsLabel": "Acertos",
+    "levelLabel": "Nível",
+    "xpLabel": "XP",
+    "guerreiro": "Guerreiro",
+    "mago": "Mago",
+    "samurai": "Samurai"
+  },
+  "myCourses": {
+    "title": "Meus Cursos",
+    "description": "Visualize os cursos que você iniciou e continue de onde parou",
+    "loading": "Carregando seus cursos...",
+    "empty": "Você ainda não iniciou nenhum curso.",
+    "explore": "Explore as trilhas disponíveis na página inicial para começar!"
+  },
+  "savedLessons": {
+    "title": "Lições Salvas",
+    "description": "Visualize as trilhas que você salvou para estudar depois",
+    "loading": "Carregando...",
+    "empty": "Você ainda não salvou nenhuma trilha."
   }
 }
 

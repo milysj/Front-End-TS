@@ -8,6 +8,7 @@ import { useState, useEffect, useLayoutEffect } from "react";
 import { useBackgroundImage } from "@/app/hooks/useBackgroundImage";
 import { PageWrapper } from "@/app/components/accessibility/PageWrapper";
 import { useKeyboardNavigation, useAccessibleLoading } from "@/app/hooks/useAccessibility";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -21,6 +22,7 @@ interface Trilha {
 }
 
 export default function MeusCursos() {
+  const { language, t } = useLanguage();
   const backgroundImage = useBackgroundImage("pages");
   const [isMobile, setIsMobile] = useState(false);
   const [token, setToken] = useState<string | null>(null);
@@ -31,8 +33,8 @@ export default function MeusCursos() {
   useAccessibleLoading(loading, false, continueTrilhas.length === 0 && !loading, "cursos");
 
   useLayoutEffect(() => {
-    document.title = "Meus Cursos - Estude.My";
-  }, []);
+    document.title = `${t("myCourses.title") || "Meus Cursos"} - Estude.My`;
+  }, [t]);
 
   // Hook para detectar se está em tela mobile
   useEffect(() => {
@@ -51,10 +53,17 @@ export default function MeusCursos() {
     const savedToken = localStorage.getItem("token");
     setToken(savedToken);
 
+    const getMappedIdioma = (lang: string) => {
+      if (lang === "en-US") return "Inglês";
+      if (lang === "es-ES") return "Espanhol";
+      return "Português";
+    };
+    const mappedIdioma = getMappedIdioma(language);
+
     if (savedToken) {
       const fetchTrilhas = async () => {
         try {
-          const res = await fetch(`${API_URL}/api/trilhas/continue`, {
+          const res = await fetch(`${API_URL}/api/trilhas/continue?idioma=${encodeURIComponent(mappedIdioma)}`, {
             headers: { Authorization: `Bearer ${savedToken}` },
           });
 
@@ -80,7 +89,7 @@ export default function MeusCursos() {
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [language]);
 
   // Navegação para trilha
   const handleTrilhaClick = (id: string) => {
@@ -97,8 +106,8 @@ export default function MeusCursos() {
 
   return (
     <PageWrapper 
-      title="Meus Cursos" 
-      description="Visualize os cursos que você iniciou e continue de onde parou"
+      title={t("myCourses.title") || "Meus Cursos"} 
+      description={t("myCourses.description") || "Visualize os cursos que você iniciou e continue de onde parou"}
     >
       <Script id="microsoft-clarity" strategy="afterInteractive">
         {`
@@ -135,18 +144,17 @@ export default function MeusCursos() {
                 } p-4 rounded-xl text-[var(--text-primary)] font-bold bg-[var(--bg-card)] bg-opacity-80 backdrop-blur-sm mb-4 border border-[var(--border-color)] transition-colors duration-300`}
                 style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
               >
-                Meus Cursos
+                {t("myCourses.title") || "Meus Cursos"}
               </h1>
               {loading ? (
                 <div className="text-center text-[var(--text-secondary)] py-6">
-                  <p role="status" aria-live="polite">Carregando seus cursos...</p>
+                  <p role="status" aria-live="polite">{t("myCourses.loading") || "Carregando seus cursos..."}</p>
                 </div>
               ) : continueTrilhas.length === 0 ? (
                 <div className="text-center text-[var(--text-secondary)] py-6" role="status" aria-live="polite">
-                  <p className="mb-4">Você ainda não iniciou nenhum curso.</p>
+                  <p className="mb-4">{t("myCourses.empty") || "Você ainda não iniciou nenhum curso."}</p>
                   <p className="text-sm">
-                    Explore as trilhas disponíveis na página inicial para
-                    começar!
+                    {t("myCourses.explore") || "Explore as trilhas disponíveis na página inicial para começar!"}
                   </p>
                 </div>
               ) : (

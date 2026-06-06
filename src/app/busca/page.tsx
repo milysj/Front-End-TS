@@ -14,6 +14,29 @@ import Link from "next/link";
 import { useBackgroundImage } from "@/app/hooks/useBackgroundImage";
 import { PageWrapper } from "@/app/components/accessibility/PageWrapper";
 import { useKeyboardNavigation, useAccessibleLoading } from "@/app/hooks/useAccessibility";
+import { useLanguage } from "@/app/contexts/LanguageContext";
+
+const getMateriaKey = (materia: string): string => {
+  switch (materia) {
+    case "Todas": return "subjects.all";
+    case "Matemática": return "subjects.math";
+    case "Português": return "subjects.portuguese";
+    case "História": return "subjects.history";
+    case "Geografia": return "subjects.geography";
+    case "Ciências": return "subjects.science";
+    case "Biologia": return "subjects.biology";
+    case "Física": return "subjects.physics";
+    case "Química": return "subjects.chemistry";
+    case "Inglês": return "subjects.english";
+    case "Espanhol": return "subjects.spanish";
+    case "Artes": return "subjects.arts";
+    case "Educação Física": return "subjects.physicalEducation";
+    case "Filosofia": return "subjects.philosophy";
+    case "Sociologia": return "subjects.sociology";
+    case "Literatura": return "subjects.literature";
+    default: return "";
+  }
+};
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"; 
 
@@ -53,6 +76,7 @@ const MATERIAS = [
 ];
 
 function BuscaContent() {
+  const { t } = useLanguage();
   const backgroundImage = useBackgroundImage("pages");
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -66,8 +90,8 @@ function BuscaContent() {
   useAccessibleLoading(loading, !!error, trilhas.length === 0 && !loading, "trilhas");
 
   useLayoutEffect(() => {
-    document.title = "Busca - Estude.My";
-  }, []);
+    document.title = `${t("common.search") || "Busca"} - Estude.My`;
+  }, [t]);
 
   const buscarTrilhas = useCallback(async (termo: string, materia?: string) => {
     setLoading(true);
@@ -147,8 +171,8 @@ function BuscaContent() {
 
   return (
     <PageWrapper 
-      title="Busca" 
-      description={`Buscar trilhas${termoBusca ? ` para "${termoBusca}"` : ""}`}
+      title={t("common.search") || "Busca"} 
+      description={`${t("common.search") || "Buscar"} trilhas${termoBusca ? ` ${t("search.for") || "para"} "${termoBusca}"` : ""}`}
     >
       <div
         className="min-h-screen bg-cover bg-center bg-no-repeat relative"
@@ -163,7 +187,7 @@ function BuscaContent() {
             <Topo />
 
             <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl" aria-labelledby="busca-title">
-              <h1 id="busca-title" className="sr-only">Buscar Trilhas</h1>
+              <h1 id="busca-title" className="sr-only">{t("common.search") || "Buscar Trilhas"}</h1>
               
               {/* Barra de busca e filtro */}
               <section
@@ -184,7 +208,7 @@ function BuscaContent() {
                       type="text"
                       value={termoBusca}
                       onChange={(e) => setTermoBusca(e.target.value)}
-                      placeholder="Pesquisar trilhas..."
+                      placeholder={t("search.placeholder") || "Pesquisar trilhas..."}
                       className="flex-1 w-full md:w-auto px-4 py-2 border border-[var(--border-color)] rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
                       style={{
                         backgroundColor: "var(--bg-input)",
@@ -192,14 +216,14 @@ function BuscaContent() {
                         borderColor: "var(--border-color)",
                         maxWidth: "100%",
                       }}
-                      aria-label="Termo de busca"
+                      aria-label={t("search.placeholder") || "Termo de busca"}
                     />
                     <button
                       type="submit"
                       className="w-full md:w-auto bg-blue-600 text-white px-6 py-2 hover:bg-blue-700 dark:hover:bg-blue-500 transition rounded-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
-                      aria-label="Buscar trilhas"
+                      aria-label={t("common.search") || "Buscar trilhas"}
                     >
-                      Buscar
+                      {t("common.search") || "Buscar"}
                     </button>
                   </div>
                   {/* Filtro de matéria */}
@@ -208,7 +232,7 @@ function BuscaContent() {
                       htmlFor="materia-filtro"
                       className="text-sm font-medium text-[var(--text-primary)] whitespace-nowrap"
                     >
-                      Filtrar por matéria:
+                      {t("search.filterBySubject") || "Filtrar por matéria:"}
                     </label>
                     <select
                       id="materia-filtro"
@@ -226,7 +250,7 @@ function BuscaContent() {
                     >
                       {MATERIAS.map((materia) => (
                         <option key={materia} value={materia}>
-                          {materia}
+                          {materia === "Todas" ? (t("search.all") || "Todas") : (t(getMateriaKey(materia)) || materia)}
                         </option>
                       ))}
                     </select>
@@ -238,7 +262,7 @@ function BuscaContent() {
               {loading ? (
                 <div className="text-center py-12">
                   <p className="text-[var(--text-secondary)]" role="status" aria-live="polite">
-                    Buscando...
+                    {t("search.searching") || "Buscando..."}
                   </p>
                 </div>
               ) : error ? (
@@ -251,10 +275,10 @@ function BuscaContent() {
                 <div className="text-center py-12">
                   <p className="text-[var(--text-secondary)]" role="status" aria-live="polite">
                     {termoBusca.trim() !== ""
-                      ? `Nenhuma trilha encontrada para "${termoBusca}"`
+                      ? `${t("search.noResults") || "Nenhuma trilha encontrada"} ${t("search.for") || "para"} "${termoBusca}"`
                       : materiaFiltro !== "Todas"
-                      ? `Nenhuma trilha encontrada para a matéria "${materiaFiltro}"`
-                      : "Nenhuma trilha encontrada"}
+                      ? `${t("search.noResults") || "Nenhuma trilha encontrada"} ${t("search.for") || "para"} ${t(getMateriaKey(materiaFiltro)) || materiaFiltro}`
+                      : (t("search.noResults") || "Nenhuma trilha encontrada")}
                   </p>
                 </div>
               ) : (
@@ -263,13 +287,13 @@ function BuscaContent() {
                     <h2 className="text-2xl font-bold text-[var(--text-primary)]">
                       {trilhas.length}{" "}
                       {trilhas.length === 1
-                        ? "trilha encontrada"
-                        : "trilhas encontradas"}
-                      {termoBusca.trim() !== "" && ` para "${termoBusca}"`}
+                        ? (t("search.resultFor") || "trilha encontrada")
+                        : (t("search.resultsFor") || "trilhas encontradas")}
+                      {termoBusca.trim() !== "" && ` ${t("search.for") || "para"} "${termoBusca}"`}
                       {materiaFiltro !== "Todas" && (
                         <>
-                          {termoBusca.trim() !== "" ? " em " : " em "}
-                          {materiaFiltro}
+                          {` ${t("common.in") || "em"} `}
+                          {t(getMateriaKey(materiaFiltro)) || materiaFiltro}
                         </>
                       )}
                     </h2>
@@ -289,7 +313,7 @@ function BuscaContent() {
                         <Link
                           href={`/trilha?trilhaId=${trilha._id}`}
                           className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
-                          aria-label={`Ver trilha: ${trilha.titulo}`}
+                          aria-label={`${t("trail.title") || "Trilha"}: ${trilha.titulo}`}
                         >
                           {trilha.imagem && (
                             <img
@@ -306,23 +330,23 @@ function BuscaContent() {
                               {trilha.descricao}
                             </p>
                             <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
-                              <span>{trilha.materia}</span>
+                              <span>{t(getMateriaKey(trilha.materia)) || trilha.materia}</span>
                               <span className="capitalize">
                                 {trilha.dificuldade === "Facil"
-                                  ? "Fácil"
+                                  ? (t("common.easy") || "Fácil")
                                   : trilha.dificuldade === "Medio"
-                                  ? "Médio"
-                                  : "Difícil"}
+                                  ? (t("common.medium") || "Médio")
+                                  : (t("common.hard") || "Difícil")}
                               </span>
                             </div>
                             {trilha.usuario && (
                               <p className="text-xs text-[var(--text-muted)] mt-2">
-                                Por {trilha.usuario.nome}
+                                {t("common.by") || "Por"} {trilha.usuario.nome}
                               </p>
                             )}
                             {trilha.pagamento === "Paga" && (
-                              <span className="inline-block mt-2 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 text-xs rounded transition-colors duration-300" aria-label="Trilha paga">
-                                Paga
+                              <span className="inline-block mt-2 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 text-xs rounded transition-colors duration-300" aria-label={t("common.paid") || "Trilha paga"}>
+                                {t("common.paid") || "Paga"}
                               </span>
                             )}
                           </div>

@@ -9,7 +9,14 @@
     "cancel": "Cancel",
     "loading": "Loading...",
     "search": "Search",
-    "back": "Back"
+    "back": "Back",
+    "subject": "Subject",
+    "difficulty": "Difficulty",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "paid": "Paid",
+    "by": "By"
   },
   "settings": {
     "title": "Settings",
@@ -62,7 +69,8 @@
     "myCourses": "My Courses",
     "savedLessons": "Saved Lessons",
     "manageTrails": "Manage Trails",
-    "consultAI": "ConsultAI"
+    "consultAI": "ConsultAI",
+    "adminPanel": "Admin Panel"
   },
   "home": {
     "continue": "Continue",
@@ -195,6 +203,52 @@
     "success": "Profile created successfully!",
     "error": "Error creating profile.",
     "connectionError": "Connection error. Check the console for more details."
+  },
+  "subjects": {
+    "all": "All",
+    "math": "Math",
+    "portuguese": "Portuguese",
+    "history": "History",
+    "geography": "Geography",
+    "science": "Science",
+    "biology": "Biology",
+    "physics": "Physics",
+    "chemistry": "Chemistry",
+    "english": "English",
+    "spanish": "Spanish",
+    "arts": "Arts",
+    "physicalEducation": "Physical Education",
+    "philosophy": "Philosophy",
+    "sociology": "Sociology",
+    "literature": "Literature"
+  },
+  "ranking": {
+    "loading": "Loading ranking...",
+    "titleHits": "Ranking of Hits",
+    "titleLevel": "Ranking of Level",
+    "yourPosition": "You are in {position}th place",
+    "general": "General Ranking",
+    "averageHits": "Average hits",
+    "totalHits": "Total hits",
+    "hitsLabel": "Hits",
+    "levelLabel": "Level",
+    "xpLabel": "XP",
+    "guerreiro": "Warrior",
+    "mago": "Mage",
+    "samurai": "Samurai"
+  },
+  "myCourses": {
+    "title": "My Courses",
+    "description": "View the courses you started and continue where you left off",
+    "loading": "Loading your courses...",
+    "empty": "You haven't started any courses yet.",
+    "explore": "Explore available trails on the home page to start!"
+  },
+  "savedLessons": {
+    "title": "Saved Lessons",
+    "description": "View the trails you saved to study later",
+    "loading": "Loading...",
+    "empty": "You haven't saved any trails yet."
   }
 }
 
