@@ -1,9 +1,12 @@
 import React from "react";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 
 // ===============================
 // Componente: ConsultAi
 // ===============================
 const ConsultAi = () => {
+  const { t } = useLanguage();
+
   return (
     // Container principal com largura máxima, padding responsivo e borda arredondada
     <div className="flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 py-4 sm:py-6 w-full">
@@ -16,13 +19,10 @@ const ConsultAi = () => {
             =============================== */}
         <section id="sobre" className="mb-6 sm:mb-8">
           <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 break-words text-[var(--text-primary)]">
-            Quem Somos
+            {t("consultAi.aboutTitle")}
           </h2>
           <p className="text-[var(--text-primary)] text-sm sm:text-base break-words leading-relaxed">
-            A ConsultAi é uma startup de tecnologia criada na Faculdade de
-            Tecnologia (FATEC). Nosso objetivo é desenvolver soluções de
-            software inovadoras voltadas para beneficiar a comunidade,
-            utilizando tecnologia como ferramenta para transformar vidas.
+            {t("consultAi.aboutDesc")}
           </p>
         </section>
 
@@ -31,19 +31,16 @@ const ConsultAi = () => {
             =============================== */}
         <section id="missao" className="mb-6 sm:mb-8 last:mb-0">
           <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 break-words text-[var(--text-primary)]">
-            Missão, Visão e Valores
+            {t("consultAi.missionTitle")}
           </h2>
           <p className="text-[var(--text-primary)] text-sm sm:text-base break-words leading-relaxed mb-3">
-            <strong className="text-[var(--text-primary)]">Missão:</strong> Facilitar o acesso a soluções tecnológicas
-            que promovam impacto social positivo.
+            <strong className="text-[var(--text-primary)]">{t("consultAi.mission")}</strong>{t("consultAi.missionDesc")}
           </p>
           <p className="text-[var(--text-primary)] text-sm sm:text-base break-words leading-relaxed mb-3">
-            <strong className="text-[var(--text-primary)]">Visão:</strong> Ser reconhecida como uma referência em
-            tecnologia para a comunidade.
+            <strong className="text-[var(--text-primary)]">{t("consultAi.vision")}</strong>{t("consultAi.visionDesc")}
           </p>
           <p className="text-[var(--text-primary)] text-sm sm:text-base break-words leading-relaxed">
-            <strong className="text-[var(--text-primary)]">Valores:</strong> Inovação, Ética, Colaboração e Compromisso
-            com o Social.
+            <strong className="text-[var(--text-primary)]">{t("consultAi.values")}</strong>{t("consultAi.valuesDesc")}
           </p>
         </section>
       </div>

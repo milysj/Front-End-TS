@@ -35,7 +35,7 @@ export default function MinhaConta() {
   const [salvando, setSalvando] = useState(false);
   const router = useRouter();
   const { announce } = useScreenReaderAnnouncement();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -138,17 +138,17 @@ export default function MinhaConta() {
 
   const handleAlterarSenha = async () => {
     if (!senhaForm.senhaAtual || !senhaForm.novaSenha) {
-      alert("Por favor, preencha todos os campos");
+      alert(t("accountPage.fillAll"));
       return;
     }
 
     if (senhaForm.novaSenha !== senhaForm.confirmarSenha) {
-      alert("As senhas não coincidem");
+      alert(t("accountPage.passwordsDoNotMatch"));
       return;
     }
 
     if (senhaForm.novaSenha.length < 8) {
-      alert("A nova senha deve ter no mínimo 8 caracteres");
+      alert(t("accountPage.passwordMin"));
       return;
     }
 
@@ -177,16 +177,16 @@ export default function MinhaConta() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "Erro ao alterar senha");
+        alert(data.message || t("accountPage.errorGeneric"));
         return;
       }
 
-      alert("Senha alterada com sucesso!");
+      alert(t("accountPage.passwordSuccess"));
       setMostrarAlterarSenha(false);
       setSenhaForm({ senhaAtual: "", novaSenha: "", confirmarSenha: "" });
     } catch (error) {
       console.error("Erro ao alterar senha:", error);
-      alert("Erro ao alterar senha");
+      alert(t("accountPage.errorGeneric"));
     } finally {
       setSalvando(false);
     }
@@ -228,30 +228,30 @@ export default function MinhaConta() {
         );
         
         if (usernameExiste) {
-          setUsernameErro("Este username já está em uso. Escolha outro.");
-          announce("Este username já está em uso. Escolha outro.", "assertive");
+          setUsernameErro(t("accountPage.usernameInUse"));
+          announce(t("accountPage.usernameInUse"), "assertive");
           return false;
         }
       }
 
       // Validações básicas
       if (username.trim().length < 3) {
-        setUsernameErro("O username deve ter no mínimo 3 caracteres.");
-        announce("O username deve ter no mínimo 3 caracteres.", "assertive");
+        setUsernameErro(t("accountPage.usernameMin"));
+        announce(t("accountPage.usernameMin"), "assertive");
         return false;
       }
 
       if (username.trim().length > 20) {
-        setUsernameErro("O username deve ter no máximo 20 caracteres.");
-        announce("O username deve ter no máximo 20 caracteres.", "assertive");
+        setUsernameErro(t("accountPage.usernameMax"));
+        announce(t("accountPage.usernameMax"), "assertive");
         return false;
       }
 
       // Validar caracteres permitidos (letras, números, underscore, hífen)
       const usernameRegex = /^[a-zA-Z0-9_-]+$/;
       if (!usernameRegex.test(username.trim())) {
-        setUsernameErro("O username pode conter apenas letras, números, underscore (_) e hífen (-).");
-        announce("O username pode conter apenas letras, números, underscore e hífen.", "assertive");
+        setUsernameErro(t("accountPage.usernameRegex"));
+        announce(t("accountPage.usernameRegex"), "assertive");
         return false;
       }
 
@@ -268,15 +268,15 @@ export default function MinhaConta() {
 
   const handleAlterarUsername = async () => {
     if (!novoUsername || novoUsername.trim() === "") {
-      setUsernameErro("Por favor, digite um username.");
-      announce("Por favor, digite um username.", "assertive");
+      setUsernameErro(t("accountPage.enterNewUsername"));
+      announce(t("accountPage.enterNewUsername"), "assertive");
       return;
     }
 
     // Se o username não mudou, não precisa atualizar
     if (userData && novoUsername.trim() === userData.username) {
       setMostrarAlterarUsername(false);
-      announce("O username não foi alterado.", "polite");
+      announce(t("accountPage.usernameNotChanged"), "polite");
       return;
     }
 
@@ -313,7 +313,7 @@ export default function MinhaConta() {
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        const errorMessage = errorData.message || "Erro ao alterar username";
+        const errorMessage = errorData.message || t("accountPage.usernameError");
         setUsernameErro(errorMessage);
         announce(errorMessage, "assertive");
         return;
@@ -326,11 +326,11 @@ export default function MinhaConta() {
         setUserData({ ...userData, username: novoUsername.trim() });
       }
 
-      announce("Username alterado com sucesso!", "polite");
+      announce(t("accountPage.usernameSuccess"), "polite");
       setMostrarAlterarUsername(false);
     } catch (error) {
       console.error("Erro ao alterar username:", error);
-      const errorMessage = "Erro ao alterar username. Tente novamente.";
+      const errorMessage = t("accountPage.usernameError");
       setUsernameErro(errorMessage);
       announce(errorMessage, "assertive");
     } finally {
@@ -340,13 +340,13 @@ export default function MinhaConta() {
 
   const handleExcluirConta = async () => {
     if (!senhaExcluir) {
-      alert("Por favor, digite sua senha para confirmar a exclusão");
+      alert(t("accountPage.deleteConfirmPassword"));
       return;
     }
 
     if (
       !confirm(
-        "Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita!"
+        t("accountPage.deleteConfirmAlert")
       )
     ) {
       return;
@@ -376,16 +376,16 @@ export default function MinhaConta() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "Erro ao excluir conta");
+        alert(data.message || t("accountPage.errorGeneric"));
         return;
       }
 
-      alert("Conta excluída com sucesso!");
+      alert(t("accountPage.deleteSuccess"));
       localStorage.removeItem("token");
       router.push("/login");
     } catch (error) {
       console.error("Erro ao excluir conta:", error);
-      alert("Erro ao excluir conta");
+      alert(t("accountPage.errorGeneric"));
     } finally {
       setSalvando(false);
     }
@@ -395,7 +395,7 @@ export default function MinhaConta() {
     return (
       <div className="flex items-center justify-center p-4 m-auto">
         <div className="bg-[var(--bg-card)] p-6 rounded shadow-md w-full max-w-md mx-auto border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-          <p className="text-center text-[var(--text-secondary)]">Carregando...</p>
+          <p className="text-center text-[var(--text-secondary)]">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -405,17 +405,17 @@ export default function MinhaConta() {
     return (
       <div className="flex items-center justify-center p-4 m-auto">
         <div className="bg-white p-6 rounded shadow-md w-full max-w-md mx-auto">
-          <p className="text-center text-red-600">Erro ao carregar dados</p>
+          <p className="text-center text-red-600">{t("profilePage.error")}</p>
         </div>
       </div>
     );
   }
 
   const formatarData = (data: string) => {
-    if (!data) return "Não informado";
+    if (!data) return t("accountPage.notInformed");
     try {
       const date = new Date(data);
-      return date.toLocaleDateString("pt-BR");
+      return date.toLocaleDateString(language || "pt-BR");
     } catch {
       return data;
     }
@@ -431,12 +431,12 @@ export default function MinhaConta() {
             Cabeçalho com título e botão Sair
             =============================== */}
         <div className="text-center mb-4">
-          <h2 className="text-2xl font-bold text-[var(--text-primary)]">Minha Conta</h2>
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]">{t("accountPage.title")}</h2>
           <button
             onClick={handleSair}
             className="bg-red-500 text-white px-4 py-1 mt-2 rounded hover:bg-red-600"
           >
-            Sair
+            {t("accountPage.logout")}
           </button>
         </div>
 
@@ -445,28 +445,28 @@ export default function MinhaConta() {
             =============================== */}
         <div className="mb-6">
           <h3 className="font-semibold text-lg border-b pb-1 mb-2">
-            Informações da Conta
+            {t("accountPage.infoTitle")}
           </h3>
           <div className="flex justify-between mb-1">
-            <span className="font-medium text-[var(--text-primary)]">Nome:</span>
+            <span className="font-medium text-[var(--text-primary)]">{t("accountPage.name")}</span>
             <span className="text-[var(--text-secondary)]">{userData.nome}</span>
           </div>
           <div className="flex justify-between mb-1">
-            <span className="font-medium text-[var(--text-primary)]">E-mail:</span>
+            <span className="font-medium text-[var(--text-primary)]">{t("accountPage.email")}</span>
             <span className="text-[var(--text-secondary)]">{userData.email}</span>
           </div>
           <div className="flex justify-between mb-1">
-            <span className="font-medium text-[var(--text-primary)]">Username:</span>
+            <span className="font-medium text-[var(--text-primary)]">{t("accountPage.username")}</span>
             <span className="text-[var(--text-secondary)] font-mono">
-              {userData.username ? `@${userData.username}` : "Não definido"}
+              {userData.username ? `@${userData.username}` : t("accountPage.notDefined")}
             </span>
           </div>
           <div className="flex justify-between mb-1">
-            <span className="font-medium text-[var(--text-primary)]">Tipo:</span>
+            <span className="font-medium text-[var(--text-primary)]">{t("accountPage.type")}</span>
             <span className="text-[var(--text-secondary)]">{userData.tipoUsuario}</span>
           </div>
           <div className="flex justify-between mb-3">
-            <span className="font-medium text-[var(--text-primary)]">Data de Nascimento:</span>
+            <span className="font-medium text-[var(--text-primary)]">{t("accountPage.dob")}</span>
             <span className="text-[var(--text-secondary)]">{formatarData(userData.dataNascimento)}</span>
           </div>
 
@@ -478,13 +478,13 @@ export default function MinhaConta() {
             =============================== */}
         <div>
           <h3 className="font-semibold text-lg border-b pb-1 mb-2">
-            Configurações
+            {t("accountPage.settings")}
           </h3>
           <button
             onClick={() => router.push("/dadosPessoais")}
             className="bg-blue-600 text-white w-full py-2 rounded mb-2 hover:bg-blue-700"
           >
-            Editar Dados Pessoais
+            {t("accountPage.editPersonal")}
           </button>
 
           {!mostrarAlterarSenha && !mostrarExcluirConta && !mostrarAlterarUsername && (
@@ -496,23 +496,23 @@ export default function MinhaConta() {
                   setUsernameErro("");
                 }}
                 className="bg-purple-500 text-white w-full py-2 rounded mb-2 hover:bg-purple-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
-                aria-label="Alterar username"
+                aria-label={t("accountPage.changeUsername")}
               >
-                Alterar Username
+                {t("accountPage.changeUsername")}
               </button>
               <button
                 onClick={() => setMostrarAlterarSenha(true)}
                 className="bg-sky-400 text-white w-full py-2 rounded mb-2 hover:bg-sky-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
-                aria-label="Alterar senha"
+                aria-label={t("accountPage.changePassword")}
               >
-                Alterar Senha
+                {t("accountPage.changePassword")}
               </button>
               <button
                 onClick={() => setMostrarExcluirConta(true)}
                 className="bg-red-500 text-white w-full py-2 rounded hover:bg-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
-                aria-label="Excluir conta"
+                aria-label={t("accountPage.deleteAccount")}
               >
-                Excluir Conta
+                {t("accountPage.deleteAccount")}
               </button>
             </>
           )}
@@ -520,20 +520,19 @@ export default function MinhaConta() {
           {mostrarAlterarUsername && (
             <div className="mb-4 p-4 border rounded border-[var(--border-color)] bg-[var(--bg-input)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border-color)' }}>
               <h4 className="font-semibold mb-3 text-[var(--text-primary)]" id="alterar-username-title">
-                Alterar Username
+                {t("accountPage.changeUsername")}
               </h4>
               <div className="space-y-3" aria-labelledby="alterar-username-title">
                 <AccessibleInput
-                  label="Novo Username"
+                  label={t("accountPage.newUsername")}
                   type="text"
-                  placeholder="Digite o novo username"
+                  placeholder={t("accountPage.enterNewUsername")}
                   value={novoUsername}
                   onChange={(e) => {
                     setNovoUsername(e.target.value);
-                    // O useEffect vai fazer a verificação com debounce
                   }}
                   error={usernameErro}
-                  helperText="Mínimo 3 caracteres, máximo 20. Apenas letras, números, underscore (_) e hífen (-)."
+                  helperText={t("accountPage.usernameHelp")}
                   required
                   id="novo-username-input"
                   aria-describedby="username-help"
@@ -541,7 +540,7 @@ export default function MinhaConta() {
                 
                 {verificandoUsername && (
                   <p className="text-sm text-[var(--text-secondary)]" role="status" aria-live="polite">
-                    Verificando disponibilidade...
+                    {t("accountPage.checkingAvailability")}
                   </p>
                 )}
 
@@ -553,7 +552,7 @@ export default function MinhaConta() {
                     className="flex-1"
                     aria-label="Salvar novo username"
                   >
-                    {salvando ? "Salvando..." : "Salvar"}
+                    {salvando ? t("settings.saving") : t("common.save")}
                   </AccessibleButton>
                   <AccessibleButton
                     onClick={() => {
@@ -564,7 +563,7 @@ export default function MinhaConta() {
                     variant="secondary"
                     aria-label="Cancelar alteração de username"
                   >
-                    Cancelar
+                    {t("common.cancel")}
                   </AccessibleButton>
                 </div>
               </div>
@@ -573,11 +572,11 @@ export default function MinhaConta() {
 
           {mostrarAlterarSenha && (
             <div className="mb-4 p-4 border rounded">
-              <h4 className="font-semibold mb-3">Alterar Senha</h4>
+              <h4 className="font-semibold mb-3">{t("accountPage.changePassword")}</h4>
               <div className="space-y-3">
                 <input
                   type="password"
-                  placeholder="Senha atual"
+                  placeholder={t("accountPage.currentPassword")}
                   value={senhaForm.senhaAtual}
                   onChange={(e) =>
                     setSenhaForm({ ...senhaForm, senhaAtual: e.target.value })
@@ -586,7 +585,7 @@ export default function MinhaConta() {
                 />
                 <input
                   type="password"
-                  placeholder="Nova senha (mínimo 8 caracteres)"
+                  placeholder={t("accountPage.newPassword")}
                   value={senhaForm.novaSenha}
                   onChange={(e) =>
                     setSenhaForm({ ...senhaForm, novaSenha: e.target.value })
@@ -596,7 +595,7 @@ export default function MinhaConta() {
                 />
                 <input
                   type="password"
-                  placeholder="Confirmar nova senha"
+                  placeholder={t("accountPage.confirmNewPassword")}
                   value={senhaForm.confirmarSenha}
                   onChange={(e) =>
                     setSenhaForm({
@@ -612,7 +611,7 @@ export default function MinhaConta() {
                     disabled={salvando}
                     className="bg-sky-400 text-white px-4 py-2 rounded hover:bg-sky-500 flex-1 disabled:bg-gray-400"
                   >
-                    {salvando ? "Salvando..." : "Salvar"}
+                    {salvando ? t("settings.saving") : t("common.save")}
                   </button>
                   <button
                     onClick={() => {
@@ -625,7 +624,7 @@ export default function MinhaConta() {
                     }}
                     className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
                   >
-                    Cancelar
+                    {t("common.cancel")}
                   </button>
                 </div>
               </div>
@@ -634,15 +633,14 @@ export default function MinhaConta() {
 
           {mostrarExcluirConta && (
             <div className="mb-4 p-4 border rounded border-red-300 bg-red-50">
-              <h4 className="font-semibold mb-3 text-red-800">Excluir Conta</h4>
+              <h4 className="font-semibold mb-3 text-red-800">{t("accountPage.deleteTitle")}</h4>
               <p className="text-sm text-red-700 mb-3">
-                Esta ação não pode ser desfeita. Todos os seus dados serão
-                permanentemente excluídos.
+                {t("accountPage.deleteWarning")}
               </p>
               <div className="space-y-3">
                 <input
                   type="password"
-                  placeholder="Digite sua senha para confirmar"
+                  placeholder={t("accountPage.deleteConfirmPassword")}
                   value={senhaExcluir}
                   onChange={(e) => setSenhaExcluir(e.target.value)}
                   className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -653,7 +651,7 @@ export default function MinhaConta() {
                     disabled={salvando}
                     className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 flex-1 disabled:bg-gray-400"
                   >
-                    {salvando ? "Excluindo..." : "Confirmar Exclusão"}
+                    {salvando ? t("accountPage.deleting") : t("accountPage.confirmDelete")}
                   </button>
                   <button
                     onClick={() => {
@@ -662,7 +660,7 @@ export default function MinhaConta() {
                     }}
                     className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
                   >
-                    Cancelar
+                    {t("common.cancel")}
                   </button>
                 </div>
               </div>

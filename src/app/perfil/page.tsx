@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useBackgroundImage } from "@/app/hooks/useBackgroundImage";
 import { PageWrapper } from "@/app/components/accessibility/PageWrapper";
 import { useKeyboardNavigation, useAccessibleLoading } from "@/app/hooks/useAccessibility";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 
 interface UserData {
   usuario: {
@@ -35,13 +36,14 @@ export default function PerfilPage() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { t } = useLanguage();
   useKeyboardNavigation();
 
   useAccessibleLoading(loading, false, !userData && !loading, "dados do perfil");
 
   useLayoutEffect(() => {
-    document.title = "Perfil - Estude.My";
-  }, []);
+    document.title = `${t("profilePage.title")} - Estude.My`;
+  }, [t]);
 
   useEffect(() => {
     let isMounted = true;
@@ -122,12 +124,19 @@ export default function PerfilPage() {
     return "/img/personagem.png";
   };
 
+  const getPersonagemTranslated = (personagem?: string) => {
+    if (!personagem) return "";
+    const key = `characterPage.classes.${personagem.toLowerCase()}`;
+    const translated = t(key);
+    return translated !== key ? translated : personagem;
+  };
+
   if (loading) {
     return (
-      <PageWrapper title="Perfil" description="Carregando dados do perfil">
+      <PageWrapper title={t("profilePage.title")} description={t("profilePage.loading")}>
         <div className="min-h-screen flex items-center justify-center">
           <p className="text-lg text-[var(--text-secondary)]" role="status" aria-live="polite">
-            Carregando...
+            {t("profilePage.loading")}
           </p>
         </div>
       </PageWrapper>
@@ -136,10 +145,10 @@ export default function PerfilPage() {
 
   if (!userData) {
     return (
-      <PageWrapper title="Perfil" description="Erro ao carregar dados do perfil">
+      <PageWrapper title={t("profilePage.title")} description={t("profilePage.error")}>
         <div className="min-h-screen flex items-center justify-center">
           <p className="text-lg text-red-600" role="alert" aria-live="assertive">
-            Erro ao carregar dados do usuário.
+            {t("profilePage.error")}
           </p>
         </div>
       </PageWrapper>
@@ -148,7 +157,7 @@ export default function PerfilPage() {
 
   return (
     <PageWrapper 
-      title="Perfil" 
+      title={t("profilePage.title")} 
       description={`Perfil do usuário ${userData.usuario.username || userData.usuario.nome || "Usuário"}`}
     >
       <div
@@ -178,7 +187,7 @@ export default function PerfilPage() {
                         getPersonagemImage(userData.usuario.personagem)
                       }
                       alt={`Imagem do personagem ${
-                        userData.usuario.personagem || "Personagem"
+                        getPersonagemTranslated(userData.usuario.personagem) || "Personagem"
                       }`}
                       width={90}
                       height={90}
@@ -198,7 +207,7 @@ export default function PerfilPage() {
                     </p>
                     {userData.usuario.personagem && (
                       <p className="text-sm text-[var(--text-secondary)]">
-                        {userData.usuario.personagem}
+                        {getPersonagemTranslated(userData.usuario.personagem)}
                       </p>
                     )}
                   </div>
@@ -213,7 +222,7 @@ export default function PerfilPage() {
 
                   <div className="text-center mb-4">
                     <p className="text-sm text-[var(--text-secondary)]">
-                      XP Total: {userData.usuario.xpTotal || 0}
+                      {t("profilePage.xpTotal")} {userData.usuario.xpTotal || 0}
                     </p>
                   </div>
 
@@ -223,14 +232,14 @@ export default function PerfilPage() {
                       href={"/personagem"}
                       aria-label="Gerenciar personagem"
                     >
-                      <span className="whitespace-nowrap">PERSONAGEM</span>
+                      <span className="whitespace-nowrap">{t("profilePage.character")}</span>
                     </Link>
                     <Link
                       className="blue-btn w-full sm:w-auto text-center min-w-0 px-3 sm:px-4 md:px-5 lg:px-6 text-xs sm:text-sm md:text-base focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
                       href={"/conta"}
                       aria-label="Gerenciar conta"
                     >
-                      <span className="whitespace-nowrap">CONTA</span>
+                      <span className="whitespace-nowrap">{t("profilePage.account")}</span>
                     </Link>
                   </nav>
                 </div>

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import BackButton from "@/app/components/BackButton";
 import { Lock, Unlock, Ban, Trash2, CheckCircle, BookOpen, Plus, Search, Users, Pencil, Check, X, ArrowLeft } from "lucide-react";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 
 interface UserData {
   _id: string;
@@ -25,6 +26,39 @@ export default function PainelAdmin() {
   const router = useRouter();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { t, language } = useLanguage();
+
+  const getTipoUsuarioTranslated = (tipo: string) => {
+    const activeLang = language || "pt-BR";
+    if (tipo === "ALUNO") {
+      if (activeLang.startsWith("en")) return "Student";
+      if (activeLang.startsWith("es")) return "Alumno";
+      return "Aluno";
+    }
+    if (tipo === "PROFESSOR") {
+      if (activeLang.startsWith("en")) return "Teacher";
+      if (activeLang.startsWith("es")) return "Profesor";
+      return "Professor";
+    }
+    if (tipo === "ADMINISTRADOR") {
+      if (activeLang.startsWith("en")) return "Administrator";
+      if (activeLang.startsWith("es")) return "Administrador";
+      return "Administrador";
+    }
+    if (tipo === "OWNER") {
+      if (activeLang.startsWith("en")) return "Owner";
+      if (activeLang.startsWith("es")) return "Propietario";
+      return "Owner";
+    }
+    return tipo;
+  };
+
+  const getStatusTranslated = (status: string) => {
+    if (status === "ATIVO") return t("adminPanel.active");
+    if (status === "BLOQUEADO") return t("adminPanel.blocked");
+    if (status === "BANIDO") return t("adminPanel.banned");
+    return status;
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -80,10 +114,10 @@ export default function PainelAdmin() {
         const data = await res.json();
         setUsuarios(data);
       } else {
-        setError("Erro ao carregar usuários.");
+        setError(t("adminPanel.errorUsers"));
       }
     } catch (err) {
-      setError("Erro de conexão ao carregar usuários.");
+      setError(t("adminPanel.errorUsersConnection"));
     } finally {
       setLoading(false);
     }
@@ -99,10 +133,10 @@ export default function PainelAdmin() {
         const data = await res.json();
         setMaterias(data);
       } else {
-        setError("Erro ao carregar matérias.");
+        setError(t("adminPanel.errorSubjects"));
       }
     } catch (err) {
-      setError("Erro de conexão ao carregar matérias.");
+      setError(t("adminPanel.errorSubjectsConnection"));
     } finally {
       setLoadingMaterias(false);
     }
@@ -136,7 +170,7 @@ export default function PainelAdmin() {
         body: JSON.stringify({ tipoUsuario: novoTipo }),
       });
       if (res.ok) {
-        showSuccess("Tipo de usuário atualizado.");
+        showSuccess(t("adminPanel.typeUpdated"));
         fetchUsuarios();
       } else {
         const errData = await res.json();
@@ -158,7 +192,7 @@ export default function PainelAdmin() {
         body: JSON.stringify({ canPromoteToAdmin: canPromote }),
       });
       if (res.ok) {
-        showSuccess("Permissões atualizadas com sucesso.");
+        showSuccess(t("adminPanel.permissionsUpdated"));
         fetchUsuarios();
       } else {
         const errData = await res.json();
@@ -180,7 +214,7 @@ export default function PainelAdmin() {
         body: JSON.stringify({ status: novoStatus, bloqueadoAte }),
       });
       if (res.ok) {
-        showSuccess(`Status alterado para ${novoStatus}.`);
+        showSuccess(t("adminPanel.statusChanged").replace("{status}", getStatusTranslated(novoStatus)));
         fetchUsuarios();
         setShowBlockModal(false);
       } else {
@@ -193,14 +227,14 @@ export default function PainelAdmin() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("ATENÇÃO: Deseja realmente excluir esta conta permanentemente?")) return;
+    if (!window.confirm(t("adminPanel.confirmDeleteUser"))) return;
     try {
       const res = await fetch(`${API_URL}/api/admin/usuarios/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
-        showSuccess("Usuário excluído com sucesso.");
+        showSuccess(t("adminPanel.userDeleted"));
         fetchUsuarios();
       } else {
         const errData = await res.json();
@@ -228,7 +262,7 @@ export default function PainelAdmin() {
       });
 
       if (res.ok) {
-        showSuccess(`Matéria "${newMateriaName.trim()}" adicionada com sucesso.`);
+        showSuccess(t("adminPanel.subjectAdded").replace("{name}", newMateriaName.trim()));
         setNewMateriaName("");
         fetchMaterias();
       } else {
@@ -262,7 +296,7 @@ export default function PainelAdmin() {
       });
 
       if (res.ok) {
-        showSuccess(`Matéria atualizada de "${nomeAntigo}" para "${novoNome}".`);
+        showSuccess(t("adminPanel.subjectUpdated").replace("{old}", nomeAntigo).replace("{new}", novoNome));
         setEditingMateriaName(null);
         fetchMaterias();
       } else {
@@ -277,7 +311,7 @@ export default function PainelAdmin() {
   };
 
   const handleDeleteMateria = async (nome: string) => {
-    if (!window.confirm(`Deseja realmente excluir a matéria "${nome}"?`)) return;
+    if (!window.confirm(t("adminPanel.confirmDeleteSubject").replace("{name}", nome))) return;
 
     try {
       setDeletingMateriaName(nome);
@@ -290,7 +324,7 @@ export default function PainelAdmin() {
       });
 
       if (res.ok) {
-        showSuccess(`Matéria "${nome}" excluída com sucesso.`);
+        showSuccess(t("adminPanel.subjectDeleted").replace("{name}", nome));
         fetchMaterias();
       } else {
         const data = await res.json().catch(() => ({}));
@@ -316,7 +350,7 @@ export default function PainelAdmin() {
   };
 
   if (loading && usuarios.length === 0) {
-    return <div className="p-8 text-center text-xl text-[var(--text-primary)]">Carregando painel...</div>;
+    return <div className="p-8 text-center text-xl text-[var(--text-primary)]">{t("adminPanel.loading")}</div>;
   }
 
   const filteredUsuarios = usuarios.filter((u) => {
@@ -346,7 +380,7 @@ export default function PainelAdmin() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h1 className="text-4xl font-bold flex items-center gap-3">
-            <Lock className="text-purple-500 w-8 h-8" /> Painel de Administração
+            <Lock className="text-purple-500 w-8 h-8" /> {t("adminPanel.title")}
           </h1>
           <BackButton href="/home" />
         </div>
@@ -373,7 +407,7 @@ export default function PainelAdmin() {
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]"
             }`}
           >
-            <Users className="w-4 h-4" /> Usuários
+            <Users className="w-4 h-4" /> {t("adminPanel.users")}
           </button>
           <button
             onClick={() => setActiveTab("materias")}
@@ -383,7 +417,7 @@ export default function PainelAdmin() {
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]"
             }`}
           >
-            <BookOpen className="w-4 h-4" /> Matérias
+            <BookOpen className="w-4 h-4" /> {t("adminPanel.subjects")}
           </button>
         </div>
 
@@ -394,7 +428,7 @@ export default function PainelAdmin() {
               <div className="flex-1">
                 <input
                   type="text"
-                  placeholder="Buscar por nome, username ou email..."
+                  placeholder={t("adminPanel.searchPlaceholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
@@ -407,11 +441,11 @@ export default function PainelAdmin() {
                   className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
                   style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                 >
-                  <option value="TODOS" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Todos os Tipos</option>
-                  <option value="ALUNO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Aluno</option>
-                  <option value="PROFESSOR" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Professor</option>
-                  <option value="ADMINISTRADOR" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Administrador</option>
-                  <option value="OWNER" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Owner</option>
+                  <option value="TODOS" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>{t("adminPanel.allTypes")}</option>
+                  <option value="ALUNO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>{getTipoUsuarioTranslated("ALUNO")}</option>
+                  <option value="PROFESSOR" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>{getTipoUsuarioTranslated("PROFESSOR")}</option>
+                  <option value="ADMINISTRADOR" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>{getTipoUsuarioTranslated("ADMINISTRADOR")}</option>
+                  <option value="OWNER" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>{getTipoUsuarioTranslated("OWNER")}</option>
                 </select>
                 <select
                   value={filterStatus}
@@ -419,10 +453,10 @@ export default function PainelAdmin() {
                   className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
                   style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                 >
-                  <option value="TODOS" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Todos os Status</option>
-                  <option value="ATIVO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Ativo</option>
-                  <option value="BLOQUEADO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Bloqueado</option>
-                  <option value="BANIDO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Banido</option>
+                  <option value="TODOS" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>{t("adminPanel.allStatus")}</option>
+                  <option value="ATIVO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>{getStatusTranslated("ATIVO")}</option>
+                  <option value="BLOQUEADO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>{getStatusTranslated("BLOQUEADO")}</option>
+                  <option value="BANIDO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>{getStatusTranslated("BANIDO")}</option>
                 </select>
               </div>
             </div>
@@ -431,11 +465,11 @@ export default function PainelAdmin() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-[var(--bg-card-hover)] border-b border-[var(--border-color)]">
-                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Usuário</th>
-                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Contato</th>
-                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Tipo</th>
-                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Status</th>
-                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">Ações</th>
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">{t("adminPanel.user")}</th>
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">{t("adminPanel.contact")}</th>
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">{t("adminPanel.type")}</th>
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">{t("adminPanel.status")}</th>
+                    <th className="p-4 font-semibold text-sm uppercase tracking-wider text-[var(--text-secondary)]">{t("adminPanel.actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -446,7 +480,7 @@ export default function PainelAdmin() {
                       <tr key={u._id} className="border-b border-[var(--border-color)] hover:bg-[var(--bg-page)] transition-colors">
                         <td className="p-4">
                           <div className="font-bold">{u.nome}</div>
-                          <div className="text-xs text-[var(--text-secondary)]">@{u.username || "sem_user"}</div>
+                          <div className="text-xs text-[var(--text-secondary)]">@{u.username || (language === "en-US" ? "no_username" : language === "es-ES" ? "sin_usuario" : "sem_user")}</div>
                         </td>
                         <td className="p-4 text-sm">{u.email}</td>
                         <td className="p-4">
@@ -457,12 +491,12 @@ export default function PainelAdmin() {
                             className={`p-2 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm outline-none focus:border-purple-500 transition-colors ${disableActions ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                             style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                           >
-                            <option value="ALUNO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Aluno</option>
-                            <option value="PROFESSOR" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Professor</option>
+                            <option value="ALUNO" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>{getTipoUsuarioTranslated("ALUNO")}</option>
+                            <option value="PROFESSOR" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>{getTipoUsuarioTranslated("PROFESSOR")}</option>
                             {(user?.tipoUsuario === "OWNER" || user?.canPromoteToAdmin || u.tipoUsuario === "ADMINISTRADOR") && (
-                              <option value="ADMINISTRADOR" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Administrador</option>
+                              <option value="ADMINISTRADOR" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>{getTipoUsuarioTranslated("ADMINISTRADOR")}</option>
                             )}
-                            {user?.tipoUsuario === "OWNER" && <option value="OWNER" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>Owner</option>}
+                            {user?.tipoUsuario === "OWNER" && <option value="OWNER" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>{getTipoUsuarioTranslated("OWNER")}</option>}
                           </select>
                           
                           {user?.tipoUsuario === "OWNER" && u.tipoUsuario === "ADMINISTRADOR" && (
@@ -474,7 +508,7 @@ export default function PainelAdmin() {
                                   onChange={(e) => handleTogglePermission(u._id, e.target.checked)}
                                   className="w-3 h-3 accent-purple-500"
                                 />
-                                Pode promover Admins
+                                {t("adminPanel.canPromote")}
                               </label>
                             </div>
                           )}
@@ -486,11 +520,11 @@ export default function PainelAdmin() {
                               u.status === "BLOQUEADO" ? "bg-yellow-500/20 text-yellow-500" :
                               "bg-red-500/20 text-red-500"
                             }`}>
-                              {u.status}
+                              {getStatusTranslated(u.status)}
                             </span>
                             {u.status === "BLOQUEADO" && u.bloqueadoAte && (
                               <span className="text-[10px] text-[var(--text-secondary)]">
-                                Até: {new Date(u.bloqueadoAte).toLocaleString()}
+                                {language === "en-US" ? "Until" : language === "es-ES" ? "Hasta" : "Até"}: {new Date(u.bloqueadoAte).toLocaleString()}
                               </span>
                             )}
                           </div>
@@ -501,7 +535,7 @@ export default function PainelAdmin() {
                               <button
                                 onClick={() => handleStatusChange(u._id, "ATIVO")}
                                 disabled={disableActions}
-                                title="Desbloquear"
+                                title={t("adminPanel.unlock")}
                                 className={`p-2 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
                               >
                                 <Unlock className="w-4 h-4" />
@@ -510,7 +544,7 @@ export default function PainelAdmin() {
                               <button
                                 onClick={() => openBlockModal(u)}
                                 disabled={disableActions || u.status === "BANIDO"}
-                                title="Bloquear"
+                                title={t("adminPanel.block")}
                                 className={`p-2 rounded-lg bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-white transition-all ${(disableActions || u.status === "BANIDO") ? 'opacity-30 cursor-not-allowed' : ''}`}
                               >
                                 <Lock className="w-4 h-4" />
@@ -521,7 +555,7 @@ export default function PainelAdmin() {
                               <button
                                 onClick={() => handleStatusChange(u._id, "ATIVO")}
                                 disabled={disableActions}
-                                title="Desbanir"
+                                title={t("adminPanel.unban")}
                                 className={`p-2 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
                               >
                                 <CheckCircle className="w-4 h-4" />
@@ -530,7 +564,7 @@ export default function PainelAdmin() {
                               <button
                                 onClick={() => handleStatusChange(u._id, "BANIDO")}
                                 disabled={disableActions}
-                                title="Banir"
+                                title={t("adminPanel.ban")}
                                 className={`p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
                               >
                                 <Ban className="w-4 h-4" />
@@ -540,7 +574,7 @@ export default function PainelAdmin() {
                             <button
                               onClick={() => handleDelete(u._id)}
                               disabled={disableActions}
-                              title="Excluir Definitivamente"
+                              title={t("adminPanel.deletePermanently")}
                               className={`p-2 rounded-lg bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white transition-all ${disableActions ? 'opacity-30 cursor-not-allowed' : ''}`}
                             >
                               <Trash2 className="w-4 h-4" />
@@ -553,7 +587,7 @@ export default function PainelAdmin() {
                   {filteredUsuarios.length === 0 && (
                     <tr>
                       <td colSpan={5} className="p-8 text-center text-[var(--text-secondary)]">
-                        Nenhum usuário encontrado com os filtros atuais.
+                        {t("adminPanel.noUsersFound")}
                       </td>
                     </tr>
                   )}
@@ -568,10 +602,12 @@ export default function PainelAdmin() {
               {editingMateriaName ? (
                 <div>
                   <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <Pencil className="text-blue-500 w-5 h-5" /> Editar Matéria
+                    <Pencil className="text-blue-500 w-5 h-5" /> {t("adminPanel.editSubject")}
                   </h2>
                   <p className="text-xs text-[var(--text-secondary)] mb-4">
-                    Alterando o nome da matéria: <strong className="text-[var(--text-primary)]">{editingMateriaName}</strong>
+                    {t("adminPanel.editingSubjectName").split("{name}")[0]}
+                    <strong className="text-[var(--text-primary)]">{editingMateriaName}</strong>
+                    {t("adminPanel.editingSubjectName").split("{name}")[1] || ""}
                   </p>
                   <form
                     onSubmit={(e) => {
@@ -581,10 +617,10 @@ export default function PainelAdmin() {
                     className="flex flex-col gap-4"
                   >
                     <div>
-                      <label className="text-sm text-[var(--text-secondary)] mb-1 block">Novo Nome</label>
+                      <label className="text-sm text-[var(--text-secondary)] mb-1 block">{t("adminPanel.newName")}</label>
                       <input
                         type="text"
-                        placeholder="Novo nome da matéria..."
+                        placeholder={t("adminPanel.newName") + "..."}
                         value={editedMateriaValue}
                         onChange={(e) => setEditedMateriaValue(e.target.value)}
                         className="w-full p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-blue-500 outline-none transition-colors"
@@ -601,11 +637,11 @@ export default function PainelAdmin() {
                         {updatingMateria ? (
                           <>
                             <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
-                            Salvando...
+                            {t("settings.saving") || "Salvando..."}
                           </>
                         ) : (
                           <>
-                            <Check className="w-4 h-4" /> Salvar
+                            <Check className="w-4 h-4" /> {t("common.save")}
                           </>
                         )}
                       </button>
@@ -617,7 +653,7 @@ export default function PainelAdmin() {
                         }}
                         className="px-4 py-3 rounded-lg font-bold bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)] transition-all flex items-center justify-center gap-2"
                       >
-                        <X className="w-4 h-4" /> Cancelar
+                        <X className="w-4 h-4" /> {t("common.cancel")}
                       </button>
                     </div>
                   </form>
@@ -625,17 +661,17 @@ export default function PainelAdmin() {
               ) : (
                 <div>
                   <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <Plus className="text-purple-500 w-5 h-5" /> Nova Matéria
+                    <Plus className="text-purple-500 w-5 h-5" /> {t("adminPanel.newSubject")}
                   </h2>
                   <p className="text-xs text-[var(--text-secondary)] mb-4">
-                    Cadastre uma nova disciplina no sistema para associar a futuras trilhas de aprendizado.
+                    {t("adminPanel.newSubjectDesc")}
                   </p>
                   <form onSubmit={handleAddMateria} className="flex flex-col gap-4">
                     <div>
-                      <label className="text-sm text-[var(--text-secondary)] mb-1 block">Nome da Matéria</label>
+                      <label className="text-sm text-[var(--text-secondary)] mb-1 block">{t("adminPanel.subjectName")}</label>
                       <input
                         type="text"
-                        placeholder="Ex: Banco de Dados, Redes..."
+                        placeholder={t("adminPanel.subjectName") + "..."}
                         value={newMateriaName}
                         onChange={(e) => setNewMateriaName(e.target.value)}
                         className="w-full p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors"
@@ -650,11 +686,11 @@ export default function PainelAdmin() {
                       {addingMateria ? (
                         <>
                           <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
-                          Adicionando...
+                          {t("settings.saving") || "Adicionando..."}
                         </>
                       ) : (
                         <>
-                          <Plus className="w-4 h-4" /> Adicionar Matéria
+                          <Plus className="w-4 h-4" /> {t("adminPanel.addSubject")}
                         </>
                       )}
                     </button>
@@ -667,13 +703,13 @@ export default function PainelAdmin() {
             <div className="lg:col-span-7 bg-[var(--bg-card)] border border-[var(--border-color)] p-6 rounded-2xl shadow-xl">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                 <h2 className="text-xl font-bold flex items-center gap-2">
-                  <BookOpen className="text-purple-500 w-5 h-5" /> Matérias Cadastradas ({materias.length})
+                  <BookOpen className="text-purple-500 w-5 h-5" /> {t("adminPanel.registeredSubjects").replace("{count}", materias.length.toString())}
                 </h2>
                 <div className="relative w-full sm:w-48">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-3.5 h-3.5" />
                   <input
                     type="text"
-                    placeholder="Buscar..."
+                    placeholder={t("manageTrails.search") + "..."}
                     value={searchMateriaTerm}
                     onChange={(e) => setSearchMateriaTerm(e.target.value)}
                     className="w-full pl-8 pr-2 py-1.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-purple-500 outline-none transition-colors text-xs"
@@ -684,11 +720,11 @@ export default function PainelAdmin() {
               {loadingMaterias && materias.length === 0 ? (
                 <div className="p-8 text-center text-[var(--text-secondary)] flex items-center justify-center gap-2">
                   <span className="animate-spin inline-block w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full" />
-                  Carregando matérias...
+                  {t("adminPanel.loading")}
                 </div>
               ) : filteredMaterias.length === 0 ? (
                 <div className="p-8 text-center text-[var(--text-secondary)]">
-                  {materias.length === 0 ? "Nenhuma matéria cadastrada." : "Nenhuma matéria encontrada."}
+                  {materias.length === 0 ? t("adminPanel.noSubjectsRegistered") : t("adminPanel.noSubjectsFound")}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2">
@@ -712,7 +748,7 @@ export default function PainelAdmin() {
                               setEditingMateriaName(mat);
                               setEditedMateriaValue(mat);
                             }}
-                            title="Editar Matéria"
+                            title={t("adminPanel.editSubject")}
                             className={`p-2 rounded-lg transition-all inline-flex items-center ${
                               isSelectedForEdit
                                 ? "bg-purple-500 text-white"
@@ -725,7 +761,7 @@ export default function PainelAdmin() {
                             onClick={() => handleDeleteMateria(mat)}
                             disabled={deletingMateriaName === mat}
                             className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all disabled:opacity-50"
-                            title="Excluir Matéria"
+                            title={t("manageTrails.delete")}
                           >
                             {deletingMateriaName === mat ? (
                               <span className="animate-spin inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full" />
@@ -748,32 +784,32 @@ export default function PainelAdmin() {
       {showBlockModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-6 rounded-2xl w-full max-w-md shadow-2xl transform scale-100 transition-transform">
-            <h2 className="text-2xl font-bold mb-4">Bloquear Usuário</h2>
+            <h2 className="text-2xl font-bold mb-4">{t("adminPanel.blockUser")}</h2>
             <p className="mb-4 text-sm text-[var(--text-secondary)]">
-              Bloqueando: <strong className="text-[var(--text-primary)]">{userToBlock?.nome}</strong>
+              {t("adminPanel.blockUser")}: <strong className="text-[var(--text-primary)]">{userToBlock?.nome}</strong>
             </p>
             <div className="flex flex-col gap-2 mb-6">
-              <label className="text-sm font-semibold">Data de Expiração (Opcional)</label>
+              <label className="text-sm font-semibold">{t("adminPanel.expirationDate")}</label>
               <input
                 type="datetime-local"
                 value={blockDate}
                 onChange={(e) => setBlockDate(e.target.value)}
                 className="w-full p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-primary)] focus:border-yellow-500 outline-none transition-colors"
               />
-              <span className="text-xs text-[var(--text-secondary)]">Deixe em branco para tempo indeterminado.</span>
+              <span className="text-xs text-[var(--text-secondary)]">{t("adminPanel.indefiniteTimeDesc")}</span>
             </div>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowBlockModal(false)}
                 className="px-4 py-2 rounded-lg font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors"
               >
-                Cancelar
+                {t("common.cancel")}
               </button>
               <button
                 onClick={confirmBlock}
                 className="px-4 py-2 rounded-lg font-semibold bg-yellow-500 text-black hover:bg-yellow-400 transition-colors shadow-lg shadow-yellow-500/20"
               >
-                Confirmar Bloqueio
+                {t("adminPanel.confirmBlock")}
               </button>
             </div>
           </div>
