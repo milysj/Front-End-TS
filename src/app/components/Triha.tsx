@@ -568,10 +568,8 @@ export default function Trilhas({ trilhaId }: TrilhasProps) {
       // Redirecionar para o game com trilhaId (fases de perguntas)
       const urlDestino = `/game?faseId=${faseId}${trilhaId ? `&trilhaId=${trilhaId}` : ''}`;
       console.log("Redirecionando para o game:", urlDestino);
-
-      // Mostrar SplashScreen e depois redirecionar
-      setUrlParaRedirecionar(urlDestino);
-      setMostrarSplash(true);
+      window.location.href = urlDestino;
+      return;
     } catch (error) {
       console.error("Erro ao verificar tipo da fase:", error);
       
@@ -585,8 +583,8 @@ export default function Trilhas({ trilhaId }: TrilhasProps) {
       
       // Se não conseguir determinar, assumir que é fase de perguntas (comportamento padrão)
       const urlDestino = `/game?faseId=${faseId}${trilhaId ? `&trilhaId=${trilhaId}` : ''}`;
-      setUrlParaRedirecionar(urlDestino);
-      setMostrarSplash(true);
+      window.location.href = urlDestino;
+      return;
     }
   };
 

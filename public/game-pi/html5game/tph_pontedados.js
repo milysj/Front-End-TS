@@ -33,6 +33,10 @@
                 width: 100% !important;
                 height: 100% !important;
                 object-fit: contain !important;
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
             }
         `;
         document.head.appendChild(style);
