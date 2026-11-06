@@ -95,7 +95,7 @@ export default function TestGamePi() {
       {/* Iframe ocupando a tela toda (só renderiza DEPOIS que os dados estiverem na window) */}
       {faseCarregada && (
         <iframe 
-          src="/game-pi/index.html?v=2" 
+          src="/game-pi/index.html?v=3" 
           className="absolute inset-0 w-full h-full border-none m-0 p-0 outline-none"
           title="GamePi - HTML5 Game"
           allow="autoplay; fullscreen; keyboard"
