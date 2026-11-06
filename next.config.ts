@@ -29,6 +29,20 @@ const nextConfig = {
 
   },
 
+  async headers() {
+    return [
+      {
+        source: '/game-pi/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, no-transform',
+          },
+        ],
+      },
+    ];
+  },
+
 };
  
 module.exports = nextConfig;
