@@ -213,20 +213,57 @@ const GameComponent = () => {
 
         if (fase) {
           const perguntasTransformadas = (fase.perguntas || []).map((p: any) => {
-            const indexCorreta = p.alternativas.findIndex(
-              (alt: string) => alt === p.respostaCorreta
+            const alternativasOriginais = Array.isArray(p.alternativas) ? [...p.alternativas] : [];
+
+            // 1. Identificar o texto exato da resposta correta antes de embaralhar
+            let textoCorreto = "";
+            if (typeof p.respostaCorreta === "number" && alternativasOriginais[p.respostaCorreta] !== undefined) {
+              textoCorreto = alternativasOriginais[p.respostaCorreta];
+            } else if (
+              typeof p.respostaCorreta === "string" &&
+              /^\d+$/.test(p.respostaCorreta.trim()) &&
+              alternativasOriginais[parseInt(p.respostaCorreta.trim())] !== undefined
+            ) {
+              textoCorreto = alternativasOriginais[parseInt(p.respostaCorreta.trim())];
+            } else if (typeof p.respostaCorreta === "string" && alternativasOriginais.includes(p.respostaCorreta)) {
+              textoCorreto = p.respostaCorreta;
+            } else if (typeof p.indiceRespostaCorreta === "number" && alternativasOriginais[p.indiceRespostaCorreta] !== undefined) {
+              textoCorreto = alternativasOriginais[p.indiceRespostaCorreta];
+            } else {
+              textoCorreto = alternativasOriginais[0] || "";
+            }
+
+            // 2. Embaralhar as alternativas aleatoriamente (Fisher-Yates) para que a correta não fique sempre no mesmo botão
+            const alternativasEmbaralhadas = [...alternativasOriginais];
+            for (let i = alternativasEmbaralhadas.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [alternativasEmbaralhadas[i], alternativasEmbaralhadas[j]] = [
+                alternativasEmbaralhadas[j],
+                alternativasEmbaralhadas[i],
+              ];
+            }
+
+            // 3. Descobrir a nova posição (0, 1, 2 ou 3) onde a resposta correta foi parar
+            const novoIndexCorreto = alternativasEmbaralhadas.findIndex(
+              (alt: string) => alt === textoCorreto
             );
-            const index = indexCorreta >= 0 ? indexCorreta : 0;
+            const index = novoIndexCorreto >= 0 ? novoIndexCorreto : 0;
+
             return {
               ...p,
+              alternativas: alternativasEmbaralhadas,
+              respostaCorreta: textoCorreto,
               indiceRespostaCorreta: index,
               indiceRespostaCorrecta: index,
               respostaCorretaIndex: index,
               _T5: p.enunciado,
-              _U5: p.alternativas,
+              _U5: alternativasEmbaralhadas,
               _V5: index,
             };
           });
+
+          // 4. Embaralhar também a ordem em que as perguntas aparecem
+          const perguntasFinais = [...perguntasTransformadas].sort(() => Math.random() - 0.5);
 
           (window as any).gameData = {
             faseId: fase._id,
@@ -234,14 +271,14 @@ const GameComponent = () => {
             personagem_selecionado:
               personagemUsuario || fase.personagem_selecionado || "samurai",
             cenario: fase.cenario || "bg_dojo",
-            perguntas: perguntasTransformadas,
+            perguntas: perguntasFinais,
 
             // Chaves minificadas para compatibilidade
             _q5: fase._id,
             _s5: fase.titulo,
             _u5: personagemUsuario || fase.personagem_selecionado || "samurai",
             _D5: fase.cenario || "bg_dojo",
-            _M5: perguntasTransformadas,
+            _M5: perguntasFinais,
           };
 
           setFaseCarregada(true);
