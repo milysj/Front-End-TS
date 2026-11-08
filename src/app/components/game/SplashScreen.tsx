@@ -41,7 +41,6 @@ const letters = [
   { key: "U", class: "U", label: "U" },
   { key: "D", class: "D", label: "D" },
   { key: "E2", class: "E2", label: "E" },
-  { key: "ponto", class: "ponto", label: "." },
   { key: "M", class: "M", label: "M" },
   { key: "Y", class: "Y", label: "Y" },
 ];
@@ -137,7 +136,7 @@ export default function SplashScreen({ onComplete, mensagem = "CARREGANDO JOGO..
                   fontFamily: "var(--font-jaro), 'Jaro', sans-serif",
                   WebkitTextStrokeWidth: "2.5px",
                   WebkitTextStrokeColor: strokeColor,
-                  margin: letter.key === "ponto" ? "0 2px" : "0",
+                  margin: "0",
                 }}
                 initial={{ opacity: 0.35, scale: 0.9 }}
                 animate={{

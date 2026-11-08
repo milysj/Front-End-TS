@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head />
-      <body className={jaro.className}>
+      <body className={`${jaro.variable} font-sans`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -32,11 +32,7 @@
             canvas, #canvas {
                 width: 100% !important;
                 height: 100% !important;
-                object-fit: contain !important;
-                position: absolute !important;
-                top: 50% !important;
-                left: 50% !important;
-                transform: translate(-50%, -50%) !important;
+                display: block !important;
             }
         `;
         document.head.appendChild(style);
@@ -51,12 +47,59 @@ function obter_dados_fase_js() {
 }
 
 function jogar_voltar_js() {
-    if (parent) {
-        // Se houver histórico anterior no Next.js, volta; caso contrário, redireciona para a home
-        if (parent.history.length > 1) {
-            parent.history.back();
-        } else {
-            parent.location.href = "/";
+    console.log("[PonteJS] Tentando voltar para a trilha / página anterior...");
+    try {
+        if (window.parent && typeof window.parent.jogar_voltar_js === "function") {
+            window.parent.jogar_voltar_js();
+            return;
         }
+    } catch (e) {}
+
+    try {
+        if (typeof window.jogar_voltar_js === "function") {
+            window.jogar_voltar_js();
+            return;
+        }
+    } catch (e) {}
+
+    try {
+        if (window.parent) {
+            window.parent.postMessage({ type: "VOLTAR_PAGINA" }, "*");
+        }
+    } catch (e) {}
+
+    try {
+        if (window.parent && window.parent.history && window.parent.history.length > 1) {
+            window.parent.history.back();
+            return;
+        }
+    } catch (e) {}
+
+    try {
+        if (window.parent) {
+            window.parent.location.href = "/trilha";
+        }
+    } catch (e) {}
+}
+
+function notificar_vitoria_js() {
+    console.log("[PonteJS] Vitória! Notificando aplicação...");
+    try {
+        if (window.parent) {
+            window.parent.postMessage({ type: "FIM_FASE", vitoria: true }, "*");
+        }
+    } catch (e) {
+        console.error("Erro ao enviar mensagem de vitória:", e);
+    }
+}
+
+function notificar_derrota_js() {
+    console.log("[PonteJS] Derrota! Notificando aplicação...");
+    try {
+        if (window.parent) {
+            window.parent.postMessage({ type: "FIM_FASE", vitoria: false }, "*");
+        }
+    } catch (e) {
+        console.error("Erro ao enviar mensagem de derrota:", e);
     }
 }

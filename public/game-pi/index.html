@@ -22,15 +22,12 @@
 
         <!-- Set the background colour of the document -->
         <style>
-            html, body {
-                background-color: #000000 !important;
+            body {
+                background: #0;
                 color: #cccccc;
                 margin: 0px;
                 padding: 0px;
                 border: 0px;
-                width: 100%;
-                height: 100%;
-                overflow: hidden;
             }
 
             canvas {
@@ -41,14 +38,6 @@
                 margin: 0px;
                 padding: 0px;
                 border: 0px;
-                display: block;
-                width: 100%;
-                height: 100%;
-                object-fit: contain;
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
             }
             :-webkit-full-screen #canvas {
                 width: 100%;
@@ -113,7 +102,7 @@
             
 
             <!-- Create the canvas element the game draws to -->
-            <canvas id="canvas" width="1366" height="768">
+            <canvas id="canvas" width="1366" height="768" style="position: absolute; top: 50%; left: 50%; bottom: -50%; right: -50%; transform: translate(-50%, -50%);">
                 
                 <p>Your browser doesn't support HTML5 canvas.</p>
             </canvas>
@@ -122,66 +111,9 @@
             
         </div>
 
-        <!-- Bypass de compressão/redimensionamento de CDN (ex: Hostinger hcdn 1600x1600) nas texturas 2048x2048 do GameMaker -->
-        <script>
-            (function () {
-                var srcDesc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
-                if (!srcDesc || !srcDesc.set) return;
-                var nativeSetSrc = srcDesc.set;
-                var nativeGetSrc = srcDesc.get;
-
-                function applyFallbackPng(img, pngUrl) {
-                    var origOnload = img.onload;
-                    img.onload = function (e) {
-                        if (img.naturalWidth === 1600 && img.naturalHeight === 1600) {
-                            var c = document.createElement('canvas');
-                            c.width = 2048;
-                            c.height = 2048;
-                            var ctx = c.getContext('2d');
-                            ctx.imageSmoothingEnabled = false;
-                            ctx.drawImage(img, 0, 0, 2048, 2048);
-                            img.onload = origOnload;
-                            nativeSetSrc.call(img, c.toDataURL('image/png'));
-                            return;
-                        }
-                        if (origOnload) origOnload.call(img, e);
-                    };
-                    nativeSetSrc.call(img, pngUrl);
-                }
-
-                Object.defineProperty(HTMLImageElement.prototype, 'src', {
-                    configurable: true,
-                    enumerable: true,
-                    get: function () {
-                        return nativeGetSrc.call(this);
-                    },
-                    set: function (val) {
-                        var img = this;
-                        if (typeof val === 'string' && /GamePi_texture_\d+\.png/i.test(val)) {
-                            var binUrl = val.replace(/\.png(\?.*)?$/i, '.bin$1');
-                            fetch(binUrl)
-                                .then(function (res) {
-                                    if (!res.ok) throw new Error('HTTP ' + res.status);
-                                    return res.arrayBuffer();
-                                })
-                                .then(function (buf) {
-                                    var blob = new Blob([buf], { type: 'image/png' });
-                                    var objUrl = URL.createObjectURL(blob);
-                                    nativeSetSrc.call(img, objUrl);
-                                })
-                                .catch(function () {
-                                    applyFallbackPng(img, val);
-                                });
-                            return;
-                        }
-                        nativeSetSrc.call(this, val);
-                    }
-                });
-            })();
-        </script>
-
         <!-- Run the game code -->
-        <script type="text/javascript" src="html5game/GamePi.js?cachebust=1870823066"></script>
+        <script type="text/javascript" src="html5game/tph_pontedados.js?v=20261108_fim_fase"></script>
+        <script type="text/javascript" src="html5game/GamePi.js?v=20261108_fim_fase"></script>
 
         <!-- Builtin injector for injecting runner path -->
         
