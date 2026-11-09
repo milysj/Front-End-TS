@@ -40,11 +40,22 @@ const GameComponent = () => {
   // Estados de orientação e mobile
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false);
-  const [manualRotate, setManualRotate] = useState(false);
-  const [showRotateNotice, setShowRotateNotice] = useState(false);
+  const [isPortraitRotated, setIsPortraitRotated] = useState(true);
+  const [portraitAngle, setPortraitAngle] = useState<90 | 270>(90);
+  const [landscapeInverted, setLandscapeInverted] = useState(false);
+  const [toastMensagem, setToastMensagem] = useState<string | null>(null);
+  const timeoutToastRef = useRef<NodeJS.Timeout | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   useKeyboardNavigation(); // Hook de acessibilidade
+
+  const exibirToast = (msg: string) => {
+    if (timeoutToastRef.current) clearTimeout(timeoutToastRef.current);
+    setToastMensagem(msg);
+    timeoutToastRef.current = setTimeout(() => {
+      setToastMensagem(null);
+    }, 3200);
+  };
 
   // Salva o progresso no backend ao vencer
   const salvarProgressoVitoria = async () => {
@@ -151,6 +162,8 @@ const GameComponent = () => {
 
   // 1. Detectar dispositivo mobile e orientação
   useEffect(() => {
+    let jaNotificouInicial = false;
+
     const updateOrientation = () => {
       const userAgentMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
         navigator.userAgent || ""
@@ -164,36 +177,29 @@ const GameComponent = () => {
       setIsMobile(mobile);
       setIsPortrait(portrait);
 
-      if (mobile && portrait) {
-        setShowRotateNotice(true);
-        const timer = setTimeout(() => setShowRotateNotice(false), 4000);
-        return () => clearTimeout(timer);
-      } else {
-        setShowRotateNotice(false);
+      if (mobile && portrait && !jaNotificouInicial) {
+        jaNotificouInicial = true;
+        exibirToast("Modo horizontal ativado para celular");
+      }
+
+      // Se o usuário virou o celular fisicamente para modo paisagem, removemos inversões
+      if (!portrait) {
+        setLandscapeInverted(false);
       }
     };
 
     updateOrientation();
     window.addEventListener("resize", updateOrientation);
     window.addEventListener("orientationchange", updateOrientation);
-
-    const lockNativeLandscape = async () => {
-      try {
-        if (window.screen?.orientation && typeof window.screen.orientation.lock === "function") {
-          await window.screen.orientation.lock("landscape");
-        } else if ((window.screen as any)?.lockOrientation) {
-          (window.screen as any).lockOrientation("landscape");
-        }
-      } catch (err) { }
-    };
-
-    lockNativeLandscape();
-    window.addEventListener("touchstart", lockNativeLandscape, { passive: true, once: true });
-    window.addEventListener("click", lockNativeLandscape, { passive: true, once: true });
+    document.addEventListener("fullscreenchange", updateOrientation);
+    document.addEventListener("webkitfullscreenchange", updateOrientation);
 
     return () => {
       window.removeEventListener("resize", updateOrientation);
       window.removeEventListener("orientationchange", updateOrientation);
+      document.removeEventListener("fullscreenchange", updateOrientation);
+      document.removeEventListener("webkitfullscreenchange", updateOrientation);
+      if (timeoutToastRef.current) clearTimeout(timeoutToastRef.current);
     };
   }, []);
 
@@ -209,7 +215,7 @@ const GameComponent = () => {
           return;
         }
 
-        const fase = await buscarFasePorId(faseId);
+        const fase: any = await buscarFasePorId(faseId);
 
         if (fase) {
           const perguntasTransformadas = (fase.perguntas || []).map((p: any) => {
@@ -294,25 +300,104 @@ const GameComponent = () => {
     carregarDadosFase();
   }, [searchParams]);
 
-  const toggleManualRotate = () => {
-    setManualRotate((prev) => !prev);
+  // Alterna entre Modo Horizontal (rotacionado) e Modo Normal (retrato 0°) quando em portrait
+  const togglePortraitRotate = () => {
+    setIsPortraitRotated((prev) => {
+      const novo = !prev;
+      exibirToast(novo ? "Modo horizontal ativado" : "Modo normal (Retrato) ativado");
+      return novo;
+    });
   };
 
-  const toggleFullscreen = () => {
+  // Inverte o lado de rotação (90° ↔ 270°) se o usuário segurar o celular pelo outro lado
+  const togglePortraitInvert = () => {
+    setPortraitAngle((prev) => {
+      const novo = prev === 90 ? 270 : 90;
+      exibirToast(`Rotação invertida (${novo}°)`);
+      return novo;
+    });
+  };
+
+  // No modo paisagem natural/fullscreen, inverte 180° se o celular estiver de ponta cabeça
+  const toggleLandscapeInvert = () => {
+    setLandscapeInverted((prev) => {
+      const novo = !prev;
+      exibirToast(novo ? "Orientação invertida (180°)" : "Orientação normal (0°)");
+      return novo;
+    });
+  };
+
+  // Alterna modo de tela cheia com bloqueio em paisagem
+  const toggleFullscreen = async () => {
     try {
       if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().then(() => {
-          if (window.screen?.orientation && typeof window.screen.orientation.lock === "function") {
-            window.screen.orientation.lock("landscape").catch(() => { });
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        } else if ((document.documentElement as any).webkitRequestFullscreen) {
+          await (document.documentElement as any).webkitRequestFullscreen();
+        }
+
+        // Ao entrar em tela cheia, tenta travar em landscape via Screen Orientation API
+        const screenAny = (window.screen as any);
+        if (screenAny?.orientation?.lock) {
+          try {
+            await screenAny.orientation.lock("landscape");
+          } catch (err) {
+            // Navegadores que não suportam silenciam
           }
-        }).catch(() => { });
+        }
+        exibirToast("Tela cheia ativada");
       } else {
-        document.exitFullscreen().catch(() => { });
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        }
+        const screenAny = (window.screen as any);
+        if (screenAny?.orientation?.unlock) {
+          try {
+            screenAny.orientation.unlock();
+          } catch (err) { }
+        }
+        exibirToast("Saiu da tela cheia");
       }
-    } catch (e) { }
+    } catch (e) {
+      console.warn("Fullscreen toggle error:", e);
+    }
   };
 
-  const shouldRotate = (isMobile && isPortrait) || manualRotate;
+  const getContainerStyle = (): React.CSSProperties => {
+    // 1. Mobile em Retrato com rotação ativa (90° ou 270°)
+    if (isMobile && isPortrait && isPortraitRotated) {
+      return {
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        width: "min(98dvh, calc(98dvw * 16 / 9))",
+        height: "min(98dvw, calc(98dvh * 9 / 16))",
+        transform: `translate(-50%, -50%) rotate(${portraitAngle}deg)`,
+        transformOrigin: "center center",
+      };
+    }
+
+    // 2. Mobile em Paisagem com inversão de 180°
+    if (isMobile && !isPortrait && landscapeInverted) {
+      return {
+        width: "min(98vw, calc(98vh * 16 / 9))",
+        height: "min(98vh, calc(98vw * 9 / 16))",
+        transform: "rotate(180deg)",
+        transformOrigin: "center center",
+      };
+    }
+
+    // 3. Padrão (Mobile Retrato normal 0°, Paisagem normal 0°, Desktop)
+    return {
+      width: "min(98vw, calc(98vh * 16 / 9))",
+      height: "min(98vh, calc(98vw * 9 / 16))",
+      transform: "none",
+    };
+  };
+
   const podeExibirJogo = faseCarregada && splashCompleta;
 
   if (erro) {
@@ -365,22 +450,7 @@ const GameComponent = () => {
       <div
         ref={containerRef}
         className="transition-all duration-300 relative flex items-center justify-center"
-        style={
-          shouldRotate
-            ? {
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              width: "min(98dvh, calc(98dvw * 16 / 9))",
-              height: "min(98dvw, calc(98dvh * 9 / 16))",
-              transform: "translate(-50%, -50%) rotate(90deg)",
-              transformOrigin: "center center",
-            }
-            : {
-              width: "min(98vw, calc(98vh * 16 / 9))",
-              height: "min(98vh, calc(98vw * 9 / 16))",
-            }
-        }
+        style={getContainerStyle()}
       >
         <div className="w-full h-full rounded-2xl overflow-hidden border border-zinc-700/60 dark:border-zinc-800 shadow-[0_0_50px_rgba(0,0,0,0.8)] bg-black relative">
           {/* Iframe monta com chave dinâmica anti-cache */}
@@ -521,17 +591,55 @@ const GameComponent = () => {
         )}
       </AnimatePresence>
 
-      {/* 5. Controles flutuantes sutis para mobile (Girar tela / Tela cheia) */}
+      {/* 5. Controles flutuantes sutis para mobile (Girar tela / Inverter / Tela cheia) */}
       {isMobile && podeExibirJogo && !fimDeJogo && (
         <div className="fixed top-3 right-3 z-[9000] flex items-center gap-2 pointer-events-auto">
-          <button
-            onClick={toggleManualRotate}
-            aria-label="Girar Tela"
-            title="Alternar rotação horizontal"
-            className="p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white/90 border border-white/20 backdrop-blur-md shadow-lg active:scale-95 transition-all"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
+          {/* Se o celular estiver em modo Retrato */}
+          {isPortrait ? (
+            <>
+              {/* Botão de Virar Tela: alterna entre Horizontal e Normal em Retrato */}
+              <button
+                onClick={togglePortraitRotate}
+                aria-label={isPortraitRotated ? "Voltar ao Modo Retrato Normal" : "Girar para Modo Horizontal"}
+                title={isPortraitRotated ? "Voltar ao Modo Retrato Normal (0°)" : "Girar para Modo Horizontal"}
+                className={`p-2.5 rounded-full border backdrop-blur-md shadow-lg active:scale-95 transition-all ${
+                  isPortraitRotated
+                    ? "bg-blue-600/80 hover:bg-blue-600 text-white border-blue-400/50"
+                    : "bg-black/60 hover:bg-black/80 text-white/90 border-white/20"
+                }`}
+              >
+                <RotateCcw className={`w-4 h-4 transition-transform ${isPortraitRotated ? "rotate-90" : ""}`} />
+              </button>
+
+              {/* Se estiver no modo horizontal em retrato, permite inverter o lado (90° ↔ 270°) */}
+              {isPortraitRotated && (
+                <button
+                  onClick={togglePortraitInvert}
+                  aria-label="Inverter Lado da Rotação"
+                  title="Inverter Lado (90° ↔ 270°)"
+                  className="p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white/90 border border-white/20 backdrop-blur-md shadow-lg active:scale-95 transition-all"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
+              )}
+            </>
+          ) : (
+            /* Se estiver em modo Paisagem (física ou fullscreen), permite inverter 180° se o celular estiver virado */
+            <button
+              onClick={toggleLandscapeInvert}
+              aria-label="Inverter Orientação"
+              title="Inverter Orientação (180°)"
+              className={`p-2.5 rounded-full border backdrop-blur-md shadow-lg active:scale-95 transition-all ${
+                landscapeInverted
+                  ? "bg-amber-600/80 hover:bg-amber-600 text-white border-amber-400/50"
+                  : "bg-black/60 hover:bg-black/80 text-white/90 border-white/20"
+              }`}
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* Botão de Tela Cheia */}
           <button
             onClick={toggleFullscreen}
             aria-label="Tela Cheia"
@@ -543,18 +651,18 @@ const GameComponent = () => {
         </div>
       )}
 
-      {/* 6. Notificação suave de modo horizontal no celular */}
+      {/* 6. Notificação suave de status / rotação no celular */}
       <AnimatePresence>
-        {showRotateNotice && podeExibirJogo && !fimDeJogo && (
+        {toastMensagem && podeExibirJogo && !fimDeJogo && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             className="fixed top-4 left-1/2 -translate-x-1/2 z-[9000] pointer-events-none"
           >
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/80 border border-white/25 text-white text-xs font-medium shadow-2xl backdrop-blur-md">
-              <Smartphone className="w-3.5 h-3.5 text-blue-400 rotate-90" />
-              <span>Modo horizontal ativado para celular</span>
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/85 border border-white/25 text-white text-xs font-medium shadow-2xl backdrop-blur-md">
+              <Smartphone className="w-3.5 h-3.5 text-blue-400" />
+              <span>{toastMensagem}</span>
             </div>
           </motion.div>
         )}
