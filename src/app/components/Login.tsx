@@ -237,7 +237,7 @@ const Login = () => {
               onClick={() => setMostrarEsqueciSenha(true)}
               className="hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
               aria-label="Esqueci minha senha"
-              style={{ color: 'blue' }}
+              style={{ color: 'red' }}
             >
               Esqueci minha senha
             </button>
@@ -344,7 +344,7 @@ const Login = () => {
           <a
             href="/cadastro"
             className="hover:underline ml-1.5"
-            style={{ color: 'blue' }}
+            style={{ color: 'red' }}
           >
             Cadastrar-se
           </a>
