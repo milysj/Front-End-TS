@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Button } from "react-bootstrap";
 import { useRouter } from "next/navigation"; // Importe para navegação interna
+import BackButton from "./BackButton";
 
 type UsuarioTipo = "ALUNO" | "PROFESSOR";
  
@@ -373,6 +374,7 @@ const Cadastrar = () => {
     <div
       className="min-h-screen flex flex-col items-center justify-center px-4 relative"
     >
+      <BackButton href="/login" className="fixed top-4 left-4 z-50" />
       <style jsx>{`
         input::placeholder,
         textarea::placeholder,

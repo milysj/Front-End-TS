@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Star, ThumbsUp, ThumbsDown, MessageSquare, AlertCircle } from "lucide-react";
+import { Star, ThumbsUp, MessageSquare, AlertCircle } from "lucide-react";
 import Button from "react-bootstrap/Button";
 import { useLanguage } from "@/app/contexts/LanguageContext";
+import apiClient from "@/app/services/api";
+import { API_ENDPOINTS } from "@/app/config/api.config";
 
 const Feedback = () => {
   const { t } = useLanguage();
@@ -27,9 +29,6 @@ const Feedback = () => {
     setMensagem("");
 
     try {
-      const token = localStorage.getItem("token");
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
       const dadosFeedback = {
         tipo,
         avaliacao,
@@ -37,35 +36,23 @@ const Feedback = () => {
         data: new Date().toISOString(),
       };
 
-      const response = await fetch(`${API_URL}/api/feedback`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
-        body: JSON.stringify(dadosFeedback),
-      });
+      await apiClient.post(API_ENDPOINTS.FEEDBACK, dadosFeedback);
 
-      if (response.ok) {
-        setMensagem(`✅ ${t("feedback.success")}`);
-        setSucesso(true);
-        // Limpar formulário
-        setTipo("");
-        setAvaliacao(0);
-        setSugestao("");
-        // Limpar mensagem de sucesso após 5 segundos
-        setTimeout(() => {
-          setMensagem("");
-          setSucesso(false);
-        }, 5000);
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        setMensagem(`❌ ${errorData.message || t("feedback.error")}`);
+      setMensagem(`✅ ${t("feedback.success")}`);
+      setSucesso(true);
+      // Limpar formulário
+      setTipo("");
+      setAvaliacao(0);
+      setSugestao("");
+      // Limpar mensagem de sucesso após 5 segundos
+      setTimeout(() => {
+        setMensagem("");
         setSucesso(false);
-      }
-    } catch (error) {
-      console.error("Erro ao enviar feedback:", error);
-      setMensagem(`❌ ${t("feedback.connectionError")}`);
+      }, 5000);
+    } catch (err: unknown) {
+      console.error("Erro ao enviar feedback:", err);
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setMensagem(`❌ ${axiosError.response?.data?.message || t("feedback.error")}`);
       setSucesso(false);
     } finally {
       setEnviando(false);

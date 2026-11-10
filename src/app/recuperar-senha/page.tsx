@@ -7,6 +7,7 @@ import { Button } from "react-bootstrap";
 import { useBackgroundImage } from "@/app/hooks/useBackgroundImage";
 import { PageWrapper } from "@/app/components/accessibility/PageWrapper";
 import { useKeyboardNavigation } from "@/app/hooks/useAccessibility";
+import BackButton from "@/app/components/BackButton";
 
 function RecuperarSenhaContent() {
   const searchParams = useSearchParams();
@@ -122,6 +123,7 @@ function RecuperarSenhaContent() {
           className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg-page)]"
           style={{ backgroundImage: `url('${backgroundImage}')` }}
         >
+          <BackButton href="/login" className="fixed top-4 left-4 z-50" />
           <div className="w-full max-w-md p-6 bg-[var(--bg-card)] rounded-lg shadow-md border border-[var(--border-color)] text-center">
             <p className="text-[var(--text-secondary)]" role="status" aria-live="polite">
               Verificando token...
@@ -139,6 +141,7 @@ function RecuperarSenhaContent() {
           className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg-page)]"
           style={{ backgroundImage: `url('${backgroundImage}')` }}
         >
+          <BackButton href="/login" className="fixed top-4 left-4 z-50" />
           <div className="w-full max-w-md p-6 bg-[var(--bg-card)] rounded-lg shadow-md border border-[var(--border-color)]">
             <div className="mb-6 text-center">
               <Image
@@ -177,6 +180,7 @@ function RecuperarSenhaContent() {
         className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg-page)]"
         style={{ backgroundImage: `url('${backgroundImage}')` }}
       >
+        <BackButton href="/login" className="fixed top-4 left-4 z-50" />
         <div className="w-full max-w-md p-6 bg-[var(--bg-card)] rounded-lg shadow-md border border-[var(--border-color)]">
           <div className="mb-6 text-center">
             <Image

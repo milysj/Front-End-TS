@@ -349,11 +349,12 @@ export default function GerarTrilhaIaDialog({
                 <input
                   type="number"
                   min={2}
-                  max={4}
+                  max={12}
                   value={perguntasPorFase}
                   onChange={(e) => setPerguntasPorFase(Number(e.target.value) || 2)}
                   className="mt-1 w-full rounded border border-[var(--border-color)] bg-[var(--bg-input)] px-3 py-2 text-sm"
                 />
+                <span className="text-xs text-[var(--text-secondary)]">Recomendado: 4 a 8 perguntas por fase</span>
               </div>
             </div>
             {erro && (

@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useBackgroundImage } from "@/app/hooks/useBackgroundImage";
 import { PageWrapper } from "@/app/components/accessibility/PageWrapper";
 import { useKeyboardNavigation, useAccessibleLoading } from "@/app/hooks/useAccessibility";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 
 interface UserData {
   _id: string;
@@ -52,13 +53,38 @@ export default function PersonagemPage() {
   const [skinSelecionada, setSkinSelecionada] = useState<string>("Padrão");
   const [mensagem, setMensagem] = useState<{ tipo: "sucesso" | "erro"; texto: string } | null>(null);
   const router = useRouter();
+  const { t } = useLanguage();
   useKeyboardNavigation();
+
+  const getClassNameTranslated = (className: string) => {
+    if (!className) return "";
+    const key = `characterPage.classes.${className.toLowerCase()}`;
+    const translated = t(key);
+    return translated !== key ? translated : className;
+  };
+
+  const getClassDescTranslated = (className: string) => {
+    if (!className) return "";
+    const key = `characterPage.descriptions.${className.toLowerCase()}`;
+    const translated = t(key);
+    return translated !== key ? translated : "";
+  };
+
+  const getSkinNameTranslated = (skinName: string) => {
+    const cleanKey = skinName
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, ""); // Remove accents
+    const key = `characterPage.skinsList.${cleanKey}`;
+    const translated = t(key);
+    return translated !== key ? translated : skinName;
+  };
 
   useAccessibleLoading(loading, false, !userData && !loading, "dados do personagem");
 
   useLayoutEffect(() => {
-    document.title = "Personalizar Personagem - Estude.My";
-  }, []);
+    document.title = `${t("characterPage.title")} - Estude.My`;
+  }, [t]);
 
   useEffect(() => {
     let isMounted = true;
@@ -101,7 +127,7 @@ export default function PersonagemPage() {
         if (error instanceof Error && error.name === "AbortError") return;
         if (!isMounted) return;
         console.error("Erro ao buscar dados do usuário:", error);
-        setMensagem({ tipo: "erro", texto: "Erro ao carregar dados do usuário" });
+        setMensagem({ tipo: "erro", texto: t("characterPage.error") });
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -119,7 +145,7 @@ export default function PersonagemPage() {
 
   const handleSalvar = async () => {
     if (!classeSelecionada) {
-      setMensagem({ tipo: "erro", texto: "Selecione uma classe" });
+      setMensagem({ tipo: "erro", texto: t("characterPage.errorSelect") });
       return;
     }
 
@@ -169,7 +195,7 @@ export default function PersonagemPage() {
         throw new Error(errorData.message || "Erro ao atualizar personagem");
       }
 
-      setMensagem({ tipo: "sucesso", texto: "Personagem atualizado com sucesso!" });
+      setMensagem({ tipo: "sucesso", texto: t("characterPage.success") });
       
       // Atualizar dados locais
       if (userData) {
@@ -184,7 +210,7 @@ export default function PersonagemPage() {
       console.error("Erro ao salvar personagem:", error);
       setMensagem({
         tipo: "erro",
-        texto: error instanceof Error ? error.message : "Erro ao atualizar personagem",
+        texto: error instanceof Error ? error.message : t("characterPage.error"),
       });
     } finally {
       setSalvando(false);
@@ -195,10 +221,10 @@ export default function PersonagemPage() {
 
   if (loading) {
     return (
-      <PageWrapper title="Personalizar Personagem" description="Carregando dados do personagem">
+      <PageWrapper title={t("characterPage.title")} description={t("characterPage.loading")}>
         <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-page)' }}>
           <p className="text-lg text-[var(--text-secondary)]" role="status" aria-live="polite">
-            Carregando...
+            {t("characterPage.loading")}
           </p>
         </div>
       </PageWrapper>
@@ -207,10 +233,10 @@ export default function PersonagemPage() {
 
   if (!userData) {
     return (
-      <PageWrapper title="Personalizar Personagem" description="Erro ao carregar dados do personagem">
+      <PageWrapper title={t("characterPage.title")} description={t("characterPage.error")}>
         <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-page)' }}>
           <p className="text-lg text-red-600 dark:text-red-400" role="alert" aria-live="assertive">
-            Erro ao carregar dados do usuário.
+            {t("characterPage.error")}
           </p>
         </div>
       </PageWrapper>
@@ -219,7 +245,7 @@ export default function PersonagemPage() {
 
   return (
     <PageWrapper 
-      title="Personalizar Personagem" 
+      title={t("characterPage.title")} 
       description="Escolha e personalize seu personagem"
     >
       <div
@@ -239,7 +265,7 @@ export default function PersonagemPage() {
             <div className="w-full max-w-4xl mx-auto">
               <div className="bg-[var(--bg-card)] rounded-lg shadow-md p-4 sm:p-6 md:p-8 border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
                 <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center text-[var(--text-primary)]" id="personagem-title">
-                  Personalizar Personagem
+                  {t("characterPage.title")}
                 </h1>
 
                 {/* Mensagem de sucesso/erro */}
@@ -259,7 +285,7 @@ export default function PersonagemPage() {
 
                 {/* Seleção de Classe */}
                 <section className="mb-8" aria-labelledby="selecao-classe">
-                  <h2 id="selecao-classe" className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Escolha sua Classe</h2>
+                  <h2 id="selecao-classe" className="text-xl font-semibold mb-4 text-[var(--text-primary)]">{t("characterPage.chooseClass")}</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="radiogroup" aria-label="Seleção de classe do personagem">
                     {CLASSES.map((classe) => (
                       <button
@@ -275,12 +301,12 @@ export default function PersonagemPage() {
                             : "border-transparent hover:border-[var(--border-color)]"
                         }`}
                         aria-pressed={classeSelecionada === classe.nome}
-                        aria-label={`Selecionar classe ${classe.nome}: ${classe.descricao}`}
+                        aria-label={`Selecionar classe ${getClassNameTranslated(classe.nome)}: ${getClassDescTranslated(classe.nome)}`}
                       >
                         <div className="p-4 flex flex-col items-center bg-[var(--bg-input)] rounded-lg transition-colors duration-300" style={{ backgroundColor: 'var(--bg-input)' }}>
                           <Image
                             src={classe.imagem}
-                            alt={classe.nome}
+                            alt={getClassNameTranslated(classe.nome)}
                             width={120}
                             height={120}
                             className="rounded-xl mb-2"
@@ -292,10 +318,10 @@ export default function PersonagemPage() {
                                 : "text-[var(--text-primary)]"
                             }`}
                           >
-                            {classe.nome}
+                            {getClassNameTranslated(classe.nome)}
                           </p>
                           <p className="text-sm text-[var(--text-secondary)] text-center mt-1">
-                            {classe.descricao}
+                            {getClassDescTranslated(classe.nome)}
                           </p>
                         </div>
                       </button>
@@ -307,9 +333,9 @@ export default function PersonagemPage() {
                 {classeSelecionada && (
                   <section className="mb-8" aria-labelledby="selecao-skin">
                     <h2 id="selecao-skin" className="text-xl font-semibold mb-4 text-[var(--text-primary)]">
-                      Skins de {classeSelecionada}
+                      {t("characterPage.skins")} {getClassNameTranslated(classeSelecionada)}
                     </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="radiogroup" aria-label={`Seleção de skin para ${classeSelecionada}`}>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="radiogroup" aria-label={`Seleção de skin para ${getClassNameTranslated(classeSelecionada)}`}>
                       {skinsDisponiveis.map((skin, index) => (
                         <button
                           key={index}
@@ -321,12 +347,12 @@ export default function PersonagemPage() {
                               : "border-transparent hover:border-[var(--border-color)]"
                           }`}
                           aria-pressed={skinSelecionada === skin.nome}
-                          aria-label={`Selecionar skin ${skin.nome}`}
+                          aria-label={`Selecionar skin ${getSkinNameTranslated(skin.nome)}`}
                         >
                           <div className="p-4 flex flex-col items-center bg-[var(--bg-input)] rounded-lg transition-colors duration-300" style={{ backgroundColor: 'var(--bg-input)' }}>
                             <Image
                               src={skin.imagem}
-                              alt={skin.nome}
+                              alt={getSkinNameTranslated(skin.nome)}
                               width={100}
                               height={100}
                               className="rounded-xl mb-2"
@@ -338,7 +364,7 @@ export default function PersonagemPage() {
                                   : "text-[var(--text-primary)]"
                               }`}
                             >
-                              {skin.nome}
+                              {getSkinNameTranslated(skin.nome)}
                             </p>
                           </div>
                         </button>
@@ -350,7 +376,7 @@ export default function PersonagemPage() {
                 {/* Preview do Personagem Selecionado */}
                 {classeSelecionada && (
                   <div className="mb-6 p-6 bg-[var(--bg-input)] rounded-lg border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border-color)' }}>
-                    <h3 className="text-lg font-semibold mb-4 text-center text-[var(--text-primary)]">Preview</h3>
+                    <h3 className="text-lg font-semibold mb-4 text-center text-[var(--text-primary)]">{t("characterPage.preview")}</h3>
                     <div className="flex flex-col items-center">
                       <Image
                         src={
@@ -363,8 +389,8 @@ export default function PersonagemPage() {
                         height={150}
                         className="rounded-xl mb-2"
                       />
-                      <p className="font-semibold text-lg text-[var(--text-primary)]">{classeSelecionada}</p>
-                      <p className="text-sm text-[var(--text-secondary)]">{skinSelecionada}</p>
+                      <p className="font-semibold text-lg text-[var(--text-primary)]">{getClassNameTranslated(classeSelecionada)}</p>
+                      <p className="text-sm text-[var(--text-secondary)]">{getSkinNameTranslated(skinSelecionada)}</p>
                     </div>
                   </div>
                 )}
@@ -378,14 +404,14 @@ export default function PersonagemPage() {
                     aria-busy={salvando}
                     aria-disabled={salvando || !classeSelecionada}
                   >
-                    {salvando ? "Salvando..." : "Salvar Alterações"}
+                    {salvando ? t("characterPage.saving") : t("characterPage.saveChanges")}
                   </button>
                   <button
                     onClick={() => router.push("/perfil")}
                     className="bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
                     aria-label="Cancelar e voltar ao perfil"
                   >
-                    Cancelar
+                    {t("characterPage.cancel")}
                   </button>
                 </div>
               </div>

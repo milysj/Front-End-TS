@@ -7,6 +7,7 @@ import { Button } from "react-bootstrap";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useTheme } from "next-themes";
 import ThemeToggle from "@/app/components/ThemeToggle";
+import BackButton from "./BackButton";
 
 const Login = () => {
   const router = useRouter();
@@ -94,6 +95,7 @@ const Login = () => {
         backgroundImage: `url('${backgroundImage}')`,
       }}
     >
+      <BackButton href="/" className="fixed top-4 left-4 z-50" />
       <ThemeToggle /> {/* Botão para alternar tema */}
       <div className="w-full max-w-md p-6 bg-[var(--bg-card)] rounded-lg shadow-md border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
         <div className="mb-6 text-center">
@@ -235,7 +237,7 @@ const Login = () => {
               onClick={() => setMostrarEsqueciSenha(true)}
               className="hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
               aria-label="Esqueci minha senha"
-              style={{ color: 'blue' }}
+              style={{ color: 'red' }}
             >
               Esqueci minha senha
             </button>
@@ -342,7 +344,7 @@ const Login = () => {
           <a
             href="/cadastro"
             className="hover:underline ml-1.5"
-            style={{ color: 'blue' }}
+            style={{ color: 'red' }}
           >
             Cadastrar-se
           </a>

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import GerarTrilhaIaDialog, {
   type TrilhaSugestaoRespostaUi,
 } from "@/app/components/GerarTrilhaIaDialog";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -74,6 +75,61 @@ interface UsuarioComTrilhas {
 }
 
 export default function GerenciarTrilha() {
+  const { t, language } = useLanguage();
+
+  const getIdiomaTranslated = (idioma: string) => {
+    if (idioma === "Português") return t("manageTrails.portuguese");
+    if (idioma === "Inglês") return t("manageTrails.english");
+    if (idioma === "Espanhol") return t("manageTrails.spanish");
+    return idioma;
+  };
+
+  const getDificuldadeTranslated = (dificuldade: string) => {
+    const dLower = dificuldade?.toLowerCase();
+    if (dLower === "facil" || dLower === "fácil") return t("common.easy");
+    if (dLower === "medio" || dLower === "médio") return t("common.medium");
+    if (dLower === "dificil" || dLower === "difícil") return t("common.hard");
+    return dificuldade;
+  };
+
+  const getMateriaTranslated = (materia: string) => {
+    if (!materia) return "";
+    const mapping: { [key: string]: string } = {
+      "matemática": "math",
+      "português": "portuguese",
+      "história": "history",
+      "geografia": "geography",
+      "ciências": "science",
+      "biologia": "biology",
+      "física": "physics",
+      "química": "chemistry",
+      "inglês": "english",
+      "espanhol": "spanish",
+      "artes": "arts",
+      "educação física": "physicalEducation",
+      "filosofia": "philosophy",
+      "sociologia": "sociology",
+      "literatura": "literature"
+    };
+    const key = mapping[materia.toLowerCase()];
+    if (key) {
+      return t(`subjects.${key}`);
+    }
+    return materia;
+  };
+
+  const getDisponibilidadeTranslated = (disponibilidade: string) => {
+    if (disponibilidade === "Privado") return t("manageTrails.private");
+    if (disponibilidade === "Aberto") return t("manageTrails.public");
+    return disponibilidade;
+  };
+
+  const getPagamentoTranslated = (pagamento: string) => {
+    if (pagamento === "Paga") return t("manageTrails.paid");
+    if (pagamento === "Gratuita") return t("manageTrails.free");
+    return pagamento;
+  };
+
   // Estados principais
   const [materias, setMaterias] = useState<string[]>(MATERIAS_FALLBACK);
   const [erros, setErros] = useState<{ [key: string]: string }>({});
@@ -327,12 +383,12 @@ export default function GerenciarTrilha() {
 
   const validarTrilha = () => {
     const newErros: { [key: string]: string } = {};
-    if (!trilha.titulo.trim()) newErros.titulo = "Título é obrigatório";
+    if (!trilha.titulo.trim()) newErros.titulo = t("manageTrails.titleRequired");
     if (!trilha.descricao.trim())
-      newErros.descricao = "Descrição é obrigatória";
-    if (!trilha.materia) newErros.materia = "Matéria é obrigatória";
+      newErros.descricao = t("manageTrails.descriptionRequired");
+    if (!trilha.materia) newErros.materia = t("manageTrails.subjectRequired");
     if (trilha.faseSelecionada === null)
-      newErros.faseSelecionada = "Selecione uma fase";
+      newErros.faseSelecionada = t("manageTrails.selectPhase");
 
     setErros(newErros);
     return Object.keys(newErros).length === 0;
@@ -343,7 +399,7 @@ export default function GerenciarTrilha() {
 
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Usuário não autenticado. Faça login novamente.");
+      alert(t("manageTrails.notAuthenticated"));
       return;
     }
 
@@ -377,7 +433,7 @@ export default function GerenciarTrilha() {
       if (!response.ok) {
         const errData = await response.json();
         console.error("Erro ao salvar trilha:", errData);
-        alert("Erro ao salvar trilha. Verifique o login ou os dados.");
+        alert(t("manageTrails.errorSaving"));
         return;
       }
 
@@ -438,12 +494,12 @@ export default function GerenciarTrilha() {
 
   const deletarTrilha = async (id?: string) => {
     if (!id) return;
-    const confirm = window.confirm("Deseja realmente deletar esta trilha?");
+    const confirm = window.confirm(t("manageTrails.confirmDelete"));
     if (!confirm) return;
 
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Usuário não autenticado!");
+      alert(t("manageTrails.notAuthenticated"));
       return;
     }
 
@@ -559,28 +615,28 @@ export default function GerenciarTrilha() {
               setMostrarFormulario(true);
             }}
           >
-            Criar Trilha
+            {t("manageTrails.createButton")}
           </button>
           <button
             type="button"
             className="rounded border border-violet-600 bg-[var(--bg-card)] px-6 py-2 text-violet-700 transition hover:bg-violet-50 dark:text-violet-300 dark:hover:bg-violet-950/40"
             onClick={() => setGerarIaAberto(true)}
           >
-            Gerar com IA
+            {t("manageTrails.generateAi")}
           </button>
         </div>
 
         {/* ================= Filtros ================= */}
         <div className="mt-4 w-full mb-6 bg-[var(--bg-card)] p-4 rounded shadow-md border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-          <h3 className="text-lg font-bold mb-4 text-[var(--text-primary)]">Filtros</h3>
+          <h3 className="text-lg font-bold mb-4 text-[var(--text-primary)]">{t("manageTrails.filters")}</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-semibold mb-1">Buscar</label>
+              <label className="block text-sm font-semibold mb-1">{t("manageTrails.search")}</label>
               <input
                 type="text"
                 value={filtroBusca}
                 onChange={(e) => setFiltroBusca(e.target.value)}
-                placeholder="Buscar por nome, título..."
+                placeholder={t("manageTrails.searchPlaceholder")}
                 className="w-full border border-[var(--border-color)] rounded px-3 py-2 text-sm bg-[var(--bg-input)] text-[var(--text-primary)] transition-colors duration-300"
                 style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
               />
@@ -588,33 +644,33 @@ export default function GerenciarTrilha() {
             {usuarioSelecionado && (
               <>
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-[var(--text-primary)]">Matéria</label>
+                  <label className="block text-sm font-semibold mb-1 text-[var(--text-primary)]">{t("manageTrails.subject")}</label>
                   <select
                     value={filtroMateria}
                     onChange={(e) => setFiltroMateria(e.target.value)}
                     className="w-full border border-[var(--border-color)] rounded px-3 py-2 text-sm bg-[var(--bg-input)] text-[var(--text-primary)] transition-colors duration-300"
                     style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                   >
-                    <option value="" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Todas</option>
+                    <option value="" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>{t("manageTrails.all")}</option>
                     {materias.map((m) => (
                       <option key={m} value={m} style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
-                        {m}
+                        {getMateriaTranslated(m)}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-[var(--text-primary)]">Dificuldade</label>
+                  <label className="block text-sm font-semibold mb-1 text-[var(--text-primary)]">{t("manageTrails.difficulty")}</label>
                   <select
                     value={filtroDificuldade}
                     onChange={(e) => setFiltroDificuldade(e.target.value)}
                     className="w-full border border-[var(--border-color)] rounded px-3 py-2 text-sm bg-[var(--bg-input)] text-[var(--text-primary)] transition-colors duration-300"
                     style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                   >
-                    <option value="" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Todas</option>
-                    <option value="Facil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Fácil</option>
-                    <option value="Medio" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Médio</option>
-                    <option value="Dificil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Difícil</option>
+                    <option value="" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>{t("manageTrails.all")}</option>
+                    <option value="Facil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>{t("common.easy")}</option>
+                    <option value="Medio" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>{t("common.medium")}</option>
+                    <option value="Dificil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>{t("common.hard")}</option>
                   </select>
                 </div>
               </>
@@ -626,10 +682,10 @@ export default function GerenciarTrilha() {
         {!usuarioSelecionado ? (
           <div className="w-full mb-8">
             <h2 className="text-2xl font-bold mb-4 text-center mt-4">
-              Usuários que Criaram Trilhas
+              {t("manageTrails.usersCreated")}
             </h2>
             {usuariosFiltrados.length === 0 ? (
-              <p className="text-center">Nenhum usuário encontrado.</p>
+              <p className="text-center">{t("manageTrails.noUsers")}</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {usuariosFiltrados.map((usuario, index) => (
@@ -643,7 +699,7 @@ export default function GerenciarTrilha() {
                     <p className="text-sm text-[var(--text-secondary)] mb-1">@{usuario.username}</p>
                     <p className="text-sm text-[var(--text-muted)] mb-2">{usuario.email}</p>
                     <p className="text-sm font-semibold text-blue-600">
-                      {usuario.trilhas.length} {usuario.trilhas.length === 1 ? "trilha" : "trilhas"}
+                      {usuario.trilhas.length} {usuario.trilhas.length === 1 ? t("manageTrails.trail") : t("manageTrails.trails")}
                     </p>
                   </div>
                 ))}
@@ -654,7 +710,7 @@ export default function GerenciarTrilha() {
           <div className="w-full mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold">
-                Trilhas de {usuariosComTrilhas.find((u) => u._id === usuarioSelecionado)?.nome}
+                {t("manageTrails.trailsOf")} {usuariosComTrilhas.find((u) => u._id === usuarioSelecionado)?.nome}
               </h2>
               <button
                 onClick={() => {
@@ -664,58 +720,58 @@ export default function GerenciarTrilha() {
                 }}
                 className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
               >
-                Voltar
+                {t("manageTrails.back")}
               </button>
             </div>
             {trilhasFiltradas.length === 0 ? (
-              <p className="text-center">Nenhuma trilha encontrada.</p>
+              <p className="text-center">{t("manageTrails.noTrails")}</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 justify-items-center">
-                {trilhasFiltradas.map((t) => (
+                {trilhasFiltradas.map((trilhaItem) => (
                   <div
-                    key={t.id ?? (t as any)._id}
+                    key={trilhaItem.id ?? (trilhaItem as any)._id}
                     className="bg-[var(--bg-card)] rounded shadow-md p-3 sm:p-4 flex flex-col gap-2 overflow-hidden w-full max-w-sm border border-[var(--border-color)] transition-colors duration-300"
                     style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
                   >
-                    {t.imagem && (
+                    {trilhaItem.imagem && (
                       <img
-                        src={t.imagem}
-                        alt={t.titulo}
+                        src={trilhaItem.imagem}
+                        alt={trilhaItem.titulo}
                         className="w-full h-32 object-cover rounded mb-2"
                       />
                     )}
                     <h3 className="font-semibold text-base sm:text-lg break-words">
-                      {t.titulo}
+                      {trilhaItem.titulo}
                     </h3>
-                    <p className="text-xs sm:text-sm break-words">{t.descricao}</p>
+                    <p className="text-xs sm:text-sm break-words">{trilhaItem.descricao}</p>
                     <p className="text-xs text-[var(--text-muted)] break-words">
-                      {t.materia} - {t.dificuldade} -{" "}
-                      {t.pagamento === "Paga" ? "Pago" : "Gratuito"}
+                      {getMateriaTranslated(trilhaItem.materia)} - {getDificuldadeTranslated(trilhaItem.dificuldade)} -{" "}
+                      {getPagamentoTranslated(trilhaItem.pagamento)}
                     </p>
                     <div className="flex flex-col gap-2 mt-2">
                       <button
                         className="bg-yellow-500 text-white px-3 py-1.5 rounded hover:bg-yellow-600 w-full whitespace-nowrap"
-                        onClick={() => editarTrilha(t)}
+                        onClick={() => editarTrilha(trilhaItem)}
                       >
-                        Editar
+                        {t("manageTrails.edit")}
                       </button>
 
                       <button
                         onClick={() =>
                           router.push(
-                            `/gerenciarFases?trilhaId=${t._id}&titulo=${t.titulo}`
+                            `/gerenciarFases?trilhaId=${trilhaItem._id}&titulo=${trilhaItem.titulo}`
                           )
                         }
                         className="bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700 w-full whitespace-nowrap"
                       >
-                        Gerenciar Fases
+                        {t("manageTrails.managePhases")}
                       </button>
 
                       <button
                         className="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 w-full whitespace-nowrap"
-                        onClick={() => deletarTrilha(t.id ?? (t as any)._id)}
+                        onClick={() => deletarTrilha(trilhaItem.id ?? (trilhaItem as any)._id)}
                       >
-                        Deletar
+                        {t("manageTrails.delete")}
                       </button>
                     </div>
                   </div>
@@ -741,8 +797,8 @@ export default function GerenciarTrilha() {
             <div className="fixed inset-x-0 top-0 sm:relative sm:inset-auto bg-[var(--bg-card)] p-3 sm:p-4 md:p-6 rounded shadow-lg w-full max-w-3xl mb-8 overflow-y-auto max-h-screen sm:max-h-none z-50 sm:z-auto mx-auto sm:shadow-md border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
               <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
-                  {modoEdicao ? "Editar" : "Criar nova"}{" "}
-                  <span className="text-pink-500">trilha</span>
+                  {modoEdicao ? t("manageTrails.editTitle") : t("manageTrails.createNew")}{" "}
+                  <span className="text-pink-500">{t("manageTrails.trail")}</span>
                 </h1>
                 {/* Botão de fechar no mobile */}
                 <button
@@ -751,7 +807,7 @@ export default function GerenciarTrilha() {
                     setMostrarFormulario(false);
                   }}
                   className="sm:hidden text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-2xl font-bold leading-none transition-colors duration-300"
-                  aria-label="Fechar"
+                  aria-label={t("common.cancel")}
                 >
                   ×
                 </button>
@@ -761,14 +817,14 @@ export default function GerenciarTrilha() {
                 {/* Título */}
                 <div>
                   <label className="block font-semibold mb-1 text-sm sm:text-base">
-                    Nome da trilha
+                    {t("manageTrails.trailName")}
                   </label>
                   <input
                     type="text"
                     name="titulo"
                     value={trilha.titulo}
                     onChange={handleChange}
-                    placeholder="Título"
+                    placeholder={t("manageTrails.titleField")}
                     className="w-full border rounded px-3 py-2 text-sm sm:text-base"
                   />
                   {erros.titulo && (
@@ -779,13 +835,13 @@ export default function GerenciarTrilha() {
                 {/* Descrição */}
                 <div>
                   <label className="block font-semibold mb-1 text-sm sm:text-base">
-                    Descrição
+                    {t("manageTrails.description")}
                   </label>
                   <textarea
                     name="descricao"
                     value={trilha.descricao}
                     onChange={handleChange}
-                    placeholder="Descrição"
+                    placeholder={t("manageTrails.description")}
                     className="w-full border rounded px-3 py-2 h-24 sm:h-28 resize-none text-sm sm:text-base"
                   />
                   {erros.descricao && (
@@ -797,7 +853,7 @@ export default function GerenciarTrilha() {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex-1">
                     <label className="block font-semibold mb-1 text-sm sm:text-base">
-                      Data de início
+                      {t("manageTrails.startDate")}
                     </label>
                     <input
                       type="date"
@@ -809,7 +865,7 @@ export default function GerenciarTrilha() {
                   </div>
                   <div className="flex-1">
                     <label className="block font-semibold mb-1 text-sm sm:text-base">
-                      Data de término (opcional)
+                      {t("manageTrails.endDate")} ({language === "en-US" ? "optional" : "opcional"})
                     </label>
                     <input
                       type="date"
@@ -825,7 +881,7 @@ export default function GerenciarTrilha() {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex-1">
                     <label className="block font-semibold mb-1 text-sm sm:text-base">
-                      Matéria
+                      {t("manageTrails.subject")}
                     </label>
                     <select
                       name="materia"
@@ -835,11 +891,11 @@ export default function GerenciarTrilha() {
                       style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                     >
                       <option value="" disabled hidden style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
-                        Selecione uma matéria
+                        {t("manageTrails.selectSubject")}
                       </option>
                       {materias.map((m, i) => (
                         <option key={i} value={m} style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
-                          {m}
+                          {getMateriaTranslated(m)}
                         </option>
                       ))}
                     </select>
@@ -849,7 +905,7 @@ export default function GerenciarTrilha() {
                   </div>
                   <div className="flex-1">
                     <label className="block font-semibold mb-1 text-sm sm:text-base">
-                      Dificuldade
+                      {t("manageTrails.difficulty")}
                     </label>
                     <select
                       name="dificuldade"
@@ -858,9 +914,9 @@ export default function GerenciarTrilha() {
                       className="w-full border border-[var(--border-color)] rounded px-3 py-2 text-sm sm:text-base bg-[var(--bg-input)] text-[var(--text-primary)] transition-colors duration-300"
                       style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                     >
-                      <option value="Facil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Fácil</option>
-                      <option value="Medio" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Médio</option>
-                      <option value="Dificil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Difícil</option>
+                      <option value="Facil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>{t("common.easy")}</option>
+                      <option value="Medio" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>{t("common.medium")}</option>
+                      <option value="Dificil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>{t("common.hard")}</option>
                     </select>
                   </div>
                 </div>
@@ -868,7 +924,7 @@ export default function GerenciarTrilha() {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex-1">
                     <label className="block font-semibold mb-1 text-sm sm:text-base">
-                      Idioma
+                      {t("manageTrails.language")}
                     </label>
                     <select
                       name="idioma"
@@ -878,11 +934,11 @@ export default function GerenciarTrilha() {
                       style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                     >
                       <option value="" disabled hidden style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
-                        Selecione um idioma
+                        {t("manageTrails.selectLanguage")}
                       </option>
                       {idiomas.map((i, index) => (  
                         <option key={index} value={i} style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
-                          {i}
+                          {getIdiomaTranslated(i)}
                         </option>
                       ))}
                     </select>
@@ -893,7 +949,7 @@ export default function GerenciarTrilha() {
                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-20 justify-center sm:justify-start">
                   <div>
                     <p className="font-semibold mb-1 text-sm sm:text-base">
-                      Disponibilidade
+                      {t("manageTrails.availability")}
                     </p>
                     <label className="mr-4">
                       <input
@@ -904,7 +960,7 @@ export default function GerenciarTrilha() {
                         onChange={handleChange}
                         className="mr-1"
                       />{" "}
-                      Privado
+                      {t("manageTrails.private")}
                     </label>
                     <label>
                       <input
@@ -915,12 +971,12 @@ export default function GerenciarTrilha() {
                         onChange={handleChange}
                         className="mr-1"
                       />{" "}
-                      Aberto
+                      {t("manageTrails.public")}
                     </label>
                   </div>
                   <div>
                     <p className="font-semibold mb-1 text-sm sm:text-base">
-                      Paga ou gratuita
+                      {t("manageTrails.access")}
                     </p>
                     <label className="mr-4">
                       <input
@@ -931,7 +987,7 @@ export default function GerenciarTrilha() {
                         onChange={handleChange}
                         className="mr-1"
                       />{" "}
-                      Paga
+                      {t("manageTrails.paid")}
                     </label>
                     <label>
                       <input
@@ -942,7 +998,7 @@ export default function GerenciarTrilha() {
                         onChange={handleChange}
                         className="mr-1"
                       />{" "}
-                      Gratuita
+                      {t("manageTrails.free")}
                     </label>
                   </div>
                 </div>
@@ -950,7 +1006,7 @@ export default function GerenciarTrilha() {
                 {/* Carrossel de fases */}
                 <div className="w-full">
                   <p className="font-semibold mb-2 text-sm sm:text-base">
-                    Fases da trilha
+                    {t("manageTrails.phasesTitle")}
                   </p>
                   {erros.faseSelecionada && (
                     <p className="text-red-500 text-sm mb-2">
@@ -983,10 +1039,10 @@ export default function GerenciarTrilha() {
                               <Unlock size={12} className="sm:w-3.5 sm:h-3.5" />
                             )}
                             <span className="hidden sm:inline">
-                              {fase.paga ? "Paga" : "Gratuita"}
+                              {getPagamentoTranslated(fase.paga ? "Paga" : "Gratuita")}
                             </span>
                             <span className="sm:hidden">
-                              {fase.paga ? "P" : "G"}
+                              {fase.paga ? t("manageTrails.paid").substring(0, 1) : t("manageTrails.free").substring(0, 1)}
                             </span>
                           </div>
                           <div className="absolute bottom-0 w-full bg-black/40 text-white text-center py-0.5 sm:py-1 text-xs sm:text-sm">
@@ -1010,7 +1066,7 @@ export default function GerenciarTrilha() {
                     className="bg-blue-600 text-white px-4 sm:px-6 py-2.5 sm:py-2 rounded hover:bg-blue-700 transition w-full sm:w-auto min-w-0 sm:min-w-[100px] text-sm sm:text-base"
                     onClick={salvarTrilha}
                   >
-                    {modoEdicao ? "Atualizar" : "Salvar"}
+                    {t("common.save")}
                   </button>
                   <button
                     type="button"
@@ -1020,7 +1076,7 @@ export default function GerenciarTrilha() {
                       setMostrarFormulario(false);
                     }}
                   >
-                    Cancelar
+                    {t("common.cancel")}
                   </button>
                 </div>
               </div>
@@ -1048,71 +1104,71 @@ export default function GerenciarTrilha() {
             setMostrarFormulario(true);
           }}
         >
-          Criar Trilha
+          {t("manageTrails.createButton")}
         </button>
         <button
           type="button"
           className="rounded border border-violet-600 bg-[var(--bg-card)] px-6 py-2 text-violet-700 transition hover:bg-violet-50 dark:text-violet-300 dark:hover:bg-violet-950/40"
           onClick={() => setGerarIaAberto(true)}
         >
-          Gerar com IA
+          {t("manageTrails.generateAi")}
         </button>
       </div>
 
       {/* ================= Lista de Trilhas ================= */}
       <div className="w-full mb-8">
         <h2 className="text-2xl font-bold mb-4 text-center mt-4">
-          Minhas Trilhas
+          {t("manageTrails.myTrails")}
         </h2>
         {trilhas.length === 0 && (
-          <p className="text-center">Nenhuma trilha criada ainda.</p>
+          <p className="text-center">{t("manageTrails.noTrailsCreated")}</p>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 justify-items-center">
-          {trilhas.map((t) => (
+          {trilhas.map((trilhaItem) => (
             <div
-              key={t.id ?? (t as any)._id} // usa id ou _id do MongoDB
+              key={trilhaItem.id ?? (trilhaItem as any)._id} // usa id ou _id do MongoDB
               className="bg-[var(--bg-card)] rounded shadow-md p-3 sm:p-4 flex flex-col gap-2 overflow-hidden w-full max-w-sm border border-[var(--border-color)] transition-colors duration-300"
               style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
             >
-              {t.imagem && (
+              {trilhaItem.imagem && (
                 <img
-                  src={t.imagem}
-                  alt={t.titulo}
+                  src={trilhaItem.imagem}
+                  alt={trilhaItem.titulo}
                   className="w-full h-32 object-cover rounded mb-2"
                 />
               )}
               <h3 className="font-semibold text-base sm:text-lg break-words">
-                {t.titulo}
+                {trilhaItem.titulo}
               </h3>
-              <p className="text-xs sm:text-sm break-words">{t.descricao}</p>
+              <p className="text-xs sm:text-sm break-words">{trilhaItem.descricao}</p>
               <p className="text-xs text-[var(--text-muted)] break-words">
-                {t.materia} - {t.dificuldade} -{" "}
-                {t.pagamento === "Paga" ? "Pago" : "Gratuito"}
+                {getMateriaTranslated(trilhaItem.materia)} - {getDificuldadeTranslated(trilhaItem.dificuldade)} -{" "}
+                {getPagamentoTranslated(trilhaItem.pagamento)}
               </p>
               <div className="flex flex-col gap-2 mt-2">
                 <button
                   className="bg-yellow-500 text-white px-3 py-1.5 rounded hover:bg-yellow-600 w-full whitespace-nowrap"
-                  onClick={() => editarTrilha(t)}
+                  onClick={() => editarTrilha(trilhaItem)}
                 >
-                  Editar
+                  {t("manageTrails.edit")}
                 </button>
 
                 <button
                   onClick={() =>
                     router.push(
-                      `/gerenciarFases?trilhaId=${t._id}&titulo=${t.titulo}`
+                      `/gerenciarFases?trilhaId=${trilhaItem._id}&titulo=${trilhaItem.titulo}`
                     )
                   }
                   className="bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700 w-full whitespace-nowrap"
                 >
-                  Gerenciar Fases
+                  {t("manageTrails.managePhases")}
                 </button>
 
                 <button
                   className="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 w-full whitespace-nowrap"
-                  onClick={() => deletarTrilha(t.id ?? (t as any)._id)}
+                  onClick={() => deletarTrilha(trilhaItem.id ?? (trilhaItem as any)._id)}
                 >
-                  Deletar
+                  {t("manageTrails.delete")}
                 </button>
               </div>
             </div>
@@ -1136,8 +1192,8 @@ export default function GerenciarTrilha() {
           <div className="fixed inset-x-0 top-0 sm:relative sm:inset-auto bg-[var(--bg-card)] p-3 sm:p-4 md:p-6 rounded shadow-lg w-full max-w-3xl mb-8 overflow-y-auto max-h-screen sm:max-h-none z-50 sm:z-auto mx-auto sm:shadow-md border border-[var(--border-color)] transition-colors duration-300" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
-                {modoEdicao ? "Editar" : "Criar nova"}{" "}
-                <span className="text-pink-500">trilha</span>
+                {modoEdicao ? t("manageTrails.editTitle") : t("manageTrails.createNew")}{" "}
+                <span className="text-pink-500">{t("manageTrails.trail")}</span>
               </h1>
               {/* Botão de fechar no mobile */}
               <button
@@ -1146,7 +1202,7 @@ export default function GerenciarTrilha() {
                   setMostrarFormulario(false);
                 }}
                 className="sm:hidden text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-2xl font-bold leading-none transition-colors duration-300"
-                aria-label="Fechar"
+                aria-label={t("common.cancel")}
               >
                 ×
               </button>
@@ -1156,14 +1212,14 @@ export default function GerenciarTrilha() {
               {/* Título */}
               <div>
                 <label className="block font-semibold mb-1 text-sm sm:text-base">
-                  Nome da trilha
+                  {t("manageTrails.trailName")}
                 </label>
                 <input
                   type="text"
                   name="titulo"
                   value={trilha.titulo}
                   onChange={handleChange}
-                  placeholder="Título"
+                  placeholder={t("manageTrails.titleField")}
                   className="w-full border rounded px-3 py-2 text-sm sm:text-base"
                 />
                 {erros.titulo && (
@@ -1174,13 +1230,13 @@ export default function GerenciarTrilha() {
               {/* Descrição */}
               <div>
                 <label className="block font-semibold mb-1 text-sm sm:text-base">
-                  Descrição
+                  {t("manageTrails.description")}
                 </label>
                 <textarea
                   name="descricao"
                   value={trilha.descricao}
                   onChange={handleChange}
-                  placeholder="Descrição"
+                  placeholder={t("manageTrails.description")}
                   className="w-full border rounded px-3 py-2 h-24 sm:h-28 resize-none text-sm sm:text-base"
                 />
                 {erros.descricao && (
@@ -1192,7 +1248,7 @@ export default function GerenciarTrilha() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <label className="block font-semibold mb-1 text-sm sm:text-base">
-                    Data de início
+                    {t("manageTrails.startDate")}
                   </label>
                   <input
                     type="date"
@@ -1204,7 +1260,7 @@ export default function GerenciarTrilha() {
                 </div>
                 <div className="flex-1">
                   <label className="block font-semibold mb-1 text-sm sm:text-base">
-                    Data de término (opcional)
+                    {t("manageTrails.endDate")} ({language === "en-US" ? "optional" : "opcional"})
                   </label>
                   <input
                     type="date"
@@ -1220,7 +1276,7 @@ export default function GerenciarTrilha() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <label className="block font-semibold mb-1 text-sm sm:text-base">
-                    Matéria
+                    {t("manageTrails.subject")}
                   </label>
                   <select
                     name="materia"
@@ -1230,11 +1286,11 @@ export default function GerenciarTrilha() {
                     style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                   >
                     <option value="" disabled hidden style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
-                      Selecione uma matéria
+                      {t("manageTrails.selectSubject")}
                     </option>
                     {materias.map((m, i) => (
                       <option key={i} value={m} style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
-                        {m}
+                        {getMateriaTranslated(m)}
                       </option>
                     ))}
                   </select>
@@ -1244,7 +1300,7 @@ export default function GerenciarTrilha() {
                 </div>
                 <div className="flex-1">
                   <label className="block font-semibold mb-1 text-sm sm:text-base">
-                    Dificuldade
+                    {t("manageTrails.difficulty")}
                   </label>
                   <select
                     name="dificuldade"
@@ -1253,9 +1309,9 @@ export default function GerenciarTrilha() {
                     className="w-full border border-[var(--border-color)] rounded px-3 py-2 text-sm sm:text-base bg-[var(--bg-input)] text-[var(--text-primary)] transition-colors duration-300"
                     style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                   >
-                    <option value="Facil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Fácil</option>
-                    <option value="Medio" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Médio</option>
-                    <option value="Dificil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>Difícil</option>
+                    <option value="Facil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>{t("common.easy")}</option>
+                    <option value="Medio" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>{t("common.medium")}</option>
+                    <option value="Dificil" style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>{t("common.hard")}</option>
                   </select>
                 </div>
               </div>
@@ -1263,7 +1319,7 @@ export default function GerenciarTrilha() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <label className="block font-semibold mb-1 text-sm sm:text-base">
-                    Idioma
+                    {t("manageTrails.language")}
                   </label>
                   <select
                     name="idioma"
@@ -1273,11 +1329,11 @@ export default function GerenciarTrilha() {
                     style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}
                   >
                     <option value="" disabled hidden style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
-                      Selecione um idioma
+                      {t("manageTrails.selectLanguage")}
                     </option>
                     {idiomas.map((i, index) => (  
                       <option key={index} value={i} style={{ backgroundColor: 'var(--bg-input)', color: 'var(--text-primary)' }}>
-                        {i}
+                        {getIdiomaTranslated(i)}
                       </option>
                     ))}
                   </select>
@@ -1288,7 +1344,7 @@ export default function GerenciarTrilha() {
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-20 justify-center sm:justify-start">
                 <div>
                   <p className="font-semibold mb-1 text-sm sm:text-base">
-                    Disponibilidade
+                    {t("manageTrails.availability")}
                   </p>
                   <label className="mr-4">
                     <input
@@ -1299,7 +1355,7 @@ export default function GerenciarTrilha() {
                       onChange={handleChange}
                       className="mr-1"
                     />{" "}
-                    Privado
+                    {t("manageTrails.private")}
                   </label>
                   <label>
                     <input
@@ -1310,12 +1366,12 @@ export default function GerenciarTrilha() {
                       onChange={handleChange}
                       className="mr-1"
                     />{" "}
-                    Aberto
+                    {t("manageTrails.public")}
                   </label>
                 </div>
                 <div>
                   <p className="font-semibold mb-1 text-sm sm:text-base">
-                    Paga ou gratuita
+                    {t("manageTrails.access")}
                   </p>
                   <label className="mr-4">
                     <input
@@ -1326,7 +1382,7 @@ export default function GerenciarTrilha() {
                       onChange={handleChange}
                       className="mr-1"
                     />{" "}
-                    Paga
+                    {t("manageTrails.paid")}
                   </label>
                   <label>
                     <input
@@ -1337,7 +1393,7 @@ export default function GerenciarTrilha() {
                       onChange={handleChange}
                       className="mr-1"
                     />{" "}
-                    Gratuita
+                    {t("manageTrails.free")}
                   </label>
                 </div>
               </div>
@@ -1345,7 +1401,7 @@ export default function GerenciarTrilha() {
               {/* Carrossel de fases */}
               <div className="w-full">
                 <p className="font-semibold mb-2 text-sm sm:text-base">
-                  Fases da trilha
+                  {t("manageTrails.phasesTitle")}
                 </p>
                 {erros.faseSelecionada && (
                   <p className="text-red-500 text-sm mb-2">
@@ -1378,10 +1434,10 @@ export default function GerenciarTrilha() {
                             <Unlock size={12} className="sm:w-3.5 sm:h-3.5" />
                           )}
                           <span className="hidden sm:inline">
-                            {fase.paga ? "Paga" : "Gratuita"}
+                            {getPagamentoTranslated(fase.paga ? "Paga" : "Gratuita")}
                           </span>
                           <span className="sm:hidden">
-                            {fase.paga ? "P" : "G"}
+                            {fase.paga ? t("manageTrails.paid").substring(0, 1) : t("manageTrails.free").substring(0, 1)}
                           </span>
                         </div>
                         <div className="absolute bottom-0 w-full bg-black/40 text-white text-center py-0.5 sm:py-1 text-xs sm:text-sm">
@@ -1405,7 +1461,7 @@ export default function GerenciarTrilha() {
                   className="bg-blue-600 text-white px-4 sm:px-6 py-2.5 sm:py-2 rounded hover:bg-blue-700 transition w-full sm:w-auto min-w-0 sm:min-w-[100px] text-sm sm:text-base"
                   onClick={salvarTrilha}
                 >
-                  {modoEdicao ? "Atualizar" : "Salvar"}
+                  {t("common.save")}
                 </button>
                 <button
                   type="button"
@@ -1415,7 +1471,7 @@ export default function GerenciarTrilha() {
                     setMostrarFormulario(false);
                   }}
                 >
-                  Cancelar
+                  {t("common.cancel")}
                 </button>
               </div>
             </div>
